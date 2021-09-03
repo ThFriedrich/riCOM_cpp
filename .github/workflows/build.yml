@@ -7,6 +7,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
+        with: 
+          submodules: true
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: amd64_x86
@@ -35,6 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with: 
+          submodules: true
       - name: Get SDL2
         run: |
             sudo apt-get update
