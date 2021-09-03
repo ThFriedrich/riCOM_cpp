@@ -1,0 +1,38 @@
+Command failed: icpx /home/thomas/Documents/GitHub_Repos/riCOM_cpp/src/Ricom.cpp -o /home/thomas/Documents/GitHub_Repos/riCOM_cpp/src/Ricom -v
+Intel(R) oneAPI DPC++/C++ Compiler 2021.3.0 (2021.3.0.20210619)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/intel/oneapi/compiler/2021.3.0/linux/bin
+Found candidate GCC installation: /usr/lib/gcc/i686-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/5
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/5.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7.5.0
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/8
+Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/9
+Selected GCC installation: /usr/lib/gcc/x86_64-linux-gnu/9
+Candidate multilib: .;@m64
+Selected multilib: .;@m64
+Found CUDA installation: /usr/local/cuda-10.0, version 10.0
+ "/opt/intel/oneapi/compiler/2021.3.0/linux/bin/clang++" -cc1 -triple x86_64-unknown-linux-gnu -emit-obj --mrelax-relocations -disable-free -disable-llvm-verifier -discard-value-names -main-file-name Ricom.cpp -mrelocation-model static -fveclib=SVML -mframe-pointer=none -menable-no-infs -menable-no-nans -menable-unsafe-fp-math -fno-signed-zeros -mreassociate -freciprocal-math -fdenormal-fp-math=preserve-sign,preserve-sign -ffp-contract=fast -fno-rounding-math -ffast-math -ffinite-math-only -mconstructor-aliases -munwind-tables -target-cpu x86-64 -mllvm -x86-enable-unaligned-vector-move=true -tune-cpu generic -debugger-tuning=gdb -v -fcoverage-compilation-dir=/home/thomas -resource-dir /opt/intel/oneapi/compiler/2021.3.0/linux/lib/clang/13.0.0 -I/opt/intel/oneapi/tbb/2021.3.0/env/../include -I/opt/intel/oneapi/dev-utilities/2021.3.0/include -I/opt/intel/oneapi/compiler/2021.3.0/linux/include -internal-isystem /opt/intel/oneapi/compiler/2021.3.0/linux/bin/../compiler/include -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/9/../../../../include/c++/9 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/9/../../../../include/x86_64-linux-gnu/c++/9 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/9/../../../../include/c++/9/backward -internal-isystem /opt/intel/oneapi/compiler/2021.3.0/linux/lib/clang/13.0.0/include -internal-isystem /usr/local/include -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/9/../../../../x86_64-linux-gnu/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -O2 -fdeprecated-macro -fdebug-compilation-dir=/home/thomas -ferror-limit 19 -fheinous-gnu-extensions -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -D__GCC_HAVE_DWARF2_CFI_ASM=1 -fintel-compatibility -mllvm -disable-hir-generate-mkl-call -mllvm -intel-libirc-allowed -mllvm -loopopt=0 -mllvm -enable-lv -o /tmp/Ricom-b8816c.o -x c++ /home/thomas/Documents/GitHub_Repos/riCOM_cpp/src/Ricom.cpp
+clang -cc1 version 13.0.0 based upon LLVM 13.0.0git default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/9/../../../../x86_64-linux-gnu/include"
+ignoring nonexistent directory "/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /opt/intel/oneapi/tbb/2021.3.0/env/../include
+ /opt/intel/oneapi/dev-utilities/2021.3.0/include
+ /opt/intel/oneapi/compiler/2021.3.0/linux/include
+ /opt/intel/oneapi/compiler/2021.3.0/linux/bin/../compiler/include
+ /usr/lib/gcc/x86_64-linux-gnu/9/../../../../include/c++/9
+ /usr/lib/gcc/x86_64-linux-gnu/9/../../../../include/x86_64-linux-gnu/c++/9
+ /usr/lib/gcc/x86_64-linux-gnu/9/../../../../include/c++/9/backward
+ /opt/intel/oneapi/compiler/2021.3.0/linux/lib/clang/13.0.0/include
+ /usr/local/include
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+/home/thomas/Documents/GitHub_Repos/riCOM_cpp/src/Ricom.cpp:15:10: fatal error: 'tinycolormap.hpp' file not found
+#include "tinycolormap.hpp"
+         ^~~~~~~~~~~~~~~~~~
+1 error generated.

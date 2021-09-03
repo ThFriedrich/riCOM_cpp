@@ -1,0 +1,51 @@
+name: BUILD
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build_win:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64_x86
+      
+      - name: unpack sdl
+        run: |
+          curl.exe http://www.libsdl.org/release/SDL2-devel-2.0.16-VC.zip --output sdl.zip
+          tar -xf sdl.zip
+          move SDL2-2.0.16 C:\
+          ren C:\SDL2-2.0.16 SDL2_VC
+
+      - name: Build with MSVC
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          msbuild .\RICOM.vcxproj /p:configuration=Release
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Release_Win
+          path: |
+            build\Release
+  
+  build_Linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get SDL2
+        run: |
+            sudo apt-get update
+            sudo apt-get install libsdl2-dev
+      - name: Build
+        run: |
+            cmake . -D CMAKE_BUILD_TYPE=Release
+            make
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Release_Linux
+          path: |
+            RICOM
