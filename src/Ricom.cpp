@@ -414,7 +414,7 @@ bool Ricom::process_frames()
     size_t idx = 0;
 
     init_uv<T>();
-    for (size_t ir = 0; ir < rep; ir++)
+    for (int ir = 0; ir < rep; ir++)
     {
         ricom_data.assign(im_size, 0);
         stem_data.assign(nxy, 0);
@@ -485,10 +485,8 @@ bool Ricom::process_frames()
                 }
             }
         }
+        reset_limits();
     }
-    // std::cout << std::endl
-    //           << "COMx, COMy: " << com_xy_sum[0] / nxy / rep + offset[0] << ", "
-    //           << com_xy_sum[1] / nxy + offset[1] / rep << std::endl;
     return true;
 }
 
@@ -569,15 +567,25 @@ void Ricom::run(size_t nx, size_t ny)
     end();
 }
 
-void Ricom::reset()
+void Ricom::reset_limits()
 {
-    rc_quit = false;
     fr_count = 0;
-    fr_freq = 0;
-    b_binary = false;
-    b_raw = false;
     ricom_max = 0;
     ricom_min = INFINITY;
     stem_max = 0;
     stem_min = INFINITY;
+    if (mode == modes::FILE)
+    {
+        mib_stream.clear();
+        mib_stream.seekg(0, std::ios::beg);
+        read_head();
+    }
+}
+void Ricom::reset()
+{
+    rc_quit = false;
+    fr_freq = 0;
+    b_binary = false;
+    b_raw = false;
+    reset_limits();
 }
