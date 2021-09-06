@@ -57,8 +57,8 @@ void Ricom_kernel::compute_kernel()
             {
                 ix_sd = (ix_s / d);
                 iy_sd = (iy_s / d);
-                kernel_y[ix_e] = cos_rot * ix_sd - sin_rot * iy_sd;
-                kernel_x[ix_e] = sin_rot * ix_sd + cos_rot * iy_sd;
+                kernel_x[ix_e] = cos_rot * ix_sd - sin_rot * iy_sd;
+                kernel_y[ix_e] = sin_rot * ix_sd + cos_rot * iy_sd;
             }
             else
             {
@@ -226,19 +226,20 @@ void Ricom::com(std::vector<T> &data, std::array<float,2> &com, size_t id_stem, 
 
     if (dose > 0)
     {
-        for (size_t i = 0; i < ny_merlin; i++)
-        {
-            com[0] += sum_y[i] * u[i];
-            sum_y[i] = 0;
-        }
         for (size_t i = 0; i < nx_merlin; i++)
         {
-            com[1] += sum_x[i] * v[i];
+            com[0] += sum_x[i] * v[i];
             sum_x[i] = 0;
         }
+        for (size_t i = 0; i < ny_merlin; i++)
+        {
+            com[1] += sum_y[i] * u[i];
+            sum_y[i] = 0;
+        }
+        
 
-        com[0] = (com[0] / dose) - offset[0];
-        com[1] = (com[1] / dose) - offset[1];
+        com[0] = (com[0] / dose);
+        com[1] = (com[1] / dose);
 
         if (use_detector)
         {
@@ -271,6 +272,8 @@ void Ricom::icom(std::array<float,2> &com, int x, int y, bool &rescale)
     int idk2 = 0;
     int idyt = 0;
     int idc = px_per_row * y + x;
+    float com_x = com[0] - offset[0];
+    float com_y = com[1] - offset[1];
 
     for (int idy = 0; idy < kernel.k_width_sym; idy++)
     {
@@ -280,7 +283,7 @@ void Ricom::icom(std::array<float,2> &com, int x, int y, bool &rescale)
         {
             idk2 = idk + idx;
             idr = idc + idx + idyt;
-            ricom_data[idr] += com[0] * kernel.kernel_x[idk2] + com[1] * kernel.kernel_y[idk2];
+            ricom_data[idr] += com_x * kernel.kernel_x[idk2] + com_y * kernel.kernel_y[idk2];
             if (idx == 0 && idy == 0 && x > kernel.kernel_size && y > kernel.kernel_size)
             {
                 if (ricom_data[idr] > ricom_max)
@@ -435,7 +438,7 @@ bool Ricom::process_frames()
                 fr_count_i++;
                 fr_count++;
                 auto mil_secs = std::chrono::duration_cast<double_ms>(chc::high_resolution_clock::now() - start_perf).count();
-                if (mil_secs > 1000.0 || fr_count == nxy) // ~50Hz for display
+                if (mil_secs > 500.0 || fr_count == nxy) // ~50Hz for display
                 {
                     if (rc_quit)
                     {
@@ -575,4 +578,6 @@ void Ricom::reset()
     b_raw = false;
     ricom_max = 0;
     ricom_min = INFINITY;
+    stem_max = 0;
+    stem_min = INFINITY;
 }

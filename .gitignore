@@ -1,4 +1,6 @@
 build
+data
 .vscode
 imgui.ini
 *.mib
+opengl32.dll
