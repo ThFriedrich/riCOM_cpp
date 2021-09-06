@@ -52,45 +52,52 @@ public:
 class Ricom : public MerlinInterface
 {
 private:
-    // ADF Variables
+    // vSTEM Variables
     std::vector<float> stem_data;
     float stem_max;
     float stem_min;
-    void set_stem_pixel(size_t idx, size_t idy);
-    void rescale_stem_image();
 
     // ricom variables
     std::array<int, 256> u;
     std::array<int, 256> v;
     std::array<size_t, 256> sum_x;
     std::array<size_t, 256> sum_y;
+    std::vector<float> ricom_data;
 
+    // Scan Area Variables
     size_t nx;
     size_t ny;
     size_t nxy;
-    size_t rep;
     int px_per_row;
-    std::vector<float> ricom_data;
-
+    
     // Variables for potting in the SDL2 frame
     float ricom_max;
     float ricom_min;
 
-    // Private Methods
+    // Private Methods - General
     template <typename T>
     void init_uv();
+    template <typename T>
+    bool process_frames();
+    void init_surface(int height, int width);
+    void draw_pixel(SDL_Surface *surface, int x, int y, float val);
+    void reset_limits();
+    
+    // Private Methods - riCOM
     void icom(std::array<float,2> &com, int x, int y, bool &rescale);
     template <typename T>
     void com(std::vector<T> &data, std::array<float,2> &com, size_t idx, bool &rescale);
-    template <typename T>
-    bool process_frames();
     void rescale_ricom_image();
     void set_ricom_image_kernel(int idx, int idy);
     void set_ricom_pixel(size_t idx, size_t idy);
-    void init_surface(int height, int width);
-    void draw_pixel(SDL_Surface *surface, int x, int y, float val);
+
+    // Private Methods - vSTEM
+    void set_stem_pixel(size_t idx, size_t idy);
+    void rescale_stem_image();
+    
 
 public:
+    int rep;
     bool use_detector;
     bool b_recompute_detector;
     bool b_recompute_kernel;
@@ -100,6 +107,7 @@ public:
     std::array<float,2> com_public;
     int depth;
     void run(size_t nx, size_t ny);
+
     // Variables for progress and performance
     float fr_freq;  // Frequncy per frame
     float fr_count; // Count all Frames processed
@@ -113,7 +121,7 @@ public:
     SDL_Surface *srf_cbed; // Surface for the window;
 
     // Constructor
-    Ricom() : stem_data(), stem_max(0.0), stem_min(INFINITY), u(), v(), sum_x{0}, sum_y{0}, nx(0), ny(0), nxy(0), rep(1), px_per_row(0), ricom_data(), ricom_max(0.0), ricom_min(INFINITY), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(),  kernel(), offset{127.5, 127.5}, depth(1), fr_freq(0.0), fr_count(0), rc_quit(false), srf_ricom(NULL), srf_stem(NULL),srf_cbed(NULL){};
+    Ricom() : stem_data(), stem_max(0.0), stem_min(INFINITY), u(), v(), sum_x{0}, sum_y{0}, ricom_data(), nx(0), ny(0), nxy(0), px_per_row(0), ricom_max(0.0), ricom_min(INFINITY), rep(1), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(),  kernel(), offset{127.5, 127.5}, depth(1), fr_freq(0.0), fr_count(0), rc_quit(false), srf_ricom(NULL), srf_stem(NULL),srf_cbed(NULL){};
 
     // Destructor
     ~Ricom();

@@ -65,6 +65,10 @@ private:
     }
 
 public:
+    enum modes{
+        FILE,
+        LIVE
+    };
     int mode;
     std::string dtype;
     std::string acq = "";
@@ -159,7 +163,7 @@ public:
             data_size /= 8;
         }
 
-        if (mode == 0)
+        if (mode == modes::FILE)
         {
             read_data_from_file(buffer, data_size);
         }
@@ -300,7 +304,7 @@ public:
 
     void open_file(std::string path)
     {
-        mode = 0;
+        mode = modes::FILE;
         mib_stream.open(path, std::ios::in | std::ios::binary);
         if (!mib_stream)
         {
@@ -319,7 +323,7 @@ public:
     // Reading data stream from Socket
     void connect_socket()
     {
-        mode = 1;
+        mode = modes::LIVE;
 
         #ifdef WIN32
         int error = WSAStartup(0x0202, &w);
