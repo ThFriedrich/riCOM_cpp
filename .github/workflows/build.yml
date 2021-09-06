@@ -34,16 +34,19 @@ jobs:
             build\Release
   
   build_Linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
         with: 
           submodules: true
-      - name: Get SDL2
+      - name: Get SDL2 and gcc-9
         run: |
             sudo apt-get update
-            sudo apt-get install libsdl2-dev
+            sudo apt-get install libsdl2-dev gcc-9 g++-9
       - name: Build
+        env:
+          CC:   gcc-9
+          CXX:  g++-9
         run: |
             cmake . -D CMAKE_BUILD_TYPE=Release
             make
