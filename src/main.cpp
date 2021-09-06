@@ -12,8 +12,21 @@
 #include "imfilebrowser.h"
 
 #include "Ricom.h"
+#include "fonts.h"
 
 namespace chc = std::chrono;
+
+// Visual Studio warnings
+#ifdef _MSC_VER
+#pragma warning (disable: 4067)
+#pragma warning (disable: 4333)
+#pragma warning (disable: 4312)
+#endif
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
 
 void run_file(Ricom *r, std::string path, size_t nx, size_t ny)
 {
@@ -36,15 +49,19 @@ void run_fake_merlin()
 #else
 void run_fake_merlin()
 {
-    std::system("python3 fake_merlin.py");
+    int r = std::system("python3 fake_merlin.py");
+    if (r != 0)
+    {
+        std::cout << "Error running fake_merlin.py" << std::endl;
+    }
 }
 #endif
 
-int main(int argc, char *argv[])
+int main(int, char **)
 {
     std::thread t1;
     std::thread t2;
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
         printf("Error: %s\n", SDL_GetError());
         return -1;
@@ -103,9 +120,12 @@ int main(int argc, char *argv[])
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    // io.Fonts->AddFontDefault();
-    // io.Fonts->AddFontFromFileTTF("imgui/misc/fonts/Roboto-Medium.ttf", 16.0f);
-    io.Fonts->AddFontFromFileTTF("imgui/misc/fonts/Karla-Regular.ttf", 16.0f);
+    io.Fonts->AddFontFromMemoryCompressedTTF(KarlaRegular_compressed_data, KarlaRegular_compressed_size, 14.0f);
+    io.Fonts->AddFontFromMemoryCompressedTTF(RobotoMedium_compressed_data, RobotoMedium_compressed_size, 14.0f);
+    io.Fonts->AddFontFromMemoryCompressedTTF(CousineRegular_compressed_data, CousineRegular_compressed_size, 14.0f);
+    io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 14.0f);
+    io.Fonts->AddFontFromMemoryCompressedTTF(ProggyClean_compressed_data, ProggyClean_compressed_size, 14.0f);
+    io.Fonts->AddFontFromMemoryCompressedTTF(ProggyTiny_compressed_data, ProggyTiny_compressed_size, 14.0f);
 
     ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
     ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
@@ -114,31 +134,20 @@ int main(int argc, char *argv[])
     ImVec4 clear_color = ImVec4(0.7f, 0.7f, 0.7f, 1.00f);
 
     ImVec2 menu_bar_size;
-    ImVec2 control_menu_size(200,800);
+    ImVec2 control_menu_size(200, 800);
 
-    GLuint uiTextureIDs[3];
-    glGenTextures(3, uiTextureIDs);
+    const size_t n_textures = 3;
+    GLuint uiTextureIDs[n_textures];
+    glGenTextures(n_textures, uiTextureIDs);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, uiTextureIDs[0]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, uiTextureIDs[1]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, uiTextureIDs[2]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    for (size_t i = 0; i < n_textures; i++)
+    {
+        glBindTexture(GL_TEXTURE_2D, uiTextureIDs[i]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
 
     // create a file browser instance
     ImGui::FileBrowser fileDialog;
@@ -197,8 +206,15 @@ int main(int argc, char *argv[])
             }
             if (ImGui::BeginMenu("Appearance"))
             {
-                ImGui::ColorEdit3("Background Color", (float*)&clear_color);
-                ImGui::ShowStyleEditor();
+                ImGui::ColorEdit3("Background Color", (float *)&clear_color);
+                ShowFontSelector("Font");
+                ImGui::ShowStyleSelector("Style");
+                ImGui::Separator();
+                if (ImGui::TreeNode("Style Editor"))
+                {
+                    ImGui::ShowStyleEditor();
+                    ImGui::TreePop();
+                }
                 ImGui::EndMenu();
             }
             menu_bar_size = ImGui::GetWindowSize();
@@ -220,29 +236,26 @@ int main(int argc, char *argv[])
             ImVec2 size = viewport->Size;
             size[0] = control_menu_size[0];
             ImGui::SetNextWindowSize(size);
-            ImGui::SetNextWindowSizeConstraints(ImVec2(0, -1),    ImVec2(FLT_MAX, -1)); 
+            ImGui::SetNextWindowSizeConstraints(ImVec2(0, -1), ImVec2(FLT_MAX, -1));
 
             ImGui::Begin("Navigation", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
 
             if (ImGui::CollapsingHeader("General Settings", ImGuiTreeNodeFlags_DefaultOpen))
             {
-
-                ImGui::Text("Scan Size");
+                ImGui::Text("Scan Area");
                 ImGui::DragInt("nx", &width);
                 ImGui::DragInt("ny", &height);
-            }
+                ImGui::DragInt("Repetitions", &ricom->rep,1,1);
 
-            if (ImGui::CollapsingHeader("RICOM Settings", ImGuiTreeNodeFlags_DefaultOpen))
-            {
-                bool kernel_changed = ImGui::DragInt("Kernel Size", &ricom->kernel.kernel_size, 1, 1, 300);
-                bool rot_changed = ImGui::SliderFloat("CBED Rotation", &ricom->kernel.rotation, 0.0f, 360.0f, "%.1f deg");
-                bool offset_changed = ImGui::DragFloat2("Offset", &ricom->offset[0], 0.1f, 0.0, 256.0);
+                ImGui::Text("CBED corrections");
+                bool rot_changed = ImGui::SliderFloat("Rotation", &ricom->kernel.rotation, 0.0f, 360.0f, "%.1f deg");
+                bool offset_changed = ImGui::DragFloat2("Centre", &ricom->offset[0], 0.1f, 0.0, 256.0);
                 if (offset_changed)
                 {
                     ricom->b_recompute_detector = true;
                     ricom->b_recompute_kernel = true;
                 }
-                if (kernel_changed || rot_changed)
+                if (rot_changed)
                 {
                     ricom->b_recompute_kernel = true;
                 }
@@ -257,6 +270,15 @@ int main(int argc, char *argv[])
                 if (ImGui::IsItemHovered())
                 {
                     ImGui::SetTooltip("Only applicable for handling recorded files, \n recorded in raw mode.");
+                }
+            }
+
+            if (ImGui::CollapsingHeader("RICOM Settings", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                bool kernel_changed = ImGui::DragInt("Kernel Size", &ricom->kernel.kernel_size, 1, 1, 300);
+                if (kernel_changed)
+                {
+                    ricom->b_recompute_kernel = true;
                 }
             }
 
@@ -291,7 +313,7 @@ int main(int argc, char *argv[])
                     if (ricom->acq_header.size() > 0)
                     {
                         ImGui::SameLine();
-                        if (ImGui::Button("Show Acqusition Info",ImVec2(-1.0f, 0.0f)))
+                        if (ImGui::Button("Show Acqusition Info", ImVec2(-1.0f, 0.0f)))
                         {
                             b_acq_open = true;
                         }
@@ -344,26 +366,48 @@ int main(int argc, char *argv[])
                     ricom->rc_quit = true;
                     b_redraw = true;
                 }
-                ImVec2 vMin = ImGui::GetWindowContentRegionMin();
-                ImVec2 vMax = ImGui::GetWindowContentRegionMax();
 
                 ImGui::Text("COM= %.2f, %.2f", ricom->com_public[0], ricom->com_public[1]);
-                
-                float my_tex_w = vMax.x - vMin.x;
-                float my_tex_h = vMax.y - vMin.y - ImGui::GetTextLineHeight() * 5 - ImGui::GetStyle().WindowPadding.y * 2.0f;
-                float tex_wh = (std::min)(my_tex_w, my_tex_h);
+
+                // CBED Plot Area
+                ImGui::BeginChild("CBED", ImVec2(0.0f, 0.0f), false, ImGuiWindowFlags_NoScrollbar);
+                ImVec2 rem_space = ImGui::GetContentRegionAvail();
+                float tex_wh = (std::min)(rem_space.x, (rem_space.y - ImGui::GetStyle().WindowPadding.y * 3.0f));
+     
+                ImVec2 p = ImGui::GetCursorScreenPos();
+
+                float com_rel_x = p.x + tex_wh * (ricom->com_public[0] / ricom->nx_merlin);
+                float com_rel_y = p.y + tex_wh * (ricom->com_public[1] / ricom->ny_merlin);
+
+                float centre_x = p.x + tex_wh * (ricom->offset[0] / ricom->nx_merlin);
+                float centre_y = p.y + tex_wh * (ricom->offset[1] / ricom->ny_merlin);
+
+                com_rel_x = (std::max)(p.x, com_rel_x);
+                com_rel_y = (std::max)(p.y, com_rel_y);
+                com_rel_x = (std::min)(p.x + tex_wh, com_rel_x);
+                com_rel_y = (std::min)(p.y + tex_wh, com_rel_y);
+
+                float cross_width = tex_wh / 15.0f;
 
                 if (b_redraw)
                 {
                     if (ricom->srf_cbed != NULL)
                     {
-                        glActiveTexture(GL_TEXTURE0);
                         glBindTexture(GL_TEXTURE_2D, uiTextureIDs[0]);
                         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ricom->srf_cbed->w, ricom->srf_cbed->h, 0,
                                      GL_RGBA, GL_UNSIGNED_BYTE, ricom->srf_cbed->pixels);
                     }
                 }
                 ImGui::Image((ImTextureID)uiTextureIDs[0], ImVec2(tex_wh, tex_wh), uv_min, uv_max, tint_col, border_col);
+                ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * 0.03, IM_COL32(255, 255, 255, 255), 256);
+                ImGui::GetWindowDrawList()->AddLine(ImVec2(com_rel_x - cross_width, com_rel_y), ImVec2(com_rel_x + cross_width, com_rel_y), IM_COL32(255, 0, 0, 255), 1.5f);
+                ImGui::GetWindowDrawList()->AddLine(ImVec2(com_rel_x, com_rel_y - cross_width), ImVec2(com_rel_x, com_rel_y + cross_width), IM_COL32(255, 0, 0, 255), 1.5f);
+                if (ricom->use_detector)
+                {
+                    ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * (ricom->detector.radius[0] / ricom->nx_merlin), IM_COL32(255, 50, 0, 255), 256);
+                    ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * (ricom->detector.radius[1] / ricom->nx_merlin), IM_COL32(255, 150, 0, 255), 256);
+                }
+                ImGui::EndChild();
             }
             ImGui::EndChild();
             control_menu_size = ImGui::GetWindowSize();
@@ -410,7 +454,6 @@ int main(int argc, char *argv[])
 
                 if (b_redraw)
                 {
-                    glActiveTexture(GL_TEXTURE1);
                     glBindTexture(GL_TEXTURE_2D, uiTextureIDs[1]);
                     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ricom->srf_ricom->w, ricom->srf_ricom->h, 0,
                                  GL_RGBA, GL_UNSIGNED_BYTE, ricom->srf_ricom->pixels);
@@ -443,7 +486,6 @@ int main(int argc, char *argv[])
 
                 if (b_redraw)
                 {
-                    glActiveTexture(GL_TEXTURE2);
                     glBindTexture(GL_TEXTURE_2D, uiTextureIDs[2]);
                     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ricom->srf_stem->w, ricom->srf_stem->h, 0,
                                  GL_RGBA, GL_UNSIGNED_BYTE, ricom->srf_stem->pixels);
