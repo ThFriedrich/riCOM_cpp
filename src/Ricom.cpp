@@ -428,7 +428,7 @@ bool Ricom::process_frames()
 
             {
                 read_data<T>(data);
-                com<T>(data, com_xy, dose_sum idx + ix, rescale_stem);
+                com<T>(data, com_xy, dose_sum, idx + ix, rescale_stem);
                 icom(com_xy, ix, iy, rescale);
                 set_ricom_image_kernel(ix, iy);
                 if (use_detector)
