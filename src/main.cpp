@@ -285,7 +285,7 @@ int run_gui(Ricom *ricom)
                     ricom->b_recompute_kernel = true;
                 }
                 ImGui::Checkbox("Auto Centering", &ricom->update_offset);
-                ImGui::DragInt("Dose ( 10^ ))", &ricom->update_dose_lowbound, 0.1f, 0.0, 10.0);
+                ImGui::DragFloat("Dose ( 10^ ))", &ricom->update_dose_lowbound, 0.1f, 0.0, 10.0);
                 ImGui::BeginGroup();
                 ImGui::Text("Depth");
                 ImGui::RadioButton("1", &ricom->depth, 1);
