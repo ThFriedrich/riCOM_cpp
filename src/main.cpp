@@ -482,6 +482,8 @@ int run_gui(Ricom *ricom)
             m_list << "m.triggerstart = " << m_trigger << '\n';
             m_list << "m.startacquisition()";
             m_list.close();
+            ImGui::EndChild();
+            ImGui::End();
         }
 
         if (b_acq_open)
