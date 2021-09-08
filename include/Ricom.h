@@ -98,7 +98,7 @@ private:
 
 public:
     int rep;
-    int update_dose_lowbound;
+    float update_dose_lowbound;
     bool update_offset;
     bool use_detector;
     bool b_recompute_detector;

@@ -2,6 +2,8 @@
 #include <thread>
 #include <chrono>
 #include <stdlib.h>
+#include <iostream>
+#include <fstream>
 
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
@@ -160,6 +162,7 @@ int main(int, char **)
 
     // Main loop
     bool done = false;
+    bool b_merlin_list = false;
     bool b_connected = false;
     bool b_acq_open = false;
     bool b_running = false;
@@ -175,6 +178,13 @@ int main(int, char **)
 
     auto start_perf = chc::high_resolution_clock::now();
     typedef std::chrono::duration<float, std::milli> double_ms;
+
+    // Merlin Parameter;
+    int m_threshold0 = 0;
+    int m_threshold1 = 511;
+    float m_dwell_time = 100; // unit us
+    int m_save = 0;
+    int m_trigger = 1; // 0 internal, 1 rising edge
 
     bool b_redraw = false;
     while (!done)
@@ -259,8 +269,8 @@ int main(int, char **)
                 {
                     ricom->b_recompute_kernel = true;
                 }
-                ImGui::Checkbox("Auto Update Center", &ricom->update_offset);
-                ImGui::DragInt("Update Dose Lower Bound ( 10^ ))", &ricom->update_dose_lowbound, 0.1f, 0.0, 10);
+                ImGui::Checkbox("Auto Centering", &ricom->update_offset);
+                ImGui::DragInt("Dose ( 10^ ))", &ricom->update_dose_lowbound, 0.1f, 0.0, 10.0);
                 ImGui::BeginGroup();
                 ImGui::Text("Depth");
                 ImGui::RadioButton("1", &ricom->depth, 1);
@@ -300,6 +310,11 @@ int main(int, char **)
                 ImGui::InputText("IP", ip, 16);
                 ImGui::InputInt("COM-Port", &c_port, 8);
                 ImGui::InputInt("Data-Port", &d_port, 8);
+
+                if (ImGui::Button("Merlin Setup", ImVec2(-1.0f, 0.0f)))
+                {
+                    b_merlin_list = true;
+                }
 
                 if (ImGui::Button("Connect to Merlin", ImVec2(-1.0f, 0.0f)))
                 {
@@ -414,6 +429,43 @@ int main(int, char **)
             ImGui::EndChild();
             control_menu_size = ImGui::GetWindowSize();
             ImGui::End();
+        }
+
+        if (b_merlin_list)
+        {
+            ImVec2 pos = viewport->Pos;
+            pos[0] += control_menu_size[0] + 128;
+            pos[1] += menu_bar_size[1] + 128;
+            ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
+            ImVec2 size = {200, 400};
+            ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
+
+            ImGui::Begin("Merlin Setup List", &b_merlin_list);
+            ImGui::BeginChild("Scrolling");
+
+            ImGui::InputText("threshold0", m_threshold0, IM_ARRAYSIZE(m_threshold0));
+            ImGui::InputText("threshold1", m_threshold1, IM_ARRAYSIZE(m_threshold1));
+            ImGui::InputText("dwell_time", m_dwell_time, IM_ARRAYSIZE(m_dwell_time));
+            ImGui::InputText("save file?", m_save, IM_ARRAYSIZE(m_save));
+            ImGui::InputText("threshold0", m_trigger, IM_ARRAYSIZE(m_trigger));
+
+            std::ofstream m_list ("m_list.txt");
+            m_list << "
+                from merlin_interface.merlin_interface import MerlinInterface\n
+                m = MerlinInterface(tcp_ip = '"<< ip <<"' , tcp_port="<< c_port <<")\n
+                m.hvbias = 120\n
+                m.threshold0 = "<< m_threshold0 <<"\n
+                m.threshold1 = "<< m_threshold1 <<"\n
+                m.continuousrw = 1\n
+                m.counterdepth = "<< ricom->depth <<"\n
+                m.acquisitiontime = "<< m_dwell_time <<"\n
+                m.acquisitionperiod = "<< m_dwell_time <<"\n
+                m.numframestoacquire = "<< width * height * ricom->rep <<"\n
+                m.fileenable = "<< m_save <<"\n
+                m.triggerstart = "<< m_trigger <<"\n
+                m.startacquisition()
+            "
+            m_list.close();
         }
 
         if (b_acq_open)
