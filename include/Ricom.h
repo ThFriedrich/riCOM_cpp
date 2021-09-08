@@ -97,13 +97,7 @@ private:
     void rescale_stem_image();
 
 public:
-<<<<<<< HEAD
-    int rep;
     float update_dose_lowbound;
-=======
-    
-    int update_dose_lowbound;
->>>>>>> 45302223b1b0993793e1738f590526c3cfad512a
     bool update_offset;
     bool use_detector;
     bool b_recompute_detector;
