@@ -2,13 +2,10 @@
 #include <thread>
 #include <chrono>
 #include <stdlib.h>
-<<<<<<< HEAD
 #include <iostream>
 #include <fstream>
-=======
 #include <filesystem>
 #include <cfloat>
->>>>>>> 45302223b1b0993793e1738f590526c3cfad512a
 
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
@@ -471,21 +468,19 @@ int run_gui(Ricom *ricom)
             ImGui::InputText("threshold0", m_trigger, IM_ARRAYSIZE(m_trigger));
 
             std::ofstream m_list ("m_list.txt");
-            m_list << "
-                from merlin_interface.merlin_interface import MerlinInterface\n
-                m = MerlinInterface(tcp_ip = '"<< ip <<"' , tcp_port="<< c_port <<")\n
-                m.hvbias = 120\n
-                m.threshold0 = "<< m_threshold0 <<"\n
-                m.threshold1 = "<< m_threshold1 <<"\n
-                m.continuousrw = 1\n
-                m.counterdepth = "<< ricom->depth <<"\n
-                m.acquisitiontime = "<< m_dwell_time <<"\n
-                m.acquisitionperiod = "<< m_dwell_time <<"\n
-                m.numframestoacquire = "<< width * height * ricom->rep <<"\n
-                m.fileenable = "<< m_save <<"\n
-                m.triggerstart = "<< m_trigger <<"\n
-                m.startacquisition()
-            "
+            m_list << "from merlin_interface.merlin_interface import MerlinInterface" << '\n';
+            m_list << "m = MerlinInterface(tcp_ip = \"" << ip << "\" , tcp_port=" << c_port << ")" << '\n';
+            m_list << "m.hvbias = 120" << '\n';
+            m_list << "m.threshold0 = " << m_threshold0 << '\n';
+            m_list << "m.threshold1 = " << m_threshold1 << '\n';
+            m_list << "m.continuousrw = 1" << '\n';
+            m_list << "m.counterdepth = " << ricom->depth << '\n';
+            m_list << "m.acquisitiontime = " << m_dwell_time << '\n';
+            m_list << "m.acquisitionperiod = " << m_dwell_time << '\n';
+            m_list << "m.numframestoacquire = " << ricom->nx * ricom->ny * ricom->rep << '\n';
+            m_list << "m.fileenable = " << m_save << '\n';
+            m_list << "m.triggerstart = " << m_trigger << '\n';
+            m_list << "m.startacquisition()";
             m_list.close();
         }
 
