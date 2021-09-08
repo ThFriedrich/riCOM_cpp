@@ -2,10 +2,13 @@
 #include <thread>
 #include <chrono>
 #include <stdlib.h>
+#include <filesystem>
+#include <cfloat>
 
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
+
 #include <stdio.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
@@ -13,14 +16,15 @@
 
 #include "Ricom.h"
 #include "fonts.h"
+#include "ricom_types.h"
 
 namespace chc = std::chrono;
 
 // Visual Studio warnings
 #ifdef _MSC_VER
-#pragma warning (disable: 4067)
-#pragma warning (disable: 4333)
-#pragma warning (disable: 4312)
+#pragma warning(disable : 4067)
+#pragma warning(disable : 4333)
+#pragma warning(disable : 4312)
 #endif
 
 #if defined(__GNUC__)
@@ -28,17 +32,18 @@ namespace chc = std::chrono;
 #pragma GCC diagnostic ignored "-Wformat-security"
 #endif
 
-void run_file(Ricom *r, std::string path, size_t nx, size_t ny)
+void run_file(Ricom *r)
 {
     r->reset();
-    r->init(path);
-    r->run(nx, ny);
+    r->mode = RICOM::modes::FILE;
+    r->run();
 }
 
-void run_live(Ricom *r, size_t nx, size_t ny)
+void run_live(Ricom *r)
 {
     r->reset();
-    r->run(nx, ny);
+    r->mode = RICOM::modes::LIVE;
+    r->run();
 }
 
 #ifdef _WIN32
@@ -57,7 +62,23 @@ void run_fake_merlin()
 }
 #endif
 
-int main(int, char **)
+void select_mode_by_file(const char *filename, Ricom *ricom)
+{
+    if (std::filesystem::path(filename).extension() == ".t3p")
+    {
+        ricom->mode = RICOM::FILE;
+        ricom->t3p_path = filename;
+        ricom->detector_type = RICOM::TIMEPIX;
+    }
+    else if (std::filesystem::path(filename).extension() == ".mib")
+    {
+        ricom->mode = RICOM::FILE;
+        ricom->mib_path = filename;
+        ricom->detector_type = RICOM::MERLIN;
+    }
+}
+
+int run_gui(Ricom *ricom)
 {
     std::thread t1;
     std::thread t2;
@@ -156,22 +177,16 @@ int main(int, char **)
     fileDialog.SetTitle("Open .mib file");
     fileDialog.SetTypeFilters({".mib"});
 
-    Ricom *ricom = new Ricom();
-
     // Main loop
     bool done = false;
     bool b_connected = false;
     bool b_acq_open = false;
     bool b_running = false;
 
-    static int d_port = 6342;
-    static int c_port = 6341;
-    static char ip[16] = "127.0.0.1";
+    int c_port = 6341;
+    char ip[16] = "127.0.0.1";
 
-    static int width = 257;
-    static int height = 256;
-
-    static std::string filename = "";
+    std::string filename = "";
 
     auto start_perf = chc::high_resolution_clock::now();
     typedef std::chrono::duration<float, std::milli> double_ms;
@@ -243,9 +258,9 @@ int main(int, char **)
             if (ImGui::CollapsingHeader("General Settings", ImGuiTreeNodeFlags_DefaultOpen))
             {
                 ImGui::Text("Scan Area");
-                ImGui::DragInt("nx", &width);
-                ImGui::DragInt("ny", &height);
-                ImGui::DragInt("Repetitions", &ricom->rep,1,1);
+                ImGui::DragInt("nx", &ricom->nx, 1, 1, FLT_MAX);
+                ImGui::DragInt("ny", &ricom->ny, 1, 1, FLT_MAX);
+                ImGui::DragInt("Repetitions", &ricom->rep, 1, 1);
 
                 ImGui::Text("CBED corrections");
                 bool rot_changed = ImGui::SliderFloat("Rotation", &ricom->kernel.rotation, 0.0f, 360.0f, "%.1f deg");
@@ -295,15 +310,17 @@ int main(int, char **)
 
             if (ImGui::CollapsingHeader("Merlin Live Mode", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                ImGui::InputText("IP", ip, 16);
+                if(ImGui::InputText("IP", ip, sizeof(ip)))
+                {
+                    ricom->ip = ip;
+                }
                 ImGui::InputInt("COM-Port", &c_port, 8);
-                ImGui::InputInt("Data-Port", &d_port, 8);
+                ImGui::InputInt("Data-Port", &ricom->port, 8);
 
                 if (ImGui::Button("Connect to Merlin", ImVec2(-1.0f, 0.0f)))
                 {
                     t2 = std::thread(run_fake_merlin);
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                    ricom->init(ip, d_port);
                     b_connected = true;
                 }
 
@@ -326,7 +343,7 @@ int main(int, char **)
 
                 if (ImGui::Button("Start Acquisition", ImVec2(-1.0f, 0.0f)))
                 {
-                    t1 = std::thread(run_live, ricom, width, height);
+                    t1 = std::thread(run_live, ricom);
                     b_running = true;
                     t1.detach();
                 }
@@ -345,11 +362,12 @@ int main(int, char **)
                 {
                     filename = fileDialog.GetSelected().string();
                     fileDialog.ClearSelected();
+                    select_mode_by_file(filename.c_str(), ricom);
                 }
 
                 if (ImGui::Button("Run File", ImVec2(-1.0f, 0.0f)))
                 {
-                    t1 = std::thread(run_file, ricom, filename, width, height);
+                    t1 = std::thread(run_file, ricom);
                     b_running = true;
                     t1.detach();
                 }
@@ -359,7 +377,7 @@ int main(int, char **)
 
             if (b_running)
             {
-                ImGui::ProgressBar(ricom->fr_count / (width * height), ImVec2(-1.0f, 0.0f));
+                ImGui::ProgressBar(ricom->fr_count / (ricom->nx * ricom->ny), ImVec2(-1.0f, 0.0f));
                 ImGui::Text("Speed: %.2f kHz", ricom->fr_freq);
                 if (ImGui::Button("Quit", ImVec2(-1.0f, 0.0f)))
                 {
@@ -373,7 +391,7 @@ int main(int, char **)
                 ImGui::BeginChild("CBED", ImVec2(0.0f, 0.0f), false, ImGuiWindowFlags_NoScrollbar);
                 ImVec2 rem_space = ImGui::GetContentRegionAvail();
                 float tex_wh = (std::min)(rem_space.x, (rem_space.y - ImGui::GetStyle().WindowPadding.y * 3.0f));
-     
+
                 ImVec2 p = ImGui::GetCursorScreenPos();
 
                 float com_rel_x = p.x + tex_wh * (ricom->com_public[0] / ricom->nx_merlin);
@@ -547,4 +565,132 @@ int main(int, char **)
     SDL_Quit();
 
     return 0;
+}
+
+int run_cli(int argc, char *argv[], Ricom *ricom)
+{
+
+    // command line arguments
+    for (int i = 1; i < argc; i++)
+    {
+        if (i + 1 != argc)
+        {
+            // Set filename to read from .mib file
+            if (strcmp(argv[i], "-filename") == 0)
+            {
+                select_mode_by_file(argv[i + 1], ricom);
+                i++;
+            }
+            if (strcmp(argv[i], "-ip") == 0)
+            {
+                ricom->ip = argv[i + 1];
+                ricom->mode = RICOM::LIVE;
+                i++;
+            }
+            // Set port to connect to Merlin
+            if (strcmp(argv[i], "-port") == 0)
+            {
+                ricom->port = std::stoi(argv[i + 1]);
+                ricom->mode = RICOM::modes::LIVE;
+                i++;
+            }
+            // Set width of image
+            if (strcmp(argv[i], "-nx") == 0)
+            {
+                ricom->nx = std::stoi(argv[i + 1]);
+                i++;
+            }
+            // Set height of image
+            if (strcmp(argv[i], "-ny") == 0)
+            {
+                ricom->ny = std::stoi(argv[i + 1]);
+                i++;
+            }
+            // Set skip per row
+            if (strcmp(argv[i], "-skipr") == 0)
+            {
+                ricom->skip_per_row = std::stoi(argv[i + 1]);
+                i++;
+            }
+            // Set skip per image
+            if (strcmp(argv[i], "-skipi") == 0)
+            {
+                ricom->skip_per_img = std::stoi(argv[i + 1]);
+                i++;
+            }
+            // Set kernel size
+            if (strcmp(argv[i], "-k") == 0)
+            {
+                ricom->kernel.kernel_size = std::stoi(argv[i + 1]);
+                i++;
+            }
+            // Set CBED Rotation
+            if (strcmp(argv[i], "-r") == 0)
+            {
+                ricom->kernel.rotation = std::stof(argv[i + 1]);
+                i++;
+            }
+            // Set CBED center offset
+            if (strcmp(argv[i], "-offset") == 0)
+            {
+                ricom->offset[0] = std::stof(argv[i + 1]);
+                ricom->detector.offset[0] = std::stof(argv[i + 1]);
+                i++;
+                ricom->offset[1] = std::stof(argv[i + 1]);
+                ricom->detector.offset[1] = std::stof(argv[i + 1]);
+                i++;
+            }
+            // Set STEM radii
+            if (strcmp(argv[i], "-radius") == 0)
+            {
+                ricom->use_detector = true;
+                ricom->detector.radius[0] = std::stof(argv[i + 1]);
+                i++;
+                ricom->detector.radius[1] = std::stof(argv[i + 1]);
+                i++;
+            }
+            // Set depth of pixel for raw mode
+            if (strcmp(argv[i], "-depth") == 0)
+            {
+                ricom->depth = std::stoi(argv[i + 1]);
+                ricom->detector_type = RICOM::MERLIN;
+                i++;
+            }
+            if (strcmp(argv[i], "-rep") == 0)
+            {
+                ricom->rep = std::stoi(argv[i + 1]);
+                i++;
+            }
+            // Set Dwell Time
+            if (strcmp(argv[i], "-time") == 0)
+            {
+                ricom->dwell_time = std::stof(argv[i + 1]);
+                ricom->detector_type = RICOM::TIMEPIX;
+                i++;
+            }
+        }
+    }
+    if (ricom->mode == RICOM::LIVE)
+    {
+        run_live(ricom);
+    }
+    else if (ricom->mode == RICOM::FILE)
+    {
+        run_file(ricom);
+    }
+    return 0;
+}
+
+int main(int argc, char *argv[])
+{
+    Ricom *ricom = new Ricom();
+    if (argc == 1)
+    {
+        return run_gui(ricom);
+    }
+    else
+    {
+        return run_cli(argc, argv, ricom);
+    }
+    delete ricom;
 }

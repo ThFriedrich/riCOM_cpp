@@ -8,15 +8,19 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+
+#include "ricom_types.h"
 #pragma pack(1)
 
-struct e_event {
-    unsigned int index;
-    unsigned long toa;
-    unsigned char overflow;
-    unsigned char ftoa;
-    unsigned short tot;
-};
+struct e_event
+    {
+        unsigned int index;
+        unsigned long toa;
+        unsigned char overflow;
+        unsigned char ftoa;
+        unsigned short tot;
+    };
+
 class TimpixInterface
 {
 private:

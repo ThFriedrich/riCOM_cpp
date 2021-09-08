@@ -21,7 +21,7 @@ void TimpixInterface::open_file(std::string path)
 }
 
 // public methods
-inline void TimpixInterface::read_data_from_file_ti(e_event &ev)
+inline void TimpixInterface::read_data_from_file_ti(RICOM::e_event &ev)
 {
     t3p_stream.read((char *)&ev, sizeof(ev));
 }
@@ -29,7 +29,7 @@ inline void TimpixInterface::read_data_from_file_ti(e_event &ev)
 void TimpixInterface::read_data_com_ti(std::vector<uint32_t> &dose_map,
                                        std::vector<uint32_t> &sumx_map, std::vector<uint32_t> &sumy_map, int img_size)
 {
-    e_event ev;
+    RICOM::e_event ev;
     int probe_position;
 
     for (size_t idx = 0; idx < ds_timpix; idx++)

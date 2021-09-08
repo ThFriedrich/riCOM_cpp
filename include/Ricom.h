@@ -3,9 +3,11 @@
 
 #include <stdio.h>
 #include <cmath>
+#include <cfloat>
 #include <vector>
 #include <string>
 #include "MerlinInterface.hpp"
+#include "TimpixInterface.h"
 #include <SDL.h>
 
 class Ricom_kernel
@@ -20,7 +22,8 @@ public:
     // Methods
     void compute_kernel();
     // Constructor
-    Ricom_kernel() : kernel_size(5), k_width_sym(0), rotation(0.0), kernel_x(), kernel_y(){
+    Ricom_kernel() : kernel_size(5), k_width_sym(0), rotation(0.0), kernel_x(), kernel_y()
+    {
         compute_kernel();
     };
     // Destructor
@@ -31,25 +34,25 @@ class Ricom_detector
 {
 public:
     // Properties
-    std::array<float,2> radius;
-    std::array<float,2> offset;
+    std::array<float, 2> radius;
+    std::array<float, 2> offset;
     size_t nx_merlin;
     size_t ny_merlin;
     std::vector<int> id_list;
-    
+
     // Methods
     void compute_detector();
-    void compute_detector(std::array<float,2> &offset);
+    void compute_detector(std::array<float, 2> &offset);
     // Constructor
-    Ricom_detector() : radius{0.0, 0.0}, offset{127.5, 127.5}, nx_merlin(256), ny_merlin(256), id_list(){
+    Ricom_detector() : radius{0.0, 0.0}, offset{127.5, 127.5}, nx_merlin(256), ny_merlin(256), id_list()
+    {
         compute_detector();
     };
     // Destructor
     ~Ricom_detector(){};
 };
 
-
-class Ricom : public MerlinInterface
+class Ricom : public MerlinInterface, public TimpixInterface
 {
 private:
     // vSTEM Variables
@@ -65,11 +68,9 @@ private:
     std::vector<float> ricom_data;
 
     // Scan Area Variables
-    size_t nx;
-    size_t ny;
     size_t nxy;
     int px_per_row;
-    
+
     // Variables for potting in the SDL2 frame
     float ricom_max;
     float ricom_min;
@@ -79,14 +80,14 @@ private:
     void init_uv();
     template <typename T>
     bool process_frames();
-    void init_surface(int height, int width);
+    void init_surface(unsigned int width, unsigned int height);
     void draw_pixel(SDL_Surface *surface, int x, int y, float val);
     void reset_limits();
-    
+
     // Private Methods - riCOM
-    void icom(std::array<float,2> &com, int x, int y, bool &rescale);
+    void icom(std::array<float, 2> &com, int x, int y, bool &rescale);
     template <typename T>
-    void com(std::vector<T> &data, std::array<float,2> &com, size_t idx, bool &rescale);
+    void com(std::vector<T> &data, std::array<float, 2> &com, size_t idx, bool &rescale);
     void rescale_ricom_image();
     void set_ricom_image_kernel(int idx, int idy);
     void set_ricom_pixel(size_t idx, size_t idy);
@@ -94,19 +95,27 @@ private:
     // Private Methods - vSTEM
     void set_stem_pixel(size_t idx, size_t idy);
     void rescale_stem_image();
-    
 
 public:
-    int rep;
     bool use_detector;
     bool b_recompute_detector;
     bool b_recompute_kernel;
     Ricom_detector detector;
     Ricom_kernel kernel;
-    std::array<float,2> offset;
-    std::array<float,2> com_public;
+    std::array<float, 2> offset;
+    std::array<float, 2> com_public;
     int depth;
-    void run(size_t nx, size_t ny);
+    void run();
+
+    size_t skip_per_row;
+    size_t skip_per_img;
+    int rep;
+
+    RICOM::Detector_type detector_type;
+
+    // Scan Area Variables
+    int nx;
+    int ny;
 
     // Variables for progress and performance
     float fr_freq;  // Frequncy per frame
@@ -116,12 +125,12 @@ public:
     template <typename T>
     void plot_cbed(std::vector<T> &data);
 
-    SDL_Surface *srf_ricom;  // Surface for the window;
-    SDL_Surface *srf_stem; // Surface for the window;
-    SDL_Surface *srf_cbed; // Surface for the window;
+    SDL_Surface *srf_ricom; // Surface for the window;
+    SDL_Surface *srf_stem;  // Surface for the window;
+    SDL_Surface *srf_cbed;  // Surface for the window;
 
     // Constructor
-    Ricom() : stem_data(), stem_max(0.0), stem_min(INFINITY), u(), v(), sum_x{0}, sum_y{0}, ricom_data(), nx(0), ny(0), nxy(0), px_per_row(0), ricom_max(0.0), ricom_min(INFINITY), rep(1), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(),  kernel(), offset{127.5, 127.5}, depth(1), fr_freq(0.0), fr_count(0), rc_quit(false), srf_ricom(NULL), srf_stem(NULL),srf_cbed(NULL){};
+    Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), sum_x{0}, sum_y{0}, ricom_data(), nxy(0), px_per_row(0), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0,0.0}, depth(1), skip_per_row(0), skip_per_img(0), rep(1), detector_type(RICOM::MERLIN), nx(257), ny(256), fr_freq(0.0), fr_count(0), rc_quit(false), srf_ricom(NULL), srf_stem(NULL), srf_cbed(NULL){};
 
     // Destructor
     ~Ricom();
