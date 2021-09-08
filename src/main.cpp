@@ -461,11 +461,11 @@ int run_gui(Ricom *ricom)
             ImGui::Begin("Merlin Setup List", &b_merlin_list);
             ImGui::BeginChild("Scrolling");
 
-            ImGui::InputText("threshold0", m_threshold0, IM_ARRAYSIZE(m_threshold0));
-            ImGui::InputText("threshold1", m_threshold1, IM_ARRAYSIZE(m_threshold1));
-            ImGui::InputText("dwell_time", m_dwell_time, IM_ARRAYSIZE(m_dwell_time));
-            ImGui::InputText("save file?", m_save, IM_ARRAYSIZE(m_save));
-            ImGui::InputText("threshold0", m_trigger, IM_ARRAYSIZE(m_trigger));
+            ImGui::InputInt("threshold0", m_threshold0, 8);
+            ImGui::InputInt("threshold1", m_threshold1, 8);
+            ImGui::InputFloat("dwell_time (us)", m_dwell_time, 64);
+            ImGui::InputInt("save file?", m_save, 8);
+            ImGui::InputInt("trigger", m_trigger, 8);
 
             std::ofstream m_list ("m_list.txt");
             m_list << "from merlin_interface.merlin_interface import MerlinInterface" << '\n';
