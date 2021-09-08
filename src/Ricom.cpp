@@ -198,7 +198,7 @@ void Ricom::init_uv()
 }
 
 template <typename T>
-void Ricom::com(std::vector<T> &data, std::array<float,2> &com, size_t id_stem, bool &rescale)
+void Ricom::com(std::vector<T> &data, std::array<float,2> &com, int &dose_sum, size_t id_stem, bool &rescale)
 {
     float dose = 0;
     T px;
@@ -240,6 +240,7 @@ void Ricom::com(std::vector<T> &data, std::array<float,2> &com, size_t id_stem, 
 
         com[0] = (com[0] / dose);
         com[1] = (com[1] / dose);
+        dose_sum += dose;
 
         if (use_detector)
         {
@@ -399,6 +400,7 @@ bool Ricom::process_frames()
     std::array<float, 2> com_xy = {0.0, 0.0};
 
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
+    int dose_sum = 0;
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
 
     // Performance measurement
@@ -426,7 +428,7 @@ bool Ricom::process_frames()
 
             {
                 read_data<T>(data);
-                com<T>(data, com_xy, idx + ix, rescale_stem);
+                com<T>(data, com_xy, dose_sum idx + ix, rescale_stem);
                 icom(com_xy, ix, iy, rescale);
                 set_ricom_image_kernel(ix, iy);
                 if (use_detector)
@@ -485,6 +487,14 @@ bool Ricom::process_frames()
                 }
             }
         }
+
+        if ( update_offset && dose_sum > pow( 10.0, update_dose_lowbound ) )
+        {
+            offset[0] = com_public[0];
+            offset[1] = com_public[1];
+            dose_sum = 0;
+        }
+
         reset_limits();
     }
     return true;

@@ -86,7 +86,7 @@ private:
     // Private Methods - riCOM
     void icom(std::array<float,2> &com, int x, int y, bool &rescale);
     template <typename T>
-    void com(std::vector<T> &data, std::array<float,2> &com, size_t idx, bool &rescale);
+    void com(std::vector<T> &data, std::array<float,2> &com, int dose_sum, size_t idx, bool &rescale);
     void rescale_ricom_image();
     void set_ricom_image_kernel(int idx, int idy);
     void set_ricom_pixel(size_t idx, size_t idy);
@@ -98,9 +98,12 @@ private:
 
 public:
     int rep;
+    int update_dose_lowbound;
+    bool update_offset;
     bool use_detector;
     bool b_recompute_detector;
     bool b_recompute_kernel;
+    bool multi_scan;
     Ricom_detector detector;
     Ricom_kernel kernel;
     std::array<float,2> offset;
