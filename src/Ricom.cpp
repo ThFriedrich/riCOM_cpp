@@ -7,6 +7,7 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <cfloat>
 #include <vector>
 #include <string>
 #include <chrono>
@@ -51,7 +52,7 @@ void Ricom_kernel::compute_kernel()
             iy_s = iy - kernel_size;
             d = ix_s * ix_s + iy_s * iy_s;
 
-            ix_e = kws2 - iy_e + ix -1;
+            ix_e = kws2 - iy_e + ix - 1;
 
             if (d > 0)
             {
@@ -114,7 +115,7 @@ void Ricom_detector::compute_detector(std::array<float, 2> &offset)
 ////////////////////////////////////////////////
 //           SDL plotting methods             //
 ////////////////////////////////////////////////
-void Ricom::init_surface(int width, int height)
+void Ricom::init_surface(unsigned int width, unsigned int height)
 {
     // Creating Surface (holding the ricom image in CPU memory)
     srf_ricom = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
@@ -140,7 +141,7 @@ void Ricom::init_surface(int width, int height)
 void Ricom::draw_pixel(SDL_Surface *surface, int x, int y, float val)
 {
     cmap::Color c = cmap::GetColor(val, cmap::ColormapType::Viridis);
-    Uint32 px = SDL_MapRGB(srf_stem->format, c.b() * 255, c.g() * 255, c.r() * 255);
+    Uint32 px = SDL_MapRGB(surface->format, (Uint8)(c.b() * 255), (Uint8)(c.g() * 255), (Uint8)(c.r() * 255));
     Uint32 *const target_pixel = (Uint32 *)((Uint8 *)surface->pixels + y * surface->pitch + x * surface->format->BytesPerPixel);
     *target_pixel = px;
 }
@@ -236,7 +237,6 @@ void Ricom::com(std::vector<T> &data, std::array<float,2> &com, int &dose_sum, s
             com[1] += sum_y[i] * u[i];
             sum_y[i] = 0;
         }
-        
 
         com[0] = (com[0] / dose);
         com[1] = (com[1] / dose);
@@ -266,7 +266,7 @@ void Ricom::com(std::vector<T> &data, std::array<float,2> &com, int &dose_sum, s
     }
 }
 
-void Ricom::icom(std::array<float,2> &com, int x, int y, bool &rescale)
+void Ricom::icom(std::array<float, 2> &com, int x, int y, bool &rescale)
 {
     int idk = 0;
     int idr = 0;
@@ -304,9 +304,9 @@ void Ricom::icom(std::array<float,2> &com, int x, int y, bool &rescale)
 
 void Ricom::rescale_ricom_image()
 {
-    for (size_t y = 0; y < ny; y++)
+    for (int y = 0; y < ny; y++)
     {
-        for (size_t x = 0; x < nx; x++)
+        for (int x = 0; x < nx; x++)
         {
             set_ricom_pixel(x, y);
         }
@@ -355,7 +355,7 @@ void Ricom::plot_cbed(std::vector<T> &data)
     {
         T vl = cbed_data[id];
         byte_swap(vl);
-        vl_f = log(1.0+(float)vl);
+        vl_f = log(1.0 + (float)vl);
         if (vl_f > v_max)
         {
             v_max = vl_f;
@@ -374,7 +374,7 @@ void Ricom::plot_cbed(std::vector<T> &data)
         {
             T vl = cbed_data[iy_t + u[iy]];
             byte_swap(vl);
-            vl_f = log(1+(float)vl);
+            vl_f = log(1 + (float)vl);
             float val = (vl_f - v_min) / (v_max - v_min);
             draw_pixel(srf_cbed, ix, iy, val);
         }
@@ -383,9 +383,9 @@ void Ricom::plot_cbed(std::vector<T> &data)
 
 void Ricom::rescale_stem_image()
 {
-    for (size_t y = 0; y < ny; y++)
+    for (int y = 0; y < ny; y++)
     {
-        for (size_t x = 0; x < nx; x++)
+        for (int x = 0; x < nx; x++)
         {
             set_stem_pixel(x, y);
         }
@@ -421,10 +421,10 @@ bool Ricom::process_frames()
         ricom_data.assign(im_size, 0);
         stem_data.assign(nxy, 0);
 
-        for (size_t iy = 0; iy < ny; iy++)
+        for (int iy = 0; iy < ny; iy++)
         {
             idx = iy * nx;
-            for (size_t ix = 0; ix < nx; ix++)
+            for (int ix = 0; ix < nx; ix++)
 
             {
                 read_data<T>(data);
@@ -500,12 +500,10 @@ bool Ricom::process_frames()
     return true;
 }
 
-void Ricom::run(size_t nx, size_t ny)
+void Ricom::run()
 {
-    this->nx = nx;
-    this->ny = ny;
     nxy = nx * ny;
-
+    merlin_init();
     init_surface(nx, ny);
 
     if (use_detector)
@@ -522,7 +520,7 @@ void Ricom::run(size_t nx, size_t ny)
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
     ricom_data.reserve(im_size);
 
-    if (mode == 1)
+    if (mode == RICOM::LIVE)
     {
         read_aquisition_header();
     }
@@ -580,11 +578,11 @@ void Ricom::run(size_t nx, size_t ny)
 void Ricom::reset_limits()
 {
     fr_count = 0;
-    ricom_max = 0;
-    ricom_min = INFINITY;
-    stem_max = 0;
-    stem_min = INFINITY;
-    if (mode == modes::FILE)
+    ricom_max = -FLT_MAX;
+    ricom_min = FLT_MAX;
+    stem_max = -FLT_MAX;
+    stem_min = FLT_MAX;
+    if (mode == RICOM::modes::FILE)
     {
         mib_stream.clear();
         mib_stream.seekg(0, std::ios::beg);

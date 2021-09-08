@@ -24,13 +24,13 @@
 #include <sstream>
 #include <algorithm>
 
+#include "ricom_types.h"
 class MerlinInterface
 {
 private:
     struct sockaddr_in address;
     int addrlen = sizeof(address);
-    std::string ip = "127.0.0.1";
-    // create the buffer with space for the header data
+
     std::array<char, 384> head_buffer;
     std::array<char, 15> tcp_buffer;
     std::string rcv;
@@ -65,10 +65,7 @@ private:
     }
 
 public:
-    enum modes{
-        FILE,
-        LIVE
-    };
+
     int mode;
     std::string dtype;
     std::string acq = "";
@@ -77,6 +74,7 @@ public:
     bool b_binary = false;
 
     // Socket description
+    std::string ip = "127.0.0.1";
     int rc_socket = 0;
     int port = 0;
 
@@ -136,7 +134,7 @@ public:
     {
         try
         {
-            if (mode == 1)
+            if (mode == RICOM::LIVE)
             {
                 read_head_from_socket();
             }
@@ -163,7 +161,7 @@ public:
             data_size /= 8;
         }
 
-        if (mode == modes::FILE)
+        if (mode == RICOM::FILE)
         {
             read_data_from_file(buffer, data_size);
         }
@@ -211,24 +209,28 @@ public:
         }
     }
 
-    void init(std::string ip, int port)
+    void merlin_init()
     {
-        mode = 1;
-        this->ip = ip;
-        this->port = port;
-        connect_socket();
-    };
-
-    void init(std::string path)
-    {
-        mode = 0;
-        mib_path = path;
-        open_file(mib_path);
+        switch (mode)
+        {
+        case RICOM::LIVE:
+        {
+            connect_socket();
+            break;
+        }
+        case RICOM::FILE:   
+        {
+            open_file();
+            break;
+        }
+        default:
+            break;
+        } 
     };
 
     void end()
     {
-        if (mode == 0)
+        if (mode == RICOM::FILE)
         {
             close_file();
         }
@@ -302,11 +304,12 @@ public:
         }
     }
 
-    void open_file(std::string path)
+    void open_file()
     {
-        mode = modes::FILE;
-        mib_stream.open(path, std::ios::in | std::ios::binary);
-        if (!mib_stream)
+        if (!mib_path.empty()){
+            mib_stream.open(mib_path, std::ios::in | std::ios::binary);
+        }
+        if (!mib_stream.is_open())
         {
             std::cout << "Cannot open file!" << std::endl;
         }
@@ -323,7 +326,7 @@ public:
     // Reading data stream from Socket
     void connect_socket()
     {
-        mode = modes::LIVE;
+        mode = RICOM::LIVE;
 
         #ifdef WIN32
         int error = WSAStartup(0x0202, &w);
