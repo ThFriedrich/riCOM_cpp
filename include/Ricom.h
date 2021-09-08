@@ -87,7 +87,7 @@ private:
     // Private Methods - riCOM
     void icom(std::array<float, 2> &com, int x, int y, bool &rescale);
     template <typename T>
-    void com(std::vector<T> &data, std::array<float, 2> &com, size_t idx, bool &rescale);
+    void com(std::vector<T> &data, std::array<float,2> &com, int &dose_sum, size_t idx, bool &rescale);
     void rescale_ricom_image();
     void set_ricom_image_kernel(int idx, int idy);
     void set_ricom_pixel(size_t idx, size_t idy);
@@ -97,9 +97,13 @@ private:
     void rescale_stem_image();
 
 public:
+    
+    int update_dose_lowbound;
+    bool update_offset;
     bool use_detector;
     bool b_recompute_detector;
     bool b_recompute_kernel;
+    bool multi_scan;
     Ricom_detector detector;
     Ricom_kernel kernel;
     std::array<float, 2> offset;
@@ -130,7 +134,7 @@ public:
     SDL_Surface *srf_cbed;  // Surface for the window;
 
     // Constructor
-    Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), sum_x{0}, sum_y{0}, ricom_data(), nxy(0), px_per_row(0), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0,0.0}, depth(1), skip_per_row(0), skip_per_img(0), rep(1), detector_type(RICOM::MERLIN), nx(257), ny(256), fr_freq(0.0), fr_count(0), rc_quit(false), srf_ricom(NULL), srf_stem(NULL), srf_cbed(NULL){};
+    Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), sum_x{0}, sum_y{0}, ricom_data(), nxy(0), px_per_row(0), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), update_dose_lowbound(1e6), update_offset(false), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0,0.0}, depth(1), skip_per_row(0), skip_per_img(0), rep(1), detector_type(RICOM::MERLIN), nx(257), ny(256), fr_freq(0.0), fr_count(0), rc_quit(false), srf_ricom(NULL), srf_stem(NULL), srf_cbed(NULL){};
 
     // Destructor
     ~Ricom();

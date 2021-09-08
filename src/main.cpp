@@ -274,6 +274,8 @@ int run_gui(Ricom *ricom)
                 {
                     ricom->b_recompute_kernel = true;
                 }
+                ImGui::Checkbox("Auto Update Center", &ricom->update_offset);
+                ImGui::DragInt("Update Dose Lower Bound ( 10^ ))", &ricom->update_dose_lowbound, 0.1f, 0.0, 10);
                 ImGui::BeginGroup();
                 ImGui::Text("Depth");
                 ImGui::RadioButton("1", &ricom->depth, 1);
