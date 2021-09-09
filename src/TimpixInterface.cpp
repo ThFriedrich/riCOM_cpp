@@ -11,9 +11,9 @@
 #include "TimpixInterface.h"
 
 // private methods
-void TimpixInterface::open_file(std::string path)
+void TimpixInterface::open_file()
 {
-    t3p_stream.open(path, std::ios::in | std::ios::binary);
+    t3p_stream.open(t3p_path, std::ios::in | std::ios::binary);
     if (!t3p_stream.is_open())
     {
         std::cout << "Cannot open T3P file!" << std::endl;
@@ -21,15 +21,15 @@ void TimpixInterface::open_file(std::string path)
 }
 
 // public methods
-inline void TimpixInterface::read_data_from_file_ti(RICOM::e_event &ev)
+inline void TimpixInterface::read_data_from_file_ti(e_event &ev)
 {
     t3p_stream.read((char *)&ev, sizeof(ev));
 }
 
-void TimpixInterface::read_data_com_ti(std::vector<uint32_t> &dose_map,
-                                       std::vector<uint32_t> &sumx_map, std::vector<uint32_t> &sumy_map, int img_size)
+void TimpixInterface::read_com_ti(std::vector<size_t> &dose_map,
+                                  std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, size_t img_size)
 {
-    RICOM::e_event ev;
+    e_event ev;
     int probe_position;
 
     for (size_t idx = 0; idx < ds_timpix; idx++)
@@ -46,8 +46,42 @@ void TimpixInterface::read_data_com_ti(std::vector<uint32_t> &dose_map,
     }
 }
 
-void TimpixInterface::init_ti(std::string path)
+void TimpixInterface::timepix_init(RICOM::modes mode)
 {
-    t3p_path = path;
-    open_file(t3p_path);
+    this->mode = mode;
+    switch (mode)
+    {
+    case RICOM::LIVE:
+    {
+        // connect_socket();
+        break;
+    }
+    case RICOM::FILE:
+    {
+        open_file();
+        break;
+    }
+    default:
+        break;
+    }
+};
+
+void TimpixInterface::timepix_end()
+{
+    if (mode == RICOM::FILE)
+    {
+        close_file();
+    }
+    else
+    {
+        // close_socket();
+    }
+};
+
+void TimpixInterface::close_file()
+{
+    if (t3p_stream.is_open())
+    {
+        t3p_stream.close();
+    }
 }

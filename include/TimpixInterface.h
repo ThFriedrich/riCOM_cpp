@@ -1,6 +1,14 @@
 #ifndef TI_H
 #define TI_H
 
+#ifdef __GNUC__
+#define PACK( __Declaration__ ) __Declaration__ __attribute__((__packed__))
+#endif
+
+#ifdef _MSC_VER
+#define PACK( __Declaration__ ) __pragma( pack(push, 1) ) __Declaration__ __pragma( pack(pop))
+#endif
+
 #include <string>
 #include <vector>
 #include <array>
@@ -10,33 +18,38 @@
 #include <algorithm>
 
 #include "ricom_types.h"
-#pragma pack(1)
 
-struct e_event
-    {
-        unsigned int index;
-        unsigned long toa;
-        unsigned char overflow;
-        unsigned char ftoa;
-        unsigned short tot;
-    };
+PACK(struct e_event
+{
+    uint32_t index;
+    uint64_t toa;
+    uint8_t overflow;
+    uint8_t ftoa;
+    uint16_t tot;
+});
 
 class TimpixInterface
 {
 private:
-    void open_file( std::string path );
+    RICOM::modes mode;
+    void open_file();
+    std::ifstream t3p_stream;
+    size_t ds_timpix;
     
 public:
-    void read_data_com_ti( std::vector<uint32_t> &dose_map, 
-        std::vector<uint32_t> &sumx_map, std::vector<uint32_t> &sumy_map, int img_size );
-    void read_data_from_file_ti( e_event &ev);
-    void init_ti( std::string path );
+    void read_com_ti(std::vector<size_t> &dose_map,
+                     std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, size_t img_size);
+    void read_data_from_file_ti(e_event &ev);
+    void timepix_init(RICOM::modes mode);
+    void close_file();
+    void timepix_end();
+    
     std::string t3p_path;
-    std::ifstream t3p_stream;
-    size_t nx_timpix = 256;
-    size_t ny_timpix = 256;
-    size_t ds_timpix = 256 * 256; 
-    size_t dwell_time = 0; // unit: ns
-    int probe_position_now = 0;
+    size_t nx_timpix;
+    size_t ny_timpix;
+    size_t dwell_time; // unit: ns
+    int probe_position_now;
+
+    TimpixInterface() : mode(), t3p_stream(), ds_timpix(65536), nx_timpix(256), ny_timpix(256), dwell_time(1000), probe_position_now(0){};
 };
 #endif // __TI_H__

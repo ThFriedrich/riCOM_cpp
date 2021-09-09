@@ -28,6 +28,7 @@
 class MerlinInterface
 {
 private:
+    RICOM::modes mode;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
 
@@ -66,7 +67,6 @@ private:
 
 public:
 
-    int mode;
     std::string dtype;
     std::string acq = "";
     std::vector<char> acq_header;
@@ -209,8 +209,9 @@ public:
         }
     }
 
-    void merlin_init()
+    void merlin_init(RICOM::modes mode)
     {
+        this->mode = mode;
         switch (mode)
         {
         case RICOM::LIVE:
@@ -326,8 +327,6 @@ public:
     // Reading data stream from Socket
     void connect_socket()
     {
-        mode = RICOM::LIVE;
-
         #ifdef WIN32
         int error = WSAStartup(0x0202, &w);
         if (error)

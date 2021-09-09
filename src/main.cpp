@@ -174,8 +174,8 @@ int run_gui(Ricom *ricom)
     ImGui::FileBrowser fileDialog;
 
     // (optional) set browser properties
-    fileDialog.SetTitle("Open .mib file");
-    fileDialog.SetTypeFilters({".mib"});
+    fileDialog.SetTitle("Open .mib or .t3p file");
+    fileDialog.SetTypeFilters({".mib",".t3p"});
 
     // Main loop
     bool done = false;
@@ -258,8 +258,8 @@ int run_gui(Ricom *ricom)
             if (ImGui::CollapsingHeader("General Settings", ImGuiTreeNodeFlags_DefaultOpen))
             {
                 ImGui::Text("Scan Area");
-                ImGui::DragInt("nx", &ricom->nx, 1, 1, FLT_MAX);
-                ImGui::DragInt("ny", &ricom->ny, 1, 1, FLT_MAX);
+                ImGui::DragInt("nx", &ricom->nx, 1, 1);
+                ImGui::DragInt("ny", &ricom->ny, 1, 1);
                 ImGui::DragInt("Repetitions", &ricom->rep, 1, 1);
 
                 ImGui::Text("CBED corrections");

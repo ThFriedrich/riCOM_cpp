@@ -15,7 +15,9 @@
 #include <thread>
 #include "tinycolormap.hpp"
 
+
 #include "Ricom.h"
+#include "progress_bar.hpp"
 
 namespace chc = std::chrono;
 namespace cmap = tinycolormap;
@@ -155,7 +157,6 @@ Ricom::~Ricom()
     end();
 };
 
-template <typename T>
 void Ricom::init_uv()
 {
     if (b_raw)
@@ -199,7 +200,7 @@ void Ricom::init_uv()
 }
 
 template <typename T>
-void Ricom::com(std::vector<T> &data, std::array<float,2> &com, int &dose_sum, size_t id_stem, bool &rescale)
+void Ricom::com(std::vector<T> &data, std::array<float, 2> &com, int &dose_sum)
 {
     float dose = 0;
     T px;
@@ -241,29 +242,31 @@ void Ricom::com(std::vector<T> &data, std::array<float,2> &com, int &dose_sum, s
         com[0] = (com[0] / dose);
         com[1] = (com[1] / dose);
         dose_sum += dose;
-
-        if (use_detector)
-        {
-            size_t stem_temp = 0;
-            for (size_t id : detector.id_list)
-            {
-                px = data[id];
-                byte_swap(px);
-                stem_temp += px;
-            }
-            if (stem_temp > stem_max)
-            {
-                stem_max = stem_temp;
-                rescale = true;
-            }
-            if (stem_temp < stem_min)
-            {
-                stem_min = stem_temp;
-                rescale = true;
-            }
-            stem_data[id_stem] = stem_temp;
-        }
     }
+}
+
+template <typename T>
+void Ricom::stem(std::vector<T> &data, size_t id_stem, bool &rescale)
+{
+    T px;
+    size_t stem_temp = 0;
+    for (size_t id : detector.id_list)
+    {
+        px = data[id];
+        byte_swap(px);
+        stem_temp += px;
+    }
+    if (stem_temp > stem_max)
+    {
+        stem_max = stem_temp;
+        rescale = true;
+    }
+    if (stem_temp < stem_min)
+    {
+        stem_min = stem_temp;
+        rescale = true;
+    }
+    stem_data[id_stem] = stem_temp;
 }
 
 void Ricom::icom(std::array<float, 2> &com, int x, int y, bool &rescale)
@@ -398,14 +401,16 @@ bool Ricom::process_frames()
     // Memory allocation
     std::vector<T> data(ds_merlin);
     std::array<float, 2> com_xy = {0.0, 0.0};
-
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
     int dose_sum = 0;
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
 
+    // Initialize Progress bar
+    ProgressBar *bar = new ProgressBar(nxy);
+    
     // Performance measurement
     auto start_perf = chc::high_resolution_clock::now();
-    typedef std::chrono::duration<float, std::milli> double_ms;
+
     float fr = 0;          // Frequncy per frame
     size_t fr_count_i = 0; // Frame count in interval
     float fr_avg = 0;      // Average frequency
@@ -415,7 +420,6 @@ bool Ricom::process_frames()
     bool rescale_stem = false;
     size_t idx = 0;
 
-    init_uv<T>();
     for (int ir = 0; ir < rep; ir++)
     {
         ricom_data.assign(im_size, 0);
@@ -428,18 +432,19 @@ bool Ricom::process_frames()
 
             {
                 read_data<T>(data);
-                com<T>(data, com_xy, dose_sum, idx + ix, rescale_stem);
+                com<T>(data, com_xy, dose_sum);
                 icom(com_xy, ix, iy, rescale);
                 set_ricom_image_kernel(ix, iy);
                 if (use_detector)
                 {
+                    stem(data, idx+ix, rescale_stem);
                     set_stem_pixel(ix, iy);
                 }
                 com_xy_sum[0] += com_xy[0];
                 com_xy_sum[1] += com_xy[1];
                 fr_count_i++;
                 fr_count++;
-                auto mil_secs = std::chrono::duration_cast<double_ms>(chc::high_resolution_clock::now() - start_perf).count();
+                auto mil_secs = std::chrono::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - start_perf).count();
                 if (mil_secs > 500.0 || fr_count == nxy) // ~50Hz for display
                 {
                     if (rc_quit)
@@ -475,6 +480,7 @@ bool Ricom::process_frames()
                     fr_count_a++;
                     start_perf = chc::high_resolution_clock::now();
                     fr_freq = fr_avg / fr_count_a;
+                    bar->Progressed(fr_count, fr_avg / fr_count_a, "kHz");
                     com_public[0] = com_xy_sum[0] / (float)fr_count_i;
                     com_public[1] = com_xy_sum[1] / (float)fr_count_i;
                     com_xy_sum = {0.0, 0.0};
@@ -488,22 +494,183 @@ bool Ricom::process_frames()
             }
         }
 
-        if ( update_offset && dose_sum > pow( 10.0, update_dose_lowbound ) )
+        if (update_offset && dose_sum > pow(10.0, update_dose_lowbound))
         {
             offset[0] = com_public[0];
             offset[1] = com_public[1];
             dose_sum = 0;
         }
-
         reset_limits();
     }
+    delete bar;
     return true;
+}
+
+bool Ricom::run_merlin()
+{
+    if (mode == RICOM::LIVE)
+    {
+        read_aquisition_header();
+    }
+
+    // Run the main loop
+    if (read_head())
+    {
+        if (dtype == "U08")
+        {
+            return process_frames<unsigned char>();
+        }
+        else if (dtype == "U16")
+        {
+            return process_frames<unsigned short>();
+        }
+        else if (dtype == "R64")
+        {
+            b_raw = true;
+            b_binary = false;
+            switch (depth)
+            {
+            case 1:
+                b_binary = true;
+                return process_frames<unsigned char>();
+                break;
+            case 6:
+                return process_frames<unsigned char>();
+                break;
+            case 12:
+                return process_frames<unsigned short>();
+                break;
+            default:
+                return false;
+                break;
+            }
+        }
+    }
+}
+
+bool Ricom::process_timepix_stream()
+{
+    // Memory allocation
+    std::vector<size_t> dose_map(nxy);
+    std::vector<size_t> sumx_map(nxy);
+    std::vector<size_t> sumy_map(nxy);
+    dose_map.assign(nxy, 0);
+    sumx_map.assign(nxy, 0);
+    sumy_map.assign(nxy, 0);
+
+    std::array<float, 2> com_xy = {0.0, 0.0};
+    std::array<float, 2> com_xy_sum = {0.0, 0.0};
+    int dose_sum = 0;
+    size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
+
+    // Initialize Progress bar
+    ProgressBar *bar = new ProgressBar(nxy);
+
+    // Performance measurement
+    auto start_perf = chc::high_resolution_clock::now();
+
+    float fr = 0;          // Frequncy per frame
+    size_t fr_count_i = 0; // Frame count in interval
+    float fr_avg = 0;      // Average frequency
+    size_t fr_count_a = 0; // Count measured points for averaging
+
+    bool rescale = false;
+    bool rescale_stem = false;
+    int idx = 0;
+    int idxx = 0;
+
+    for (int ir = 0; ir < rep; ir++)
+    {
+        ricom_data.assign(im_size, 0);
+        stem_data.assign(nxy, 0);
+
+        for (int iy = 0; iy < ny; iy++)
+        {
+            idx = iy * nx;
+            for (int ix = 0; ix < nx; ix++)
+            {
+                idxx = idx + ix;
+                read_com_ti(dose_map, sumx_map, sumy_map, nxy);
+                if (dose_map[idxx] > 0)
+                {
+                    com_xy[0] = sumx_map[idxx] / dose_map[idxx];
+                    com_xy[1] = sumy_map[idxx] / dose_map[idxx];
+
+                    if (idxx >= 1)
+                    {
+                        icom(com_xy, (idxx) % nx, floor((idxx) / nx), rescale); // process one frame before the probe position to avoid toa problem
+                        set_ricom_image_kernel(ix, iy);
+                    }
+
+                    com_xy_sum[0] += com_xy[0];
+                    com_xy_sum[1] += com_xy[1];
+                }
+                if (use_detector)
+                {
+                    set_stem_pixel(ix, iy);
+                }
+
+                fr_count_i++;
+                fr_count++;
+                auto mil_secs = std::chrono::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - start_perf).count();
+                if (mil_secs > 500.0 || fr_count == nxy) // ~50Hz for display
+                {
+
+                    if (rc_quit)
+                    {
+                        return false;
+                    };
+                    if (rescale)
+                    {
+                        rescale_ricom_image();
+                    };
+                    if (use_detector)
+                    {
+                        if (rescale_stem)
+                        {
+                            rescale_stem_image();
+                        };
+                    };
+                    if (b_recompute_detector)
+                    {
+                        detector.compute_detector(offset);
+                        b_recompute_detector = false;
+                    }
+                    if (b_recompute_kernel)
+                    {
+                        kernel.compute_kernel();
+                        b_recompute_kernel = false;
+                    }
+                    // plot_cbed<T>(data);
+                    rescale = false;
+                    rescale_stem = false;
+                    fr = fr_count_i / mil_secs;
+                    fr_avg += fr;
+                    fr_count_a++;
+                    start_perf = chc::high_resolution_clock::now();
+                    fr_freq = fr_avg / fr_count_a;
+                    com_public[0] = com_xy_sum[0] / (float)fr_count_i;
+                    com_public[1] = com_xy_sum[1] / (float)fr_count_i;
+                    com_xy_sum = {0.0, 0.0};
+                    fr_count_i = 0;
+                    bar->Progressed(fr_count, fr_avg / fr_count_a, "kHz");
+                }
+            }
+        }
+        reset_limits();
+    }
+    delete bar;
+    return true;
+}
+bool Ricom::run_timepix()
+{
+    // Run the main loop
+    return process_timepix_stream();
 }
 
 void Ricom::run()
 {
     nxy = nx * ny;
-    merlin_init();
     init_surface(nx, ny);
 
     if (use_detector)
@@ -520,50 +687,24 @@ void Ricom::run()
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
     ricom_data.reserve(im_size);
 
-    if (mode == RICOM::LIVE)
-    {
-        read_aquisition_header();
-    }
+    init_uv();
 
     bool b_quit = true;
-    // Run the main loop
-    if (read_head())
-    {
-        if (dtype == "U08")
-        {
-            b_quit = process_frames<unsigned char>();
-        }
-        else if (dtype == "U16")
-        {
-            b_quit = process_frames<unsigned short>();
-        }
-        else if (dtype == "R64")
-        {
-            b_raw = true;
 
-            if (depth == 0)
-            {
-                depth = 1;
-                std::cout << "The data is in raw mode format, but no depth was specified and was automatically set to 1. Specify the the depth flag, e.g. '-depth 6' to change this default behaviour." << std::endl;
-            }
-            b_binary = false;
-            switch (depth)
-            {
-            case 1:
-                b_binary = true;
-                b_quit = process_frames<unsigned char>();
-                break;
-            case 6:
-                b_quit = process_frames<unsigned char>();
-                break;
-            case 12:
-                b_quit = process_frames<unsigned short>();
-                break;
-            default:
-                break;
-            }
-        }
+    switch (detector_type)
+    {
+    case RICOM::MERLIN:
+        merlin_init(mode);
+        b_quit = run_merlin();
+        break;
+    case RICOM::TIMEPIX:
+        timepix_init(mode);
+        b_quit = run_timepix();
+        break;
+    default:
+        break;
     }
+
     if (b_quit)
     {
         std::cout << "Quitting..." << std::endl;
@@ -572,7 +713,7 @@ void Ricom::run()
     {
         std::cout << "All done. Exiting..." << std::endl;
     }
-    end();
+    timepix_end();
 }
 
 void Ricom::reset_limits()
