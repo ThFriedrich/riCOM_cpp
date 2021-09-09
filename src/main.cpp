@@ -77,7 +77,7 @@ void run_connection_script()
     }
 }
 #else
-void run_connection_script(std::string )
+void run_connection_script()
 {
     std::filesystem::path temp_path = std::filesystem::temp_directory_path();
     std::filesystem::path file = "m_list.txt";
