@@ -69,7 +69,7 @@ void run_connection_script()
 {
     std::filesystem::path temp_path = std::filesystem::temp_directory_path();
     std::filesystem::path file = "m_list.txt";
-    std::string file_directory = (temp_path / file);
+    std::string file_directory = (temp_path / file).string;
     int r = std::system( ("py " + file_directory).c_str() );
     if (r != 0)
     {
@@ -81,7 +81,7 @@ void run_connection_script()
 {
     std::filesystem::path temp_path = std::filesystem::temp_directory_path();
     std::filesystem::path file = "m_list.txt";
-    std::string file_directory = (temp_path / file);
+    std::string file_directory = (temp_path / file).string();
     int r = std::system( ("python3 " + file_directory).c_str() );
     if (r != 0)
     {
