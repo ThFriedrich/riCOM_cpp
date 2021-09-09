@@ -66,6 +66,7 @@ private:
     }
 
 public:
+    bool b_connected = false;
     std::string dtype;
     std::string acq = "";
     std::vector<char> acq_header;
@@ -208,6 +209,26 @@ public:
         }
     }
 
+    void flush_socket()
+    {
+        char *buffer;
+        int bytes_count = 0;
+        int bytes_total = 0;
+
+        while (true)
+        {
+            bytes_count = recv(rc_socket, &buffer[0], 1, 0);
+
+            if (bytes_count <= 0)
+            {
+                std::cout << "Socket flushed (" << bytes_total/1024 << " kB)" << std::endl;
+                perror("Error reading MerlinData!");
+                break;
+            }
+            bytes_total += bytes_count;
+        }
+    }
+
     void merlin_init(RICOM::modes mode)
     {
         this->mode = mode;
@@ -237,6 +258,7 @@ public:
         else
         {
             close_socket();
+            b_connected = false;
         }
     };
 
@@ -367,15 +389,13 @@ public:
                 {
                     handle_socket_errors("connecting to Socket");
                 }
-                else
-                {
-                    // std::cout << error_counter << " ";
-                }
                 error_counter++;
             }
             else
             {
                 std::cout << "Connected by " << inet_ntoa(address.sin_addr) << "\n";
+                b_connected = true;
+                break;
             }
         }
     }

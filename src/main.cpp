@@ -212,7 +212,6 @@ int run_gui(Ricom *ricom)
     // Main loop
     bool done = false;
     bool b_merlin_list = false;
-    bool b_connected = false;
     bool b_acq_open = false;
     bool b_running = false;
 
@@ -364,15 +363,15 @@ int run_gui(Ricom *ricom)
                     b_merlin_list = true;
                 }
 
-                if (ImGui::Button("Connect to Merlin", ImVec2(-1.0f, 0.0f)))
-                {
-                    // t2 = std::thread(run_fake_merlin);
-                    t2 = std::thread(run_connection_script);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                    b_connected = true;
-                }
+                // if (ImGui::Button("Connect to Merlin", ImVec2(-1.0f, 0.0f)))
+                // {
+                //     // t2 = std::thread(run_fake_merlin);
+                //     t2 = std::thread(run_connection_script);
+                //     std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                //     b_connected = true;
+                // }
 
-                if (b_connected)
+                if (ricom->b_connected)
                 {
                     ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Connected");
                     if (ricom->acq_header.size() > 0)
@@ -392,8 +391,10 @@ int run_gui(Ricom *ricom)
                 if (ImGui::Button("Start Acquisition", ImVec2(-1.0f, 0.0f)))
                 {
                     t1 = std::thread(run_live, ricom);
+                    t2 = std::thread(run_connection_script);
                     b_running = true;
                     t1.detach();
+                    t2.detach();
                 }
             }
 
