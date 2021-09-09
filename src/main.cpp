@@ -50,8 +50,8 @@ void run_live(Ricom *r)
 
 #ifdef _WIN32
 void run_fake_merlin()
-{
-    std::system("py fake_merlin.py");
+{   
+    std::system("/py fake_merlin.py");
 }
 #else
 void run_fake_merlin()
@@ -60,6 +60,34 @@ void run_fake_merlin()
     if (r != 0)
     {
         std::cout << "Error running fake_merlin.py" << std::endl;
+    }
+}
+#endif
+
+#ifdef _WIN32
+void run_connection_script()
+{
+    // std::filesystem::path temp_path = std::filesystem::temp_directory_path();
+    // std::filesystem::path file = "m_list.txt";
+    // std::string file_directory = (temp_path / file).string();
+    // int r = std::system( ("py " + file_directory).c_str() );
+    int r = std::system( "py m_list.py" );
+    if (r != 0)
+    {
+        std::cout << "Cannot find m_list, generate file first." << std::endl;
+    }
+}
+#else
+void run_connection_script()
+{
+    // std::filesystem::path temp_path = std::filesystem::temp_directory_path();
+    // std::filesystem::path file = "m_list.txt";
+    // std::string file_directory = (temp_path / file).string();
+    // int r = std::system( ("python3 " + file_directory).c_str() );
+    int r = std::system( "python3 m_list.py" );
+    if (r != 0)
+    {
+        std::cout << "Cannot find m_list, generate file first." << std::endl;
     }
 }
 #endif
@@ -338,7 +366,8 @@ int run_gui(Ricom *ricom)
 
                 if (ImGui::Button("Connect to Merlin", ImVec2(-1.0f, 0.0f)))
                 {
-                    t2 = std::thread(run_fake_merlin);
+                    // t2 = std::thread(run_fake_merlin);
+                    t2 = std::thread(run_connection_script);
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));
                     b_connected = true;
                 }
@@ -466,13 +495,15 @@ int run_gui(Ricom *ricom)
             ImGui::InputInt("threshold0", &m_threshold0, 8);
             ImGui::InputInt("threshold1", &m_threshold1, 8);
             ImGui::InputFloat("dwell_time (us)", &m_dwell_time, 64);
-            ImGui::Checkbox("save file?", &m_save);
             ImGui::InputInt("trigger", &m_trigger, 1, 1);
+            
+            ImGui::Checkbox("save file?", &m_save);
 
             if (ImGui::Button("Confirm")){
-                std::filesystem::path temp_path = std::filesystem::temp_directory_path();
-                std::filesystem::path file = "m_list.txt";
-                std::ofstream m_list (temp_path / file);
+                // std::filesystem::path temp_path = std::filesystem::temp_directory_path();
+                // std::filesystem::path file = "m_list.txt";
+                // std::ofstream m_list (temp_path / file);
+                std::ofstream m_list ("m_list.py");
                 m_list << "from merlin_interface.merlin_interface import MerlinInterface" << '\n';
                 m_list << "m = MerlinInterface(tcp_ip = \"" << ip << "\" , tcp_port=" << c_port << ")" << '\n';
                 m_list << "m.hvbias = 120" << '\n';

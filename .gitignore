@@ -5,3 +5,5 @@ imgui.ini
 *.mib
 opengl32.dll
 ricom.log
+m_list.py
+RICOM
