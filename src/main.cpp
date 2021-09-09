@@ -76,7 +76,7 @@ void run_connection_script()
     {
         std::cout << "Cannot find m_list, generate file first." << std::endl;
     }
-}./r
+}
 #else
 void run_connection_script()
 {
