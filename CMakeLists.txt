@@ -52,6 +52,8 @@ target_sources( RICOM PRIVATE
     imgui/imgui.cpp
     imgui/backends/imgui_impl_opengl3.cpp
     imgui/backends/imgui_impl_sdl.cpp
+    src/progress_bar.cpp
+    src/TimpixInterface.cpp
     src/Ricom.cpp 
     src/main.cpp
     )

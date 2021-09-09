@@ -196,8 +196,8 @@ int run_gui(Ricom *ricom)
     ImGui::FileBrowser fileDialog;
 
     // (optional) set browser properties
-    fileDialog.SetTitle("Open .mib file");
-    fileDialog.SetTypeFilters({".mib"});
+    fileDialog.SetTitle("Open .mib or .t3p file");
+    fileDialog.SetTypeFilters({".mib",".t3p"});
 
     // Main loop
     bool done = false;
@@ -218,7 +218,7 @@ int run_gui(Ricom *ricom)
     int m_threshold0 = 0;
     int m_threshold1 = 511;
     float m_dwell_time = 100; // unit us
-    int m_save = 0;
+    bool m_save = false;
     int m_trigger = 1; // 0 internal, 1 rising edge
 
     bool b_redraw = false;
@@ -288,8 +288,8 @@ int run_gui(Ricom *ricom)
             if (ImGui::CollapsingHeader("General Settings", ImGuiTreeNodeFlags_DefaultOpen))
             {
                 ImGui::Text("Scan Area");
-                ImGui::DragInt("nx", &ricom->nx, 1, 1, FLT_MAX);
-                ImGui::DragInt("ny", &ricom->ny, 1, 1, FLT_MAX);
+                ImGui::DragInt("nx", &ricom->nx, 1, 1);
+                ImGui::DragInt("ny", &ricom->ny, 1, 1);
                 ImGui::DragInt("Repetitions", &ricom->rep, 1, 1);
 
                 ImGui::Text("CBED corrections");
@@ -485,24 +485,28 @@ int run_gui(Ricom *ricom)
             ImGui::InputInt("threshold0", &m_threshold0, 8);
             ImGui::InputInt("threshold1", &m_threshold1, 8);
             ImGui::InputFloat("dwell_time (us)", &m_dwell_time, 64);
-            ImGui::InputInt("save file?", &m_save, 8);
-            ImGui::InputInt("trigger", &m_trigger, 8);
+            ImGui::Checkbox("save file?", &m_save);
+            ImGui::InputInt("trigger", &m_trigger, 1, 1);
 
-            std::ofstream m_list ("m_list.py");
-            m_list << "from merlin_interface.merlin_interface import MerlinInterface" << '\n';
-            m_list << "m = MerlinInterface(tcp_ip = \"" << ip << "\" , tcp_port=" << c_port << ")" << '\n';
-            m_list << "m.hvbias = 120" << '\n';
-            m_list << "m.threshold0 = " << m_threshold0 << '\n';
-            m_list << "m.threshold1 = " << m_threshold1 << '\n';
-            m_list << "m.continuousrw = 1" << '\n';
-            m_list << "m.counterdepth = " << ricom->depth << '\n';
-            m_list << "m.acquisitiontime = " << m_dwell_time << '\n';
-            m_list << "m.acquisitionperiod = " << m_dwell_time << '\n';
-            m_list << "m.numframestoacquire = " << ricom->nx * ricom->ny * ricom->rep << '\n';
-            m_list << "m.fileenable = " << m_save << '\n';
-            m_list << "m.triggerstart = " << m_trigger << '\n';
-            m_list << "m.startacquisition()";
-            m_list.close();
+            if (ImGui::Button("Confirm")){
+                std::filesystem::path temp_path = std::filesystem::temp_directory_path();
+                std::filesystem::path file = "m_list.txt";
+                std::ofstream m_list (temp_path / file);
+                m_list << "from merlin_interface.merlin_interface import MerlinInterface" << '\n';
+                m_list << "m = MerlinInterface(tcp_ip = \"" << ip << "\" , tcp_port=" << c_port << ")" << '\n';
+                m_list << "m.hvbias = 120" << '\n';
+                m_list << "m.threshold0 = " << m_threshold0 << '\n';
+                m_list << "m.threshold1 = " << m_threshold1 << '\n';
+                m_list << "m.continuousrw = 1" << '\n';
+                m_list << "m.counterdepth = " << ricom->depth << '\n';
+                m_list << "m.acquisitiontime = " << m_dwell_time << '\n';
+                m_list << "m.acquisitionperiod = " << m_dwell_time << '\n';
+                m_list << "m.numframestoacquire = " << ricom->nx * ricom->ny * ricom->rep << '\n';
+                m_list << "m.fileenable = " << (int)m_save << '\n';
+                m_list << "m.triggerstart = " << m_trigger << '\n';
+                m_list << "m.startacquisition()";
+                m_list.close();
+            }
             ImGui::EndChild();
             ImGui::End();
         }

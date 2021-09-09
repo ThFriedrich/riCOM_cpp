@@ -4,3 +4,5 @@ data
 imgui.ini
 *.mib
 opengl32.dll
+m_list.py
+RICOM
