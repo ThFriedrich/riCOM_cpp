@@ -67,22 +67,24 @@ void run_fake_merlin()
 #ifdef _WIN32
 void run_connection_script()
 {
-    std::filesystem::path temp_path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = "m_list.txt";
-    std::string file_directory = (temp_path / file).string();
-    int r = std::system( ("py " + file_directory).c_str() );
+    // std::filesystem::path temp_path = std::filesystem::temp_directory_path();
+    // std::filesystem::path file = "m_list.txt";
+    // std::string file_directory = (temp_path / file).string();
+    // int r = std::system( ("py " + file_directory).c_str() );
+    int r = std::system( "py m_list.py" );
     if (r != 0)
     {
         std::cout << "Cannot find m_list, generate file first." << std::endl;
     }
-}
+}./r
 #else
 void run_connection_script()
 {
-    std::filesystem::path temp_path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = "m_list.txt";
-    std::string file_directory = (temp_path / file).string();
-    int r = std::system( ("python3 " + file_directory).c_str() );
+    // std::filesystem::path temp_path = std::filesystem::temp_directory_path();
+    // std::filesystem::path file = "m_list.txt";
+    // std::string file_directory = (temp_path / file).string();
+    // int r = std::system( ("python3 " + file_directory).c_str() );
+    int r = std::system( "python3 m_list.py" );
     if (r != 0)
     {
         std::cout << "Cannot find m_list, generate file first." << std::endl;
@@ -496,9 +498,10 @@ int run_gui(Ricom *ricom)
             ImGui::Checkbox("save file?", &m_save);
 
             if (ImGui::Button("Confirm")){
-                std::filesystem::path temp_path = std::filesystem::temp_directory_path();
-                std::filesystem::path file = "m_list.txt";
-                std::ofstream m_list (temp_path / file);
+                // std::filesystem::path temp_path = std::filesystem::temp_directory_path();
+                // std::filesystem::path file = "m_list.txt";
+                // std::ofstream m_list (temp_path / file);
+                std::ofstream m_list ("m_list.py");
                 m_list << "from merlin_interface.merlin_interface import MerlinInterface" << '\n';
                 m_list << "m = MerlinInterface(tcp_ip = \"" << ip << "\" , tcp_port=" << c_port << ")" << '\n';
                 m_list << "m.hvbias = 120" << '\n';
