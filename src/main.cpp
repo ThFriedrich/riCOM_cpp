@@ -50,8 +50,8 @@ void run_live(Ricom *r)
 
 #ifdef _WIN32
 void run_fake_merlin()
-{
-    std::system("py fake_merlin.py");
+{   
+    std::system("/py fake_merlin.py");
 }
 #else
 void run_fake_merlin()
@@ -67,7 +67,8 @@ void run_fake_merlin()
 #ifdef _WIN32
 void run_connection_script()
 {
-    int r = std::system("py m_list.py");
+    filename = temp_path + "/m_list.py";
+    int r = std::system("py " + filename);
     if (r != 0)
     {
         std::cout << "Cannot find m_list, generate file first." << std::endl;
@@ -76,7 +77,8 @@ void run_connection_script()
 #else
 void run_connection_script()
 {
-    int r = std::system("python3 m_list.py");
+    filename = temp_path + "/m_list.py";
+    int r = std::system("python3 " + filename);
     if (r != 0)
     {
         std::cout << "Cannot find m_list, generate file first." << std::endl;
@@ -205,6 +207,7 @@ int run_gui(Ricom *ricom)
     bool b_connected = false;
     bool b_acq_open = false;
     bool b_running = false;
+    std::filesystem::path temp_path = std::filesystem::temp_directory_path();
 
     int c_port = 6341;
     char ip[16] = "127.0.0.1";
@@ -485,11 +488,11 @@ int run_gui(Ricom *ricom)
             ImGui::InputInt("threshold0", &m_threshold0, 8);
             ImGui::InputInt("threshold1", &m_threshold1, 8);
             ImGui::InputFloat("dwell_time (us)", &m_dwell_time, 64);
-            ImGui::Checkbox("save file?", &m_save);
             ImGui::InputInt("trigger", &m_trigger, 1, 1);
+            
+            ImGui::Checkbox("save file?", &m_save);
 
             if (ImGui::Button("Confirm")){
-                std::filesystem::path temp_path = std::filesystem::temp_directory_path();
                 std::filesystem::path file = "m_list.txt";
                 std::ofstream m_list (temp_path / file);
                 m_list << "from merlin_interface.merlin_interface import MerlinInterface" << '\n';
