@@ -6,6 +6,7 @@
 #include <fstream>
 #include <filesystem>
 #include <cfloat>
+#include<ctime>
 
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
@@ -110,8 +111,6 @@ void select_mode_by_file(const char *filename, Ricom *ricom)
 
 int run_gui(Ricom *ricom)
 {
-    freopen( "ricom.log", "a", stdout );
-    freopen( "ricom.log", "a", stderr );
     std::thread t1;
     std::thread t2;
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
@@ -392,6 +391,11 @@ int run_gui(Ricom *ricom)
                 {
                     t1 = std::thread(run_live, ricom);
                     t2 = std::thread(run_connection_script);
+
+                    // t2 = std::thread(run_fake_merlin);
+                    // std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                    // t1 = std::thread(run_live, ricom);
+                    
                     b_running = true;
                     t1.detach();
                     t2.detach();
@@ -775,6 +779,15 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
 
 int main(int argc, char *argv[])
 {
+    freopen( "ricom.log", "a", stdout );
+    freopen( "ricom.log", "a", stderr );
+
+    time_t timetoday;
+    time(&timetoday);
+    std::cout << std::endl << "##########################################################################" << std::endl;
+    std::cout << "Ricom started at " << asctime(localtime(&timetoday)) << std::endl;
+    std::cout << std::endl << "##########################################################################" << std::endl;
+
     Ricom *ricom = new Ricom();
     if (argc == 1)
     {

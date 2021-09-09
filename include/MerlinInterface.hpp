@@ -76,7 +76,7 @@ public:
     // Socket description
     std::string ip = "127.0.0.1";
     int rc_socket = 0;
-    int port = 0;
+    int port = 6342;
 
     // Data Stream description
     std::string mib_path;
@@ -211,7 +211,8 @@ public:
 
     void flush_socket()
     {
-        char *buffer;
+        connect_socket();
+        char *buffer[1] = {0};
         int bytes_count = 0;
         int bytes_total = 0;
 
@@ -222,11 +223,11 @@ public:
             if (bytes_count <= 0)
             {
                 std::cout << "Socket flushed (" << bytes_total/1024 << " kB)" << std::endl;
-                perror("Error reading MerlinData!");
                 break;
             }
             bytes_total += bytes_count;
         }
+        close_socket();
     }
 
     void merlin_init(RICOM::modes mode)
@@ -236,6 +237,7 @@ public:
         {
         case RICOM::LIVE:
         {
+            flush_socket();
             connect_socket();
             break;
         }
@@ -264,7 +266,7 @@ public:
 
     int read_aquisition_header()
     {
-        size_t er = recv(rc_socket, &tcp_buffer[0], tcp_buffer.size(), 0);
+        int er = recv(rc_socket, &tcp_buffer[0], tcp_buffer.size(), 0);
         if (er == -1)
         {
             std::cout << "Error on recv() reading TCP-Header" << std::endl;

@@ -505,7 +505,7 @@ bool Ricom::process_frames()
 bool Ricom::run_merlin()
 {
     if (mode == RICOM::LIVE)
-    {
+    {   
         if (read_aquisition_header() == -1)
         {
             return false;
