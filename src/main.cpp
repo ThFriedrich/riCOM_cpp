@@ -67,7 +67,7 @@ void run_fake_merlin()
 #ifdef _WIN32
 void run_connection_script()
 {
-    filename = temp_path + "/m_list.py";
+    std::string filename = temp_path + "/m_list.py";
     int r = std::system("py " + filename);
     if (r != 0)
     {
@@ -77,7 +77,7 @@ void run_connection_script()
 #else
 void run_connection_script()
 {
-    filename = temp_path + "/m_list.py";
+    std::string filename = temp_path + "/m_list.py";
     int r = std::system("python3 " + filename);
     if (r != 0)
     {
