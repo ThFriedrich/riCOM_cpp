@@ -70,7 +70,7 @@ void run_connection_script()
     std::filesystem::path temp_path = std::filesystem::temp_directory_path();
     std::filesystem::path file = "m_list.txt";
     std::string file_directory = (temp_path / file);
-    int r = std::system( "py " + file_directory );
+    int r = std::system( ("py " + file_directory).c_str() );
     if (r != 0)
     {
         std::cout << "Cannot find m_list, generate file first." << std::endl;
@@ -82,7 +82,7 @@ void run_connection_script(std::string )
     std::filesystem::path temp_path = std::filesystem::temp_directory_path();
     std::filesystem::path file = "m_list.txt";
     std::string file_directory = (temp_path / file);
-    int r = std::system("python3 " + file_directory);
+    int r = std::system( ("python3 " + file_directory).c_str() );
     if (r != 0)
     {
         std::cout << "Cannot find m_list, generate file first." << std::endl;
