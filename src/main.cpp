@@ -64,6 +64,26 @@ void run_fake_merlin()
 }
 #endif
 
+#ifdef _WIN32
+void run_connection_script()
+{
+    int r = std::system("py m_list.py");
+    if (r != 0)
+    {
+        std::cout << "Cannot find m_list, generate file first." << std::endl;
+    }
+}
+#else
+void run_connection_script()
+{
+    int r = std::system("python3 m_list.py");
+    if (r != 0)
+    {
+        std::cout << "Cannot find m_list, generate file first." << std::endl;
+    }
+}
+#endif
+
 void select_mode_by_file(const char *filename, Ricom *ricom)
 {
     if (std::filesystem::path(filename).extension() == ".t3p")
@@ -336,7 +356,8 @@ int run_gui(Ricom *ricom)
 
                 if (ImGui::Button("Connect to Merlin", ImVec2(-1.0f, 0.0f)))
                 {
-                    t2 = std::thread(run_fake_merlin);
+                    // t2 = std::thread(run_fake_merlin);
+                    t2 = std::thread(run_connection_script);
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));
                     b_connected = true;
                 }
@@ -467,7 +488,7 @@ int run_gui(Ricom *ricom)
             ImGui::InputInt("save file?", &m_save, 8);
             ImGui::InputInt("trigger", &m_trigger, 8);
 
-            std::ofstream m_list ("m_list.txt");
+            std::ofstream m_list ("m_list.py");
             m_list << "from merlin_interface.merlin_interface import MerlinInterface" << '\n';
             m_list << "m = MerlinInterface(tcp_ip = \"" << ip << "\" , tcp_port=" << c_port << ")" << '\n';
             m_list << "m.hvbias = 120" << '\n';
