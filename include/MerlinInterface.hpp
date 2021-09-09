@@ -229,7 +229,7 @@ public:
         } 
     };
 
-    void end()
+    void merlin_end()
     {
         if (mode == RICOM::FILE)
         {
@@ -372,7 +372,7 @@ public:
         fprintf(stderr, "%S\n", s);
         LocalFree(s);
 
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
     }
 
     void close_socket()
@@ -385,7 +385,7 @@ public:
     {
         std::cout << "Error occured while " << raised_at << "." << std::endl;
         std::cout << std::strerror(errno) << std::endl;
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
     }
 
     void close_socket()

@@ -152,10 +152,7 @@ void Ricom::draw_pixel(SDL_Surface *surface, int x, int y, float val)
 //     RICOM class method implementations     //
 ////////////////////////////////////////////////
 
-Ricom::~Ricom()
-{
-    end();
-};
+Ricom::~Ricom(){};
 
 void Ricom::init_uv()
 {
@@ -717,7 +714,18 @@ void Ricom::run()
     {
         std::cout << "All done. Exiting..." << std::endl;
     }
-    timepix_end();
+    switch (detector_type)
+    {
+    case RICOM::MERLIN:
+        merlin_end();
+        break;
+    case RICOM::TIMEPIX:
+        timepix_end();
+        break;
+    default:
+        break;
+    }
+    
 }
 
 void Ricom::reset_limits()

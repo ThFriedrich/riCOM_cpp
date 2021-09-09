@@ -82,6 +82,8 @@ void select_mode_by_file(const char *filename, Ricom *ricom)
 
 int run_gui(Ricom *ricom)
 {
+    freopen( "ricom.log", "a", stdout );
+    freopen( "ricom.log", "a", stderr );
     std::thread t1;
     std::thread t2;
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
