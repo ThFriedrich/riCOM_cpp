@@ -36,12 +36,12 @@ private:
     std::array<char, 15> tcp_buffer;
     std::string rcv;
     std::array<std::string, 384> head;
-    #ifdef WIN32
+#ifdef WIN32
     WSADATA w;
     const char opt = 1;
-    #else
+#else
     int opt = 1;
-    #endif
+#endif
 
     void read_head_from_file()
     {
@@ -66,7 +66,6 @@ private:
     }
 
 public:
-
     std::string dtype;
     std::string acq = "";
     std::vector<char> acq_header;
@@ -219,14 +218,14 @@ public:
             connect_socket();
             break;
         }
-        case RICOM::FILE:   
+        case RICOM::FILE:
         {
             open_file();
             break;
         }
         default:
             break;
-        } 
+        }
     };
 
     void merlin_end()
@@ -241,9 +240,14 @@ public:
         }
     };
 
-    void read_aquisition_header()
+    int read_aquisition_header()
     {
-        recv(rc_socket, &tcp_buffer[0], tcp_buffer.size(), 0);
+        size_t er = recv(rc_socket, &tcp_buffer[0], tcp_buffer.size(), 0);
+        if (er == -1)
+        {
+            std::cout << "Error on recv() reading TCP-Header" << std::endl;
+            return -1;
+        }
         int l = decode_tcp_head();
         acq_header.resize(l);
         char *buffer = reinterpret_cast<char *>(&acq_header[0]);
@@ -307,7 +311,8 @@ public:
 
     void open_file()
     {
-        if (!mib_path.empty()){
+        if (!mib_path.empty())
+        {
             mib_stream.open(mib_path, std::ios::in | std::ios::binary);
         }
         if (!mib_stream.is_open())
@@ -327,13 +332,13 @@ public:
     // Reading data stream from Socket
     void connect_socket()
     {
-        #ifdef WIN32
+#ifdef WIN32
         int error = WSAStartup(0x0202, &w);
         if (error)
         {
             exit(EXIT_FAILURE);
         }
-        #endif
+#endif
 
         // Creating socket file descriptor
         rc_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -353,14 +358,29 @@ public:
 
         std::cout << "Waiting for incoming connection..." << std::endl;
         // Connecting socket to the port
-        if (connect(rc_socket, (struct sockaddr *)&address, sizeof(address)) == SOCKET_ERROR)
+        int error_counter = 0;
+        while (true)
         {
-            handle_socket_errors("connecting to Socket");
+            if (connect(rc_socket, (struct sockaddr *)&address, sizeof(address)) == SOCKET_ERROR)
+            {
+                if (error_counter < 1)
+                {
+                    handle_socket_errors("connecting to Socket");
+                }
+                else
+                {
+                    // std::cout << error_counter << " ";
+                }
+                error_counter++;
+            }
+            else
+            {
+                std::cout << "Connected by " << inet_ntoa(address.sin_addr) << "\n";
+            }
         }
-        std::cout << "Connected by " << inet_ntoa(address.sin_addr) << "\n";
     }
 
-    #ifdef WIN32
+#ifdef WIN32
     void handle_socket_errors(std::string raised_at)
     {
         wchar_t *s = NULL;
@@ -380,7 +400,7 @@ public:
         closesocket(rc_socket);
         WSACleanup();
     }
-    #else
+#else
     void handle_socket_errors(std::string raised_at)
     {
         std::cout << "Error occured while " << raised_at << "." << std::endl;
@@ -392,7 +412,7 @@ public:
     {
         close(rc_socket);
     }
-    #endif
+#endif
 };
 
 #endif // MERLIN_INTERFACE_H

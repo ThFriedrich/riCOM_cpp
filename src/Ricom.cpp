@@ -15,7 +15,6 @@
 #include <thread>
 #include "tinycolormap.hpp"
 
-
 #include "Ricom.h"
 #include "progress_bar.hpp"
 
@@ -434,7 +433,7 @@ bool Ricom::process_frames()
                 set_ricom_image_kernel(ix, iy);
                 if (use_detector)
                 {
-                    stem(data, idx+ix, rescale_stem);
+                    stem(data, idx + ix, rescale_stem);
                     set_stem_pixel(ix, iy);
                 }
                 com_xy_sum[0] += com_xy[0];
@@ -507,7 +506,10 @@ bool Ricom::run_merlin()
 {
     if (mode == RICOM::LIVE)
     {
-        read_aquisition_header();
+        if (read_aquisition_header() == -1)
+        {
+            return false;
+        }
     }
 
     // Run the main loop
@@ -543,7 +545,7 @@ bool Ricom::run_merlin()
             }
         }
     }
-    else 
+    else
     {
         return false;
     }
@@ -725,7 +727,6 @@ void Ricom::run()
     default:
         break;
     }
-    
 }
 
 void Ricom::reset_limits()
