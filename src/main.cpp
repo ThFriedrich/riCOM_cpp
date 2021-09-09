@@ -468,7 +468,9 @@ int run_gui(Ricom *ricom)
             ImGui::InputInt("trigger", &m_trigger, 1, 1);
 
             if (ImGui::Button("Confirm")){
-                std::ofstream m_list ("m_list.txt");
+                std::filesystem::path temp_path = std::filesystem::temp_directory_path();
+                std::filesystem::path file = "m_list.txt";
+                std::ofstream m_list (temp_path / file);
                 m_list << "from merlin_interface.merlin_interface import MerlinInterface" << '\n';
                 m_list << "m = MerlinInterface(tcp_ip = \"" << ip << "\" , tcp_port=" << c_port << ")" << '\n';
                 m_list << "m.hvbias = 120" << '\n';

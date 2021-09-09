@@ -407,7 +407,7 @@ bool Ricom::process_frames()
 
     // Initialize Progress bar
     ProgressBar *bar = new ProgressBar(nxy);
-    
+
     // Performance measurement
     auto start_perf = chc::high_resolution_clock::now();
 
@@ -545,6 +545,10 @@ bool Ricom::run_merlin()
                 break;
             }
         }
+    }
+    else 
+    {
+        return false;
     }
 }
 
