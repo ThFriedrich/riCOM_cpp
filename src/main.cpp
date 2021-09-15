@@ -639,7 +639,7 @@ int run_gui(Ricom *ricom)
         // }
     }
 
-    Cleanup
+    //Cleanup
     if (ricom->srf_ricom != NULL)
     SDL_FreeSurface(ricom->srf_ricom);
     if (ricom->srf_stem != NULL)
