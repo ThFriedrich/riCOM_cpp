@@ -489,7 +489,7 @@ bool Ricom::process_frames()
                 //     std::cout << "head not received" << std::endl;
                 //     return false;
                 // }
-                if ( idx + ix < nxy)
+                if ( idx + ix < nxy-1)
                 {
                     read_head();
                 }
