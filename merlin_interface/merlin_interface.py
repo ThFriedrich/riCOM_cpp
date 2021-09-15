@@ -551,6 +551,46 @@ class MerlinInterface(object):
     # ACQUISITION AND TRIGGER CONTROL
 
     @property
+    def runheadless(self):
+        command_name = b"RUNHEADLESS"
+        command_type = b"GET"
+        command_string = self._make_message_string(
+                command_name, command_type)
+        return_data = self._send_packet(command_string)
+        return(return_data)
+
+    @runheadless.setter
+    def runheadless(self, value):
+        command_name = b"RUNHEADLESS"
+        command_type = b"SET"
+        command_argument_list = [str(value)]
+        command_string = self._make_message_string(
+                command_name,
+                command_type,
+                command_argument_list)
+        self._send_packet(command_string)
+
+    @property
+    def fileformat(self):
+        command_name = b"FILEFORMAT"
+        command_type = b"GET"
+        command_string = self._make_message_string(
+                command_name, command_type)
+        return_data = self._send_packet(command_string)
+        return(return_data)
+
+    @fileformat.setter
+    def fileformat(self, value):
+        command_name = b"FILEFORMAT"
+        command_type = b"SET"
+        command_argument_list = [str(value)]
+        command_string = self._make_message_string(
+                command_name,
+                command_type,
+                command_argument_list)
+        self._send_packet(command_string)
+
+    @property
     def numframestoacquire(self):
         command_name = b"NUMFRAMESTOACQUIRE"
         command_type = b"GET"

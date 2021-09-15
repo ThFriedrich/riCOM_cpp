@@ -68,8 +68,7 @@ private:
     std::vector<float> ricom_data;
 
     // Scan Area Variables
-    size_t nxy;
-    int px_per_row;
+    int px_per_row; // not sure what is this for
 
     // Variables for potting in the SDL2 frame
     float ricom_max;
@@ -119,8 +118,6 @@ public:
     bool run_merlin();
     bool run_timepix();
 
-    size_t skip_per_row;
-    size_t skip_per_img;
     int rep;
 
     RICOM::Detector_type detector_type;
@@ -128,6 +125,10 @@ public:
     // Scan Area Variables
     int nx;
     int ny;
+    int nxy;
+    int total_px;
+    int skip_row;
+    int skip_img;
 
     // Variables for progress and performance
     float fr_freq;  // Frequncy per frame

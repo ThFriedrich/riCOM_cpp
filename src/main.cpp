@@ -225,9 +225,12 @@ int run_gui(Ricom *ricom)
     // Merlin Parameter;
     int m_threshold0 = 0;
     int m_threshold1 = 511;
-    float m_dwell_time = 100; // unit us
+    float m_dwell_time = 0.1; // unit ms
     bool m_save = false;
-    int m_trigger = 1; // 0 internal, 1 rising edge
+    bool m_trigger = true; // false: internal, true: rising edge
+    bool m_headless = true;
+    bool m_raw = true;
+
 
     bool b_redraw = false;
     while (!done)
@@ -298,6 +301,8 @@ int run_gui(Ricom *ricom)
                 ImGui::Text("Scan Area");
                 ImGui::DragInt("nx", &ricom->nx, 1, 1);
                 ImGui::DragInt("ny", &ricom->ny, 1, 1);
+                ImGui::DragInt("skip row", &ricom->skip_row, 1, 1);
+                ImGui::DragInt("skip img", &ricom->skip_img, 1, 1);
                 ImGui::DragInt("Repetitions", &ricom->rep, 1, 1);
 
                 ImGui::Text("CBED corrections");
@@ -500,8 +505,9 @@ int run_gui(Ricom *ricom)
             ImGui::InputInt("threshold0", &m_threshold0, 8);
             ImGui::InputInt("threshold1", &m_threshold1, 8);
             ImGui::InputFloat("dwell_time (us)", &m_dwell_time, 64);
-            ImGui::InputInt("trigger", &m_trigger, 1, 1);
-            
+            ImGui::Checkbox("trigger", &m_trigger);
+            ImGui::Checkbox("headless", &m_headless);
+            ImGui::Checkbox("raw", &m_raw);
             ImGui::Checkbox("save file?", &m_save);
 
             if (ImGui::Button("Confirm")){
@@ -520,6 +526,8 @@ int run_gui(Ricom *ricom)
                 m_list << "m.acquisitionperiod = " << m_dwell_time << '\n';
                 m_list << "m.numframestoacquire = " << ricom->nx * ricom->ny * ricom->rep << '\n';
                 m_list << "m.fileenable = " << (int)m_save << '\n';
+                m_list << "m.runheadless = " << (int)m_headless << '\n';
+                m_list << "m.fileformat = " << (int)m_raw * 2 << '\n';
                 m_list << "m.triggerstart = " << m_trigger << '\n';
                 m_list << "m.startacquisition()";
                 m_list.close();

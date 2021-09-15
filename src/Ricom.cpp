@@ -489,9 +489,25 @@ bool Ricom::process_frames()
                 //     std::cout << "head not received" << std::endl;
                 //     return false;
                 // }
-                if ( (fr_count) < (nxy*rep-2) )
+                if ( (fr_count) < (total_px - 2) )
                 {
                     read_head();
+                }
+            }
+            for (int sr = 0; sr < skip_row; sr++)
+            {
+                read_data<T>(data);
+                read_head();
+                fr_count++;
+            }
+        
+            if ( ir != (rep-1) ) // for the last repetition, extra data will be flushed after recon is finished
+            {
+                for (int si = 0; si < skip_img; si++)
+                {
+                    read_data<T>(data);
+                    read_head();
+                    fr_count++;
                 }
             }
         }
@@ -680,6 +696,7 @@ bool Ricom::run_timepix()
 void Ricom::run()
 {
     nxy = nx * ny;
+    total_px = ( rep * nxy ) + ( ny * rep * skip_row ) + ( rep * skip_img );
     init_surface(nx, ny);
 
     if (use_detector)
