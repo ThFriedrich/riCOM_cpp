@@ -499,7 +499,7 @@ bool Ricom::process_frames()
         reset_limits();
     }
     delete bar;
-    return true;
+    return false; // was true here, not sure why
 }
 
 bool Ricom::run_merlin()
