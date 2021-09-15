@@ -376,11 +376,20 @@ public:
         {
             handle_socket_errors("intitializing Socket");
         }
-
-        if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
+#ifdef WIN32
+        DWROD timeout = 0.5;
+        if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt), SO_RVBTIMEO, (const char*)&timeout, sizeof timeout) == SOCKET_ERROR)
         {
             handle_socket_errors("setting socket options");
         }
+#else   
+        struct timeval tv;
+        tv.tc_sec = 0.5;
+        if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt), SO_RCVTIMEO, (struct timeval *)%tv, sizeof(struct timeval)) == SOCKET_ERROR)
+        {
+            handle_socket_errors("setting socket options");
+        }
+#endif
 
         address.sin_family = AF_INET;
         address.sin_addr.s_addr = inet_addr(ip.c_str());
