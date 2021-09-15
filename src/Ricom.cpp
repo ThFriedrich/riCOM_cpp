@@ -428,6 +428,7 @@ bool Ricom::process_frames()
 
             {
                 read_data<T>(data);
+                std::cout << "read frame number: " << idx + ix << std::endl;
                 com<T>(data, com_xy, dose_sum);
                 icom(com_xy, ix, iy, rescale);
                 set_ricom_image_kernel(ix, iy);
@@ -485,6 +486,7 @@ bool Ricom::process_frames()
 
                 if (!read_head())
                 {
+                    std::cout << "head not received" << std::endl;
                     return false;
                 }
             }
@@ -499,7 +501,6 @@ bool Ricom::process_frames()
         reset_limits();
     }
     delete bar;
-    std::cout << "PF: job's done" << std::endl;
     return false; // was true here, not sure why
 }
 
