@@ -379,7 +379,7 @@ public:
  
         struct timeval tv;
         tv.tv_sec = 0.5;
-        if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt), SO_RCVTIMEO, (struct timeval *)%tv, sizeof(struct timeval)) == SOCKET_ERROR)
+        if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt), SO_RCVTIMEO, &tv, sizeof(tv)) == SOCKET_ERROR)
         {
             handle_socket_errors("setting socket options");
         }
