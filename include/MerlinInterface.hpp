@@ -53,9 +53,9 @@ private:
     {
         int bytesReceived;
         bytesReceived = recv(rc_socket, &tcp_buffer[0], tcp_buffer.size(), 0);
-        std::cout << "bytesReceived1: " << bytesReceived << std::endl;
+        // std::cout << "bytesReceived1: " << bytesReceived << std::endl;
         bytesReceived = recv(rc_socket, &head_buffer[0], head_buffer.size(), 0);
-        std::cout << "bytesReceived2: " << bytesReceived << std::endl;
+        // std::cout << "bytesReceived2: " << bytesReceived << std::endl;
 
         if (bytesReceived == -1)
         {
