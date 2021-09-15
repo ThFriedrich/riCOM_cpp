@@ -499,6 +499,7 @@ bool Ricom::process_frames()
         reset_limits();
     }
     delete bar;
+    std::cout << "PF: job's done" << std::endl;
     return false; // was true here, not sure why
 }
 

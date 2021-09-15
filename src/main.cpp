@@ -640,10 +640,10 @@ int run_gui(Ricom *ricom)
     }
 
     //Cleanup
-    if (ricom->srf_ricom != NULL)
-    SDL_FreeSurface(ricom->srf_ricom);
-    if (ricom->srf_stem != NULL)
-    SDL_FreeSurface(ricom->srf_stem);
+    // if (ricom->srf_ricom != NULL)
+    // SDL_FreeSurface(ricom->srf_ricom);
+    // if (ricom->srf_stem != NULL)
+    // SDL_FreeSurface(ricom->srf_stem);
 
     if (t1.joinable())
         t1.join();
