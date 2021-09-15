@@ -385,7 +385,7 @@ public:
         }
         else
         {
-            setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+            setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
         }
  #else
         struct timeval tv;
