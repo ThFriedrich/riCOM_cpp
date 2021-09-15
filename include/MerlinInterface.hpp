@@ -377,13 +377,29 @@ public:
             handle_socket_errors("intitializing Socket");
         }
  
-        struct timeval tv;
-        tv.tv_sec = 0.5;
-        // if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt), SO_RCVTIMEO, &tv, sizeof(tv)) == SOCKET_ERROR)
-        if (setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) == SOCKET_ERROR)
+ #ifdef WIN32
+        DWORD timeout = 0.5;
+        if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
         {
             handle_socket_errors("setting socket options");
         }
+        else
+        {
+            setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+        }
+ #else
+        struct timeval tv;
+        tv.tv_sec = 0.5;
+        if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
+        {
+            handle_socket_errors("setting socket options");
+        }
+        else
+        {
+            setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+        }
+ #endif
+
 
 
         address.sin_family = AF_INET;
