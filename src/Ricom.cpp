@@ -420,15 +420,15 @@ bool Ricom::process_frames()
     {
         ricom_data.assign(im_size, 0);
         stem_data.assign(nxy, 0);
+        std::cout << "ny, nx: " << ny << " , " << nx << std::endl;
 
         for (int iy = 0; iy < ny; iy++)
         {
             idx = iy * nx;
             for (int ix = 0; ix < nx; ix++)
-
             {
                 read_data<T>(data);
-                std::cout << "read frame number: " << idx + ix << std::endl;
+                std::cout << "read frame number, iy: " << iy << " ix: " << ix << std::endl;
                 com<T>(data, com_xy, dose_sum);
                 icom(com_xy, ix, iy, rescale);
                 set_ricom_image_kernel(ix, iy);
