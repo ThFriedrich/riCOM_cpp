@@ -377,28 +377,34 @@ public:
             handle_socket_errors("intitializing Socket");
         }
  
- #ifdef WIN32
-        DWORD timeout = 0.5;
+//  #ifdef WIN32
+//         DWORD timeout = 0.5;
+//         if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
+//         {
+//             handle_socket_errors("setting socket options");
+//         }
+//         else
+//         {
+//             setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
+//         }
+//  #else
+//         struct timeval tv;
+//         tv.tv_sec = 0.5;
+//         if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
+//         {
+//             handle_socket_errors("setting socket options");
+//         }
+//         else
+//         {
+//             setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+//         }
+//  #endif
+        
         if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
         {
             handle_socket_errors("setting socket options");
         }
-        else
-        {
-            setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
-        }
- #else
-        struct timeval tv;
-        tv.tv_sec = 0.5;
-        if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
-        {
-            handle_socket_errors("setting socket options");
-        }
-        else
-        {
-            setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-        }
- #endif
+
 
 
 

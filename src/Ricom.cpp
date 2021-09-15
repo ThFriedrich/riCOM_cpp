@@ -484,11 +484,11 @@ bool Ricom::process_frames()
                     fr_count_i = 0;
                 }
 
-                if (!read_head())
-                {
-                    std::cout << "head not received" << std::endl;
-                    return false;
-                }
+                // if (!read_head())
+                // {
+                //     std::cout << "head not received" << std::endl;
+                //     return false;
+                // }
             }
         }
 
