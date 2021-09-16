@@ -479,7 +479,7 @@ bool Ricom::process_frames()
                     fr_count_a++;
                     start_perf = chc::high_resolution_clock::now();
                     fr_freq = fr_avg / fr_count_a;
-                    bar->Progressed(fr_count, fr_avg / fr_count_a, "kHz");
+                    bar->Progressed(fr_count_total, fr_avg / fr_count_a, "kHz");
                     com_public[0] = com_xy_sum[0] / (float)fr_count_i;
                     com_public[1] = com_xy_sum[1] / (float)fr_count_i;
                     com_xy_sum = {0.0, 0.0};
