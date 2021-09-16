@@ -435,7 +435,7 @@ int run_gui(Ricom *ricom)
 
             if (b_running)
             {
-                ImGui::ProgressBar(ricom->fr_count / (ricom->total_px), ImVec2(-1.0f, 0.0f));
+                ImGui::ProgressBar(ricom->fr_count_total / (ricom->total_px), ImVec2(-1.0f, 0.0f));
                 ImGui::Text("Speed: %.2f kHz", ricom->fr_freq);
                 if (ImGui::Button("Quit", ImVec2(-1.0f, 0.0f)))
                 {
