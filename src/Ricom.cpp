@@ -411,7 +411,6 @@ bool Ricom::process_frames()
     size_t fr_count_i = 0; // Frame count in interval
     float fr_avg = 0;      // Average frequency
     size_t fr_count_a = 0; // Count measured points for averaging
-    size_t fr_count_total = 0;
 
     bool rescale = false;
     bool rescale_stem = false;
@@ -527,6 +526,7 @@ bool Ricom::process_frames()
         reset_limits();
     }
     delete bar;
+    fr_count_total = 0;
     return false; // was true here, not sure why
     if (mode == RICOM::modes::FILE)
     {

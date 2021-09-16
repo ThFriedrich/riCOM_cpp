@@ -135,7 +135,8 @@ public:
 
     // Variables for progress and performance
     float fr_freq;  // Frequncy per frame
-    float fr_count; // Count all Frames processed
+    float fr_count; // Count all Frames processed in an image
+    float fr_count_total; // Count all Frames in a scanning session
     bool rc_quit;
     void reset();
     template <typename T>
