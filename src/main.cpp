@@ -527,7 +527,7 @@ int run_gui(Ricom *ricom)
                 m_list << "m.counterdepth = " << ricom->depth << '\n';
                 m_list << "m.acquisitiontime = " << m_dwell_time << '\n';
                 m_list << "m.acquisitionperiod = " << m_dwell_time << '\n';
-                m_list << "m.numframestoacquire = " << ricom->nx * ricom->ny * ricom->rep << '\n';
+                m_list << "m.numframestoacquire = " << ricom->total_px << '\n';
                 m_list << "m.fileenable = " << (int)m_save << '\n';
                 m_list << "m.runheadless = " << (int)m_headless << '\n';
                 m_list << "m.fileformat = " << (int)m_raw * 2 << '\n';

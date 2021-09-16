@@ -411,6 +411,7 @@ bool Ricom::process_frames()
     size_t fr_count_i = 0; // Frame count in interval
     float fr_avg = 0;      // Average frequency
     size_t fr_count_a = 0; // Count measured points for averaging
+    size_t fr_count_total = 0;
 
     bool rescale = false;
     bool rescale_stem = false;
@@ -441,8 +442,9 @@ bool Ricom::process_frames()
                 com_xy_sum[1] += com_xy[1];
                 fr_count_i++;
                 fr_count++;
+                fr_count_total++;
                 auto mil_secs = std::chrono::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - start_perf).count();
-                if (mil_secs > 500.0 || fr_count == img_px) // ~50Hz for display
+                if (mil_secs > 500.0 || fr_count == nxy) // ~50Hz for display
                 {
                     if (rc_quit)
                     {
@@ -489,7 +491,7 @@ bool Ricom::process_frames()
                 //     std::cout << "head not received" << std::endl;
                 //     return false;
                 // }
-                if ( (fr_count) < (total_px - 2) )
+                if ( (fr_count_total) < (total_px - 2) )
                 {
                     read_head();
                 }
@@ -498,7 +500,8 @@ bool Ricom::process_frames()
             {
                 read_data<T>(data);
                 fr_count++;
-                if ( (fr_count) < (total_px - 2) )
+                fr_count_total++;
+                if ( (fr_count_total) < (total_px - 2) )
                 {
                     read_head();
                 }            
@@ -509,7 +512,8 @@ bool Ricom::process_frames()
         {
             read_data<T>(data);
             fr_count++;
-            if ( (fr_count) < (total_px - 2) )
+            fr_count_total++;
+            if ( (fr_count_total) < (total_px - 2) )
             {
                 read_head();
             }      
@@ -595,7 +599,7 @@ bool Ricom::process_timepix_stream()
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
 
     // Initialize Progress bar
-    ProgressBar *bar = new ProgressBar(nxy);
+    ProgressBar *bar = new ProgressBar(total_px);
 
     // Performance measurement
     auto start_perf = chc::high_resolution_clock::now();
