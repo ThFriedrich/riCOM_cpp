@@ -304,9 +304,6 @@ int run_gui(Ricom *ricom)
                 ImGui::DragInt("skip row", &ricom->skip_row, 1, 1);
                 ImGui::DragInt("skip img", &ricom->skip_img, 1, 1);
                 ImGui::DragInt("Repetitions", &ricom->rep, 1, 1);
-                ricom->nxy = ricom->nx * ricom->ny;
-                ricom->img_px = ricom->nxy + ( ricom->ny * ricom->skip_row ) + ricom->skip_img;
-                ricom->total_px = ricom->rep * ricom->img_px;
 
                 ImGui::Text("CBED corrections");
                 bool rot_changed = ImGui::SliderFloat("Rotation", &ricom->kernel.rotation, 0.0f, 360.0f, "%.1f deg");
@@ -516,7 +513,10 @@ int run_gui(Ricom *ricom)
             if (ImGui::Button("Confirm")){
                 // std::filesystem::path temp_path = std::filesystem::temp_directory_path();
                 // std::filesystem::path file = "m_list.txt";
-                // std::ofstream m_list (temp_path / file);
+                // std::ofstream m_list (temp_path / file);                
+                ricom->nxy = ricom->nx * ricom->ny;
+                ricom->img_px = ricom->nxy + ( ricom->ny * ricom->skip_row ) + ricom->skip_img;
+                ricom->total_px = ricom->rep * ricom->img_px;
                 std::ofstream m_list ("m_list.py");
                 m_list << "from merlin_interface.merlin_interface import MerlinInterface" << '\n';
                 m_list << "m = MerlinInterface(tcp_ip = \"" << ip << "\" , tcp_port=" << c_port << ")" << '\n';

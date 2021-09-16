@@ -402,7 +402,7 @@ bool Ricom::process_frames()
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
 
     // Initialize Progress bar
-    ProgressBar *bar = new ProgressBar(nxy);
+    ProgressBar *bar = new ProgressBar(total_px);
 
     // Performance measurement
     auto start_perf = chc::high_resolution_clock::now();
