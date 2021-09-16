@@ -304,6 +304,9 @@ int run_gui(Ricom *ricom)
                 ImGui::DragInt("skip row", &ricom->skip_row, 1, 1);
                 ImGui::DragInt("skip img", &ricom->skip_img, 1, 1);
                 ImGui::DragInt("Repetitions", &ricom->rep, 1, 1);
+                ricom->nxy = ricom->nx * ricom->ny;
+                ricom->img_px = ricom->nxy + ( ricom->ny * ricom->skip_row ) + ricom->skip_img;
+                ricom->total_px = ricom->rep * ricom->img_px;
 
                 ImGui::Text("CBED corrections");
                 bool rot_changed = ImGui::SliderFloat("Rotation", &ricom->kernel.rotation, 0.0f, 360.0f, "%.1f deg");
@@ -435,7 +438,7 @@ int run_gui(Ricom *ricom)
 
             if (b_running)
             {
-                ImGui::ProgressBar(ricom->fr_count / (ricom->nx * ricom->ny), ImVec2(-1.0f, 0.0f));
+                ImGui::ProgressBar(ricom->fr_count / (ricom->total_px), ImVec2(-1.0f, 0.0f));
                 ImGui::Text("Speed: %.2f kHz", ricom->fr_freq);
                 if (ImGui::Button("Quit", ImVec2(-1.0f, 0.0f)))
                 {

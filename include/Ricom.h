@@ -126,6 +126,7 @@ public:
     int nx;
     int ny;
     int nxy;
+    int img_px;
     int total_px;
     int skip_row;
     int skip_img;

@@ -442,7 +442,7 @@ bool Ricom::process_frames()
                 fr_count_i++;
                 fr_count++;
                 auto mil_secs = std::chrono::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - start_perf).count();
-                if (mil_secs > 500.0 || fr_count == total_px) // ~50Hz for display
+                if (mil_secs > 500.0 || fr_count == img_px) // ~50Hz for display
                 {
                     if (rc_quit)
                     {
@@ -503,18 +503,15 @@ bool Ricom::process_frames()
                     read_head();
                 }            
             }
-        
-            if ( ir != (rep-1) ) // for the last repetition, extra data will be flushed after recon is finished
+
+            for (int si = 0; si < skip_img; si++)
             {
-                for (int si = 0; si < skip_img; si++)
+                read_data<T>(data);
+                fr_count++;
+                if ( (fr_count) < (total_px - 2) )
                 {
-                    read_data<T>(data);
-                    fr_count++;
-                    if ( (fr_count) < (total_px - 2) )
-                    {
-                        read_head();
-                    }      
-                }
+                    read_head();
+                }      
             }
         }
 
@@ -701,8 +698,6 @@ bool Ricom::run_timepix()
 
 void Ricom::run()
 {
-    nxy = nx * ny;
-    total_px = ( rep * nxy ) + ( ny * rep * skip_row ) + ( rep * skip_img );
     init_surface(nx, ny);
 
     if (use_detector)
@@ -765,12 +760,12 @@ void Ricom::reset_limits()
     ricom_min = FLT_MAX;
     stem_max = -FLT_MAX;
     stem_min = FLT_MAX;
-    if (mode == RICOM::modes::FILE)
-    {
-        mib_stream.clear();
-        mib_stream.seekg(0, std::ios::beg);
-        read_head();
-    }
+    // if (mode == RICOM::modes::FILE)
+    // {
+    //     mib_stream.clear();
+    //     mib_stream.seekg(0, std::ios::beg);
+    //     read_head();
+    // }
 }
 void Ricom::reset()
 {
