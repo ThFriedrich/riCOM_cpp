@@ -713,13 +713,13 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
             // Set skip per row
             if (strcmp(argv[i], "-skipr") == 0)
             {
-                ricom->skip_per_row = std::stoi(argv[i + 1]);
+                ricom->skip_row = std::stoi(argv[i + 1]);
                 i++;
             }
             // Set skip per image
             if (strcmp(argv[i], "-skipi") == 0)
             {
-                ricom->skip_per_img = std::stoi(argv[i + 1]);
+                ricom->skip_img = std::stoi(argv[i + 1]);
                 i++;
             }
             // Set kernel size

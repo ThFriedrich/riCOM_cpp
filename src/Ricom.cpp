@@ -420,7 +420,7 @@ bool Ricom::process_frames()
     {
         ricom_data.assign(im_size, 0);
         stem_data.assign(nxy, 0);
-        std::cout << "nxy: " << nxy << std::endl;
+        std::cout << "total frame number: " << total_px << std::endl;
 
         for (int iy = 0; iy < ny; iy++)
         {
@@ -428,7 +428,7 @@ bool Ricom::process_frames()
             for (int ix = 0; ix < nx; ix++)
             {
                 read_data<T>(data);
-                std::cout << "read frame number: " << idx + ix << std::endl;
+                // std::cout << "read frame number: " << idx + ix << std::endl;
                 com<T>(data, com_xy, dose_sum);
                 icom(com_xy, ix, iy, rescale);
                 set_ricom_image_kernel(ix, iy);
@@ -442,7 +442,7 @@ bool Ricom::process_frames()
                 fr_count_i++;
                 fr_count++;
                 auto mil_secs = std::chrono::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - start_perf).count();
-                if (mil_secs > 500.0 || fr_count == nxy) // ~50Hz for display
+                if (mil_secs > 500.0 || fr_count == total_px) // ~50Hz for display
                 {
                     if (rc_quit)
                     {
@@ -497,8 +497,11 @@ bool Ricom::process_frames()
             for (int sr = 0; sr < skip_row; sr++)
             {
                 read_data<T>(data);
-                read_head();
                 fr_count++;
+                if ( (fr_count) < (total_px - 2) )
+                {
+                    read_head();
+                }            
             }
         
             if ( ir != (rep-1) ) // for the last repetition, extra data will be flushed after recon is finished
@@ -506,8 +509,11 @@ bool Ricom::process_frames()
                 for (int si = 0; si < skip_img; si++)
                 {
                     read_data<T>(data);
-                    read_head();
                     fr_count++;
+                    if ( (fr_count) < (total_px - 2) )
+                    {
+                        read_head();
+                    }      
                 }
             }
         }
