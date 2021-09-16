@@ -503,18 +503,17 @@ bool Ricom::process_frames()
                     read_head();
                 }            
             }
-
-            for (int si = 0; si < skip_img; si++)
-            {
-                read_data<T>(data);
-                fr_count++;
-                if ( (fr_count) < (total_px - 2) )
-                {
-                    read_head();
-                }      
-            }
         }
-
+        
+        for (int si = 0; si < skip_img; si++)
+        {
+            read_data<T>(data);
+            fr_count++;
+            if ( (fr_count) < (total_px - 2) )
+            {
+                read_head();
+            }      
+        }
         if (update_offset && dose_sum > pow(10.0, update_dose_lowbound))
         {
             offset[0] = com_public[0];
@@ -525,6 +524,10 @@ bool Ricom::process_frames()
     }
     delete bar;
     return false; // was true here, not sure why
+    if (mode == RICOM::modes::FILE)
+    {
+        reset_file();
+    }
 }
 
 bool Ricom::run_merlin()
@@ -760,13 +763,15 @@ void Ricom::reset_limits()
     ricom_min = FLT_MAX;
     stem_max = -FLT_MAX;
     stem_min = FLT_MAX;
-    // if (mode == RICOM::modes::FILE)
-    // {
-    //     mib_stream.clear();
-    //     mib_stream.seekg(0, std::ios::beg);
-    //     read_head();
-    // }
 }
+
+void Ricom::reset_file()
+{
+    mib_stream.clear();
+    mib_stream.seekg(0, std::ios::beg);
+    read_head();
+}
+
 void Ricom::reset()
 {
     rc_quit = false;

@@ -84,6 +84,7 @@ private:
     void init_surface(unsigned int width, unsigned int height);
     void draw_pixel(SDL_Surface *surface, int x, int y, float val);
     void reset_limits();
+    void reset_file();
 
     // Private Methods - riCOM
     void icom(std::array<float, 2> &com, int x, int y, bool &rescale);
@@ -118,7 +119,7 @@ public:
     bool run_merlin();
     bool run_timepix();
 
-    int rep;
+
 
     RICOM::Detector_type detector_type;
 
@@ -127,6 +128,7 @@ public:
     int ny;
     int nxy;
     int img_px;
+    int rep;
     int total_px;
     int skip_row;
     int skip_img;
