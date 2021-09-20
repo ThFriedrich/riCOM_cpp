@@ -21,6 +21,7 @@ if (WIN32)
     set(SDL2_INCLUDE_DIR C:/SDL2_VC/include/)
     set(SDL2_LIB_DIR C:/SDL2_VC/lib/x64)
     file(COPY ${SDL2_LIB_DIR}/SDL2.dll DESTINATION ${PROJECT_BINARY_DIR})
+    file(COPY ${SDL2_LIB_DIR}/SDL2_image.dll DESTINATION ${PROJECT_BINARY_DIR})
     link_directories(${SDL2_LIB_DIR})
 
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
@@ -67,4 +68,4 @@ target_include_directories( RICOM PUBLIC
 
 find_package(OpenGL REQUIRED)
 target_link_libraries(RICOM PUBLIC ${OPENGL_LIBRARIES})
-target_link_libraries(RICOM PUBLIC SDL2main SDL2 ${CMAKE_DL_LIBS})
+target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image ${CMAKE_DL_LIBS})

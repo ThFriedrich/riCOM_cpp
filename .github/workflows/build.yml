@@ -16,9 +16,15 @@ jobs:
       - name: unpack sdl
         run: |
           curl.exe http://www.libsdl.org/release/SDL2-devel-2.0.16-VC.zip --output sdl.zip
+          curl.exe http://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-2.0.5-VC.zip --output sdl_im.zip
           tar -xf sdl.zip
-          move SDL2-2.0.16 C:\
-          ren C:\SDL2-2.0.16 SDL2_VC
+          tar -xf sdl_im.zip
+          ren SDL2_image-2.0.5 SDL2_IM_VC
+          ren SDL2-2.0.16 SDL2_VC
+          move .\SDL2_IM_VC\include\* .\SDL2_VC\include\
+          move .\SDL2_IM_VC\lib\x64\* .\SDL2_VC\lib\x64
+          move .\SDL2_IM_VC\lib\x86\* .\SDL2_VC\lib\x86
+          move SDL2_VC C:\
 
       - name: Build with MSVC
         run: |
@@ -42,7 +48,7 @@ jobs:
       - name: Get SDL2 and gcc-9
         run: |
             sudo apt-get update
-            sudo apt-get install libsdl2-dev gcc-9 g++-9
+            sudo apt-get install libsdl2-dev libsdl2-image-dev gcc-9 g++-9
       - name: Build
         env:
           CC:   gcc-9
