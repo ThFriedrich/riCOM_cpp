@@ -53,18 +53,20 @@ private:
     {
         int bytesReceived;
         bytesReceived = recv(rc_socket, &tcp_buffer[0], tcp_buffer.size(), 0);
-        // std::cout << "bytesReceived1: " << bytesReceived << std::endl;
-        bytesReceived = recv(rc_socket, &head_buffer[0], head_buffer.size(), 0);
-        // std::cout << "bytesReceived2: " << bytesReceived << std::endl;
-
         if (bytesReceived == -1)
         {
-            perror("Error reading header!");
+            perror("Error reading TCP header from Socket!");
+        }
+
+        bytesReceived = recv(rc_socket, &head_buffer[0], head_buffer.size(), 0);
+        if (bytesReceived == -1)
+        {
+            perror("Error reading Frame header from Socket!");
         }
         else
         {
             rcv.assign(head_buffer.cbegin(), head_buffer.cend());
-        }
+        }  
     }
 
 public:
@@ -285,6 +287,7 @@ public:
             std::cout << p << std::endl; //printing each token
             p = strtok(NULL, "\n");
         }
+        return 0;
     }
 
     int decode_tcp_head()
