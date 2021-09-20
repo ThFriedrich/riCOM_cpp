@@ -67,4 +67,4 @@ target_include_directories( RICOM PUBLIC
 
 find_package(OpenGL REQUIRED)
 target_link_libraries(RICOM PUBLIC ${OPENGL_LIBRARIES})
-target_link_libraries(RICOM PUBLIC SDL2main SDL2 ${CMAKE_DL_LIBS})
+target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image ${CMAKE_DL_LIBS})
