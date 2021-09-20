@@ -596,7 +596,8 @@ bool Ricom::process_timepix_stream()
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
     int dose_sum = 0;
     int idx = 0;
-    int idxx = 0;    int ix; 
+    int idxx = 0;    
+    int ix; 
     int iy;
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
 
@@ -644,7 +645,6 @@ bool Ricom::process_timepix_stream()
             comy_map[idxx] = com_xy[1];
             com_xy_sum[0] += com_xy[0];
             com_xy_sum[1] += com_xy[1];
-            std::cout << idxx << " " << dose_map[idxx] << " " << com_xy[0] << " " << com_xy[1] <<  std::endl;
 
             ix = idxx % nx;
             iy = floor( idxx / nx );
@@ -656,22 +656,23 @@ bool Ricom::process_timepix_stream()
         auto mil_secs = std::chrono::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - start_perf).count();
         if (mil_secs > 500.0 || fr_count == nxy) // ~50Hz for display
         {
+            std::cout << idxx << " " << dose_map[idxx] << " " << com_xy[0] << " " << com_xy[1] <<  std::endl;
 
             if (rc_quit)
             {
                 return false;
-            };
+            }
             if (rescale)
             {
                 rescale_ricom_image();
-            };
+            }
             if (use_detector)
             {
                 if (rescale_stem)
                 {
                     rescale_stem_image();
-                };
-            };
+                }
+            }
             if (b_recompute_detector)
             {
                 detector.compute_detector(offset);
