@@ -37,7 +37,7 @@ private:
     size_t ds_timpix;
     
 public:
-    void read_com_ti(std::vector<size_t> &dose_map,
+    void read_com_ti(int &idx, std::vector<size_t> &dose_map,
                      std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, size_t img_size);
     void read_data_from_file_ti(e_event &ev);
     void timepix_init(RICOM::modes mode);

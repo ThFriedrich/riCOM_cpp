@@ -87,7 +87,7 @@ private:
     void reset_file();
     inline void rescales_recomputes();
     template <typename T>
-    inline void skip_frames(int n_skip, std::vector<T> &data, bool last_frame);
+    inline void skip_frames(int n_skip, std::vector<T> &data);
 
     // Private Methods - riCOM
     void icom(std::array<float, 2> &com, int x, int y);
