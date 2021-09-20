@@ -590,8 +590,8 @@ void Ricom::process_timepix_stream()
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
     // int dose_sum = 0;
     int idx = 0;
-    int idxx = 0;
-    int ix;
+    int idxx = 0;    
+    int ix; 
     int iy;
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
 
@@ -635,7 +635,6 @@ void Ricom::process_timepix_stream()
             comy_map[idxx] = com_xy[1];
             com_xy_sum[0] += com_xy[0];
             com_xy_sum[1] += com_xy[1];
-            std::cout << idxx << " " << dose_map[idxx] << " " << com_xy[0] << " " << com_xy[1] << std::endl;
 
             ix = idxx % nx;
             iy = floor(idxx / nx);

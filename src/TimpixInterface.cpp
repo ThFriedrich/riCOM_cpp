@@ -35,7 +35,7 @@ void TimpixInterface::read_com_ti(int &idx, std::vector<size_t> &dose_map,
     while (true)
     {
         read_data_from_file_ti(ev);
-        probe_position = floor(ev.toa / dwell_time);
+        probe_position = floor(ev.toa*25 / dwell_time);
 
         if (probe_position >= 0 && probe_position <= img_size)
         {
