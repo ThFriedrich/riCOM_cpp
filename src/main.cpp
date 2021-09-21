@@ -842,9 +842,8 @@ int main(int argc, char *argv[])
     time(&timetoday);
     std::cout << std::endl
               << "##########################################################################" << std::endl;
-    std::cout << "Ricom started at " << asctime(localtime(&timetoday)) << std::endl;
-    std::cout << std::endl
-              << "##########################################################################" << std::endl;
+    std::cout << "              Ricom started at " << asctime(localtime(&timetoday));
+    std::cout << "##########################################################################" << std::endl;
 
     Ricom ricom;
     Ricom* ricom_ptr = &ricom;
