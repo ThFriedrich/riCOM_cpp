@@ -27,7 +27,7 @@ inline void TimpixInterface::read_data_from_file_ti(e_event &ev)
 }
 
 void TimpixInterface::read_com_ti(int &idx, std::vector<size_t> &dose_map,
-                                  std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, size_t img_size)
+                                  std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, int first_frame, int end_frame)
 {
     e_event ev;
     int probe_position;
@@ -37,17 +37,16 @@ void TimpixInterface::read_com_ti(int &idx, std::vector<size_t> &dose_map,
         read_data_from_file_ti(ev);
         probe_position = floor(ev.toa*25 / dwell_time);
 
-        if (probe_position >= 0 && probe_position <= img_size)
+        if (probe_position >= first_frame && probe_position < end_frame)
         {
             dose_map[probe_position]++;
             sumx_map[probe_position] += ev.index % nx_timpix;
             sumy_map[probe_position] += floor(ev.index / nx_timpix);
-
-            if (probe_position > idx)
-            {
-                idx++;
-                break;
-            }
+        }
+        if (probe_position > idx)
+        {
+            idx++;
+            break;
         }
     }
 }

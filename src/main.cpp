@@ -403,6 +403,7 @@ int run_gui(Ricom *ricom)
                     ImGui::SameLine();
                     ImGui::RadioButton("12", &ricom->depth, 12);
                     ImGui::EndGroup();
+                    ImGui::DragInt("dwell time (.t3p)", &ricom->dwell_time, 1, 1);
                     if (ImGui::IsItemHovered())
                     {
                         ImGui::SetTooltip("Only applicable for handling recorded files, \n recorded in raw mode.");
@@ -489,7 +490,7 @@ int run_gui(Ricom *ricom)
 
             ImGui::InputInt("threshold0", &m_threshold0, 8);
             ImGui::InputInt("threshold1", &m_threshold1, 8);
-            ImGui::InputFloat("dwell_time (us)", &m_dwell_time, 64);
+            ImGui::InputFloat("dwell time (us)", &m_dwell_time, 64);
             ImGui::Checkbox("trigger", &m_trigger);
             ImGui::Checkbox("headless", &m_headless);
             ImGui::Checkbox("raw", &m_raw);
