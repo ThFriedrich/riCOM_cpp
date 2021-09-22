@@ -39,9 +39,9 @@ void TimpixInterface::read_com_ti(int &idx, std::vector<size_t> &dose_map,
 
         if (probe_position >= first_frame && probe_position < end_frame)
         {
-            dose_map[probe_position]++;
-            sumx_map[probe_position] += ev.index % nx_timpix;
-            sumy_map[probe_position] += floor(ev.index / nx_timpix);
+            dose_map[probe_position - first_frame]++;
+            sumx_map[probe_position - first_frame] += ev.index % nx_timpix;
+            sumy_map[probe_position - first_frame] += floor(ev.index / nx_timpix);
         }
         if (probe_position > idx)
         {

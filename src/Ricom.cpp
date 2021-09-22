@@ -677,7 +677,7 @@ void Ricom::process_timepix_stream()
             img_num++;
             first_frame = img_num * nxy;
             end_frame = (img_num+1) * nxy;
-
+            reset_limits();
                 dose_map.assign(nxy, 0);
                 sumx_map.assign(nxy, 0);
                 sumy_map.assign(nxy, 0);
