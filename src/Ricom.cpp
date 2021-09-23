@@ -32,9 +32,9 @@ void Ricom_kernel::compute_kernel()
     float sin_rot = sin(rot_rad);
 
     k_width_sym = kernel_size * 2 + 1;
-    int kws2 = k_width_sym * k_width_sym;
-    kernel_x.assign(kws2, 0);
-    kernel_y.assign(kws2, 0);
+    k_area = k_width_sym * k_width_sym;
+    kernel_x.assign(k_area, 0);
+    kernel_y.assign(k_area, 0);
     float d;
     float ix_sd;
     float iy_sd;
@@ -53,7 +53,7 @@ void Ricom_kernel::compute_kernel()
             iy_s = iy - kernel_size;
             d = ix_s * ix_s + iy_s * iy_s;
 
-            ix_e = kws2 - iy_e + ix - 1;
+            ix_e = k_area - iy_e + ix - 1;
 
             if (d > 0)
             {
@@ -267,38 +267,41 @@ void Ricom::stem(std::vector<T> &data, size_t id_stem)
 
 void Ricom::icom(std::array<float, 2> &com, int x, int y)
 {
-    int idk = 0;
-    int idr = 0;
-    int idk2 = 0;
-    int idyt = 0;
-    int idc = px_per_row * y + x;
     float com_x = com[0] - offset[0];
     float com_y = com[1] - offset[1];
+    int idr = 0;
+    int idc = x + y * px_per_row; 
 
+    for ( int id = 0; id < kernel.k_area; id ++ )
+    {
+        idr = update_list[id] + idc;
+        ricom_data[idr] += com_x * kernel.kernel_x[id] + com_y * kernel.kernel_y[id];
+    }
+    if (ricom_data[idc] > ricom_max)
+    {
+        ricom_max = ricom_data[idc];
+        rescale_ricom = true;
+    }
+    if (ricom_data[idc] < ricom_min)
+    {
+        ricom_min = ricom_data[idc];
+        rescale_ricom = true;
+    }
+}
+
+std::vector<int> Ricom::calculate_update_list()
+{
+    std::vector<int> ul(kernel.k_area);
+    int idul = 0;
     for (int idy = 0; idy < kernel.k_width_sym; idy++)
     {
-        idyt = idy * px_per_row;
-        idk = idy * kernel.k_width_sym;
         for (int idx = 0; idx < kernel.k_width_sym; idx++)
         {
-            idk2 = idk + idx;
-            idr = idc + idx + idyt;
-            ricom_data[idr] += com_x * kernel.kernel_x[idk2] + com_y * kernel.kernel_y[idk2];
-            if (idx == 0 && idy == 0 && x > kernel.kernel_size && y > kernel.kernel_size)
-            {
-                if (ricom_data[idr] > ricom_max)
-                {
-                    ricom_max = ricom_data[idr];
-                    rescale_ricom = true;
-                }
-                if (ricom_data[idr] < ricom_min)
-                {
-                    ricom_min = ricom_data[idr];
-                    rescale_ricom = true;
-                }
-            }
+            ul[idul] = idy * px_per_row + idx;
+            idul++;
         }
     }
+    return ul;
 }
 
 void Ricom::rescale_ricom_image()
@@ -481,7 +484,6 @@ void Ricom::process_frames()
                 com_xy_sum[1] += com_xy[1];
                 fr_count_i++;
                 fr_count++;
-                fr_count_total++;
                 auto mil_secs = chc::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - start_perf).count();
                 if (mil_secs > 500.0 || fr_count == nxy) // ~2Hz for display
                 {
@@ -496,7 +498,7 @@ void Ricom::process_frames()
                     fr_count_a++;
                     start_perf = chc::high_resolution_clock::now();
                     fr_freq = fr_avg / fr_count_a;
-                    bar.Progressed(fr_count_total, fr_avg / fr_count_a, "kHz");
+                    bar.Progressed(fr_count, fr_avg / fr_count_a, "kHz");
                     for (int i = 0; i < 2; i++)
                     {
                         com_public[i] = com_xy_sum[i] / fr_count_i;
@@ -504,7 +506,7 @@ void Ricom::process_frames()
                     }
                     fr_count_i = 0;
                 }
-                if (fr_count_total < fr_total)
+                if (fr_count < fr_total)
                 {
                     read_head();
                 }
@@ -537,6 +539,7 @@ void Ricom::run_merlin()
             perror("Ricom::run_merlin() could not obtain aquisition_header");
             return;
         }
+        fr_count++;
     }
 
     // Run the main loop
@@ -622,7 +625,7 @@ void Ricom::process_timepix_stream()
     {
         read_com_ti(idx, dose_map, sumx_map, sumy_map, first_frame, end_frame);
         // std::cout << idx << std::endl;
-        idxx = idx - nxy * img_num - 3;
+        idxx = idx - nxy * img_num - 2;
         if (idxx>=0)
         {
             if (dose_map[idxx] == 0)
@@ -646,9 +649,8 @@ void Ricom::process_timepix_stream()
         }
 
         fr_count_i++;
-        fr_count++;
         auto mil_secs = std::chrono::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - start_perf).count();
-        if (mil_secs > 500.0 || fr_count == nxy * img_num) // ~50Hz for display
+        if (mil_secs > 500.0 || idx == fr_total) // ~50Hz for display
         {
             rescales_recomputes();
             std::cout << idx << " rescale'd" << std::endl;  
@@ -724,6 +726,7 @@ void Ricom::run()
     // Allocate the ricom image, including zero padding for kernel size
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
     ricom_data.reserve(im_size);
+    update_list = calculate_update_list();
 
     init_uv();
 

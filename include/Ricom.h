@@ -16,6 +16,7 @@ public:
     // Properties
     int kernel_size;
     int k_width_sym;
+    int k_area;
     float rotation;
     std::vector<float> kernel_x;
     std::vector<float> kernel_y;
@@ -66,6 +67,7 @@ private:
     std::array<size_t, 256> sum_x;
     std::array<size_t, 256> sum_y;
     std::vector<float> ricom_data;
+    std::vector<int> update_list;
 
     // Scan Area Variables
     int nxy;
@@ -85,6 +87,7 @@ private:
     void draw_pixel(SDL_Surface *surface, int x, int y, float val, int color_map);
     void reset_limits();
     void reset_file();
+    std::vector<int> calculate_update_list();
     inline void rescales_recomputes();
     template <typename T>
     inline void skip_frames(int n_skip, std::vector<T> &data);
