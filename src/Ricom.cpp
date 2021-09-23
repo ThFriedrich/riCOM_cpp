@@ -539,12 +539,12 @@ void Ricom::run_merlin()
             perror("Ricom::run_merlin() could not obtain aquisition_header");
             return;
         }
-        fr_count++;
     }
 
     // Run the main loop
     if (read_head())
     {
+        fr_count++;
         if (dtype == "U08")
         {
             process_frames<unsigned char>();
