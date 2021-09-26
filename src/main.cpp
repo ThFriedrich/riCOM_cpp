@@ -6,7 +6,7 @@
 #include <fstream>
 #include <filesystem>
 #include <cfloat>
-#include<ctime>
+#include <ctime>
 
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <SDL.h>
+#include <SDL_image.h>
 #include <SDL_opengl.h>
 #include "imfilebrowser.h"
 
@@ -51,7 +52,7 @@ void run_live(Ricom *r)
 
 #ifdef _WIN32
 void run_fake_merlin()
-{   
+{
     std::system("/py fake_merlin.py");
 }
 #else
@@ -72,7 +73,7 @@ void run_connection_script()
     // std::filesystem::path file = "m_list.txt";
     // std::string file_directory = (temp_path / file).string();
     // int r = std::system( ("py " + file_directory).c_str() );
-    int r = std::system( "py m_list.py" );
+    int r = std::system("py m_list.py");
     if (r != 0)
     {
         std::cout << "Cannot find m_list, generate file first." << std::endl;
@@ -85,7 +86,7 @@ void run_connection_script()
     // std::filesystem::path file = "m_list.txt";
     // std::string file_directory = (temp_path / file).string();
     // int r = std::system( ("python3 " + file_directory).c_str() );
-    int r = std::system( "python3 m_list.py" );
+    int r = std::system("python3 m_list.py");
     if (r != 0)
     {
         std::cout << "Cannot find m_list, generate file first." << std::endl;
@@ -202,17 +203,17 @@ int run_gui(Ricom *ricom)
     }
 
     // create a file browser instance
-    ImGui::FileBrowser fileDialog;
-
-    // (optional) set browser properties
-    fileDialog.SetTitle("Open .mib or .t3p file");
-    fileDialog.SetTypeFilters({".mib",".t3p"});
-
+    ImGui::FileBrowser openFileDialog;
+    openFileDialog.SetTitle("Open .mib or .t3p file");
+    openFileDialog.SetTypeFilters({".mib", ".t3p"});
+    ImGui::FileBrowser saveFileDialog(ImGuiFileBrowserFlags_EnterNewFilename | ImGuiFileBrowserFlags_CreateNewDir);
+    saveFileDialog.SetTitle("Save image as .png");
     // Main loop
     bool done = false;
     bool b_merlin_list = false;
     bool b_acq_open = false;
     bool b_running = false;
+    bool file_selected = false;
 
     int c_port = 6341;
     char ip[16] = "127.0.0.1";
@@ -231,7 +232,7 @@ int run_gui(Ricom *ricom)
     bool m_headless = true;
     bool m_raw = true;
 
-
+    const char *cmaps[] = {"Parula", "Heat", "Jet", "Turbo", "Hot", "Gray", "Magma", "Inferno", "Plasma", "Viridis", "Cividis", "Github"};
     bool b_redraw = false;
     while (!done)
     {
@@ -254,14 +255,9 @@ int run_gui(Ricom *ricom)
         // Menu
         if (ImGui::BeginMainMenuBar())
         {
-            if (ImGui::BeginMenu("File"))
-            {
-                ImGui::MenuItem("Placeholder: Save Settings");
-                ImGui::MenuItem("Placeholder: Save Image");
-                ImGui::EndMenu();
-            }
             if (ImGui::BeginMenu("Appearance"))
             {
+                ImGui::Combo("CBED Colormap", &ricom->cbed_cmap, cmaps, IM_ARRAYSIZE(cmaps));
                 ImGui::ColorEdit3("Background Color", (float *)&clear_color);
                 ShowFontSelector("Font");
                 ImGui::ShowStyleSelector("Style");
@@ -301,42 +297,24 @@ int run_gui(Ricom *ricom)
                 ImGui::Text("Scan Area");
                 ImGui::DragInt("nx", &ricom->nx, 1, 1);
                 ImGui::DragInt("ny", &ricom->ny, 1, 1);
-                ImGui::DragInt("skip row", &ricom->skip_row, 1, 1);
-                ImGui::DragInt("skip img", &ricom->skip_img, 1, 1);
                 ImGui::DragInt("Repetitions", &ricom->rep, 1, 1);
 
-                ImGui::Text("CBED corrections");
-                bool rot_changed = ImGui::SliderFloat("Rotation", &ricom->kernel.rotation, 0.0f, 360.0f, "%.1f deg");
+                ImGui::Text("CBED Centre");
                 bool offset_changed = ImGui::DragFloat2("Centre", &ricom->offset[0], 0.1f, 0.0, 256.0);
                 if (offset_changed)
                 {
                     ricom->b_recompute_detector = true;
                     ricom->b_recompute_kernel = true;
                 }
-                if (rot_changed)
-                {
-                    ricom->b_recompute_kernel = true;
-                }
                 ImGui::Checkbox("Auto Centering", &ricom->update_offset);
                 ImGui::DragFloat("Dose ( 10^ ))", &ricom->update_dose_lowbound, 0.1f, 0.0, 10.0);
-                ImGui::BeginGroup();
-                ImGui::Text("Depth");
-                ImGui::RadioButton("1", &ricom->depth, 1);
-                ImGui::SameLine();
-                ImGui::RadioButton("6", &ricom->depth, 6);
-                ImGui::SameLine();
-                ImGui::RadioButton("12", &ricom->depth, 12);
-                ImGui::EndGroup();
-                if (ImGui::IsItemHovered())
-                {
-                    ImGui::SetTooltip("Only applicable for handling recorded files, \n recorded in raw mode.");
-                }
             }
 
             if (ImGui::CollapsingHeader("RICOM Settings", ImGuiTreeNodeFlags_DefaultOpen))
             {
                 bool kernel_changed = ImGui::DragInt("Kernel Size", &ricom->kernel.kernel_size, 1, 1, 300);
-                if (kernel_changed)
+                bool rot_changed = ImGui::SliderFloat("Rotation", &ricom->kernel.rotation, 0.0f, 360.0f, "%.1f deg");
+                if (rot_changed || kernel_changed)
                 {
                     ricom->b_recompute_kernel = true;
                 }
@@ -355,25 +333,21 @@ int run_gui(Ricom *ricom)
 
             if (ImGui::CollapsingHeader("Merlin Live Mode", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                if(ImGui::InputText("IP", ip, sizeof(ip)))
+                if (ImGui::InputText("IP", ip, sizeof(ip)))
                 {
                     ricom->ip = ip;
                 }
                 ImGui::InputInt("COM-Port", &c_port, 8);
                 ImGui::InputInt("Data-Port", &ricom->port, 8);
 
+                ImGui::Text("Scan Engine Settings");
+                ImGui::DragInt("skip row", &ricom->skip_row, 1, 1);
+                ImGui::DragInt("skip img", &ricom->skip_img, 1, 1);
+
                 if (ImGui::Button("Merlin Setup", ImVec2(-1.0f, 0.0f)))
                 {
                     b_merlin_list = true;
                 }
-
-                // if (ImGui::Button("Connect to Merlin", ImVec2(-1.0f, 0.0f)))
-                // {
-                //     // t2 = std::thread(run_fake_merlin);
-                //     t2 = std::thread(run_connection_script);
-                //     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                //     b_connected = true;
-                // }
 
                 if (ricom->b_connected)
                 {
@@ -397,11 +371,6 @@ int run_gui(Ricom *ricom)
                     t1 = std::thread(run_live, ricom);
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));
                     t2 = std::thread(run_connection_script);
-
-                    // t2 = std::thread(run_fake_merlin);
-                    // std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                    // t1 = std::thread(run_live, ricom);
-                    
                     b_running = true;
                     t1.detach();
                     t2.detach();
@@ -413,22 +382,39 @@ int run_gui(Ricom *ricom)
 
                 if (ImGui::Button("Open File", ImVec2(-1.0f, 0.0f)))
                 {
-                    fileDialog.Open();
+                    openFileDialog.Open();
                 }
 
-                fileDialog.Display();
-                if (fileDialog.HasSelected())
+                openFileDialog.Display();
+                if (openFileDialog.HasSelected())
                 {
-                    filename = fileDialog.GetSelected().string();
-                    fileDialog.ClearSelected();
+                    filename = openFileDialog.GetSelected().string();
+                    file_selected = true;
+                    openFileDialog.ClearSelected();
                     select_mode_by_file(filename.c_str(), ricom);
                 }
-
-                if (ImGui::Button("Run File", ImVec2(-1.0f, 0.0f)))
+                if (file_selected)
                 {
-                    t1 = std::thread(run_file, ricom);
-                    b_running = true;
-                    t1.detach();
+                    ImGui::Text("File: %s", filename.c_str());
+                    ImGui::BeginGroup();
+                    ImGui::Text("Depth");
+                    ImGui::RadioButton("1", &ricom->depth, 1);
+                    ImGui::SameLine();
+                    ImGui::RadioButton("6", &ricom->depth, 6);
+                    ImGui::SameLine();
+                    ImGui::RadioButton("12", &ricom->depth, 12);
+                    ImGui::EndGroup();
+                    ImGui::DragInt("dwell time (.t3p)", &ricom->dwell_time, 1, 1);
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip("Only applicable for handling recorded files, \n recorded in raw mode.");
+                    }
+                    if (ImGui::Button("Run File", ImVec2(-1.0f, 0.0f)))
+                    {
+                        t1 = std::thread(run_file, ricom);
+                        b_running = true;
+                        t1.detach();
+                    }
                 }
             }
             ImGui::Separator();
@@ -436,7 +422,7 @@ int run_gui(Ricom *ricom)
 
             if (b_running)
             {
-                ImGui::ProgressBar(ricom->fr_count_total / (ricom->total_px), ImVec2(-1.0f, 0.0f));
+                ImGui::ProgressBar(ricom->fr_count_total / (ricom->fr_total), ImVec2(-1.0f, 0.0f));
                 ImGui::Text("Speed: %.2f kHz", ricom->fr_freq);
                 if (ImGui::Button("Quit", ImVec2(-1.0f, 0.0f)))
                 {
@@ -472,7 +458,7 @@ int run_gui(Ricom *ricom)
                     {
                         glBindTexture(GL_TEXTURE_2D, uiTextureIDs[0]);
                         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ricom->srf_cbed->w, ricom->srf_cbed->h, 0,
-                                     GL_RGBA, GL_UNSIGNED_BYTE, ricom->srf_cbed->pixels);
+                                     GL_BGRA, GL_UNSIGNED_BYTE, ricom->srf_cbed->pixels);
                     }
                 }
                 ImGui::Image((ImTextureID)uiTextureIDs[0], ImVec2(tex_wh, tex_wh), uv_min, uv_max, tint_col, border_col);
@@ -505,20 +491,32 @@ int run_gui(Ricom *ricom)
 
             ImGui::InputInt("threshold0", &m_threshold0, 8);
             ImGui::InputInt("threshold1", &m_threshold1, 8);
-            ImGui::InputFloat("dwell_time (us)", &m_dwell_time, 64);
+            ImGui::InputFloat("dwell time (us)", &m_dwell_time, 64);
             ImGui::Checkbox("trigger", &m_trigger);
             ImGui::Checkbox("headless", &m_headless);
             ImGui::Checkbox("raw", &m_raw);
+
+            ImGui::SameLine();
+            ImGui::BeginGroup();
+            ImGui::RadioButton("1", &ricom->depth, 1);
+            ImGui::SameLine();
+            ImGui::RadioButton("6", &ricom->depth, 6);
+            ImGui::SameLine();
+            ImGui::RadioButton("12", &ricom->depth, 12);
+            ImGui::EndGroup();
+            ImGui::SameLine();
+            ImGui::Text("Depth");
+
             ImGui::Checkbox("save file?", &m_save);
 
-            if (ImGui::Button("Confirm")){
+            if (ImGui::Button("Confirm"))
+            {
                 // std::filesystem::path temp_path = std::filesystem::temp_directory_path();
                 // std::filesystem::path file = "m_list.txt";
-                // std::ofstream m_list (temp_path / file);                
-                ricom->nxy = ricom->nx * ricom->ny;
-                ricom->img_px = ricom->nxy + ( ricom->ny * ricom->skip_row ) + ricom->skip_img;
-                ricom->total_px = ricom->rep * ricom->img_px;
-                std::ofstream m_list ("m_list.py");
+                // std::ofstream m_list (temp_path / file);
+                int fr_total = ricom->nx * ricom->ny * ricom->rep;
+
+                std::ofstream m_list("m_list.py");
                 m_list << "from merlin_interface.merlin_interface import MerlinInterface" << '\n';
                 m_list << "m = MerlinInterface(tcp_ip = \"" << ip << "\" , tcp_port=" << c_port << ")" << '\n';
                 m_list << "m.hvbias = 120" << '\n';
@@ -528,7 +526,7 @@ int run_gui(Ricom *ricom)
                 m_list << "m.counterdepth = " << ricom->depth << '\n';
                 m_list << "m.acquisitiontime = " << m_dwell_time << '\n';
                 m_list << "m.acquisitionperiod = " << m_dwell_time << '\n';
-                m_list << "m.numframestoacquire = " << ricom->total_px << '\n';
+                m_list << "m.numframestoacquire = " << fr_total << '\n';
                 m_list << "m.fileenable = " << (int)m_save << '\n';
                 m_list << "m.runheadless = " << (int)m_headless << '\n';
                 m_list << "m.fileformat = " << (int)m_raw * 2 << '\n';
@@ -569,6 +567,34 @@ int run_gui(Ricom *ricom)
 
                 ImGui::Begin("riCOM", NULL, ImGuiWindowFlags_NoScrollbar);
 
+                if (ImGui::Combo("Colormap", &ricom->ricom_cmap, cmaps, IM_ARRAYSIZE(cmaps)))
+                {
+                    if (ricom->fr_count_total == 0)
+                    {
+                        ricom->rescale_ricom_image();
+                    }
+                    else
+                    {
+                        ricom->rescale_ricom = true;
+                    }
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Save Image as..."))
+                {
+                    saveFileDialog.Open();
+                }
+                saveFileDialog.Display();
+                if (saveFileDialog.HasSelected())
+                {
+                    std::string img_file = saveFileDialog.GetSelected().string();
+                    if (img_file.substr(img_file.size() - 4, 4) != ".png" && img_file.substr(img_file.size() - 4, 4) != ".PNG")
+                    {
+                        img_file += ".png";
+                    }
+                    saveFileDialog.ClearSelected();
+                    IMG_SavePNG(ricom->srf_ricom, img_file.c_str());
+                }
+
                 ImVec2 vMin = ImGui::GetWindowContentRegionMin();
                 ImVec2 vMax = ImGui::GetWindowContentRegionMax();
 
@@ -582,7 +608,7 @@ int run_gui(Ricom *ricom)
                 {
                     glBindTexture(GL_TEXTURE_2D, uiTextureIDs[1]);
                     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ricom->srf_ricom->w, ricom->srf_ricom->h, 0,
-                                 GL_RGBA, GL_UNSIGNED_BYTE, ricom->srf_ricom->pixels);
+                                 GL_BGRA, GL_UNSIGNED_BYTE, ricom->srf_ricom->pixels);
                 }
                 ImGui::Image((ImTextureID)uiTextureIDs[1], ImVec2(my_tex_w, my_tex_h), uv_min, uv_max, tint_col, border_col);
                 ImGui::End();
@@ -601,6 +627,35 @@ int run_gui(Ricom *ricom)
 
                 ImGui::Begin("vSTEM", &ricom->use_detector, ImGuiWindowFlags_NoScrollbar);
 
+                
+                
+                if (ImGui::Combo("Colormap", &ricom->stem_cmap, cmaps, IM_ARRAYSIZE(cmaps)))
+                {
+                    if (ricom->fr_count_total == 0)
+                    {
+                        ricom->rescale_stem_image();
+                    }
+                    else
+                    {
+                        ricom->rescale_stem = true;
+                    }
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Save Image as..."))
+                {
+                    saveFileDialog.Open();
+                }
+                saveFileDialog.Display();
+                if (saveFileDialog.HasSelected())
+                {
+                    std::string img_file = saveFileDialog.GetSelected().string();
+                    if (img_file.substr(img_file.size() - 4, 4) != ".png" && img_file.substr(img_file.size() - 4, 4) != ".PNG")
+                    {
+                        img_file += ".png";
+                    }
+                    saveFileDialog.ClearSelected();
+                    IMG_SavePNG(ricom->srf_stem, img_file.c_str());
+                }
                 ImVec2 vMin = ImGui::GetWindowContentRegionMin();
                 ImVec2 vMax = ImGui::GetWindowContentRegionMax();
 
@@ -614,7 +669,7 @@ int run_gui(Ricom *ricom)
                 {
                     glBindTexture(GL_TEXTURE_2D, uiTextureIDs[2]);
                     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ricom->srf_stem->w, ricom->srf_stem->h, 0,
-                                 GL_RGBA, GL_UNSIGNED_BYTE, ricom->srf_stem->pixels);
+                                 GL_BGRA, GL_UNSIGNED_BYTE, ricom->srf_stem->pixels);
                 }
 
                 ImGui::Image((ImTextureID)uiTextureIDs[2], ImVec2(my_tex_w, my_tex_h), uv_min, uv_max, tint_col, border_col);
@@ -635,20 +690,6 @@ int run_gui(Ricom *ricom)
             b_redraw = false;
             start_perf = chc::high_resolution_clock::now();
         }
-
-        // if (ricom->rc_quit || (nxy - ricom->fr_count < 1))
-        // {
-        //     if (t1.joinable())
-        //     {
-        //         t1.join();
-        //     }
-        //     if (t2.joinable())
-        //     {
-        //         t2.~thread();
-        //     }
-        // b_connected = false;
-        // ricom->rc_quit = false;
-        // }
     }
 
     //Cleanup
@@ -661,8 +702,6 @@ int run_gui(Ricom *ricom)
         t1.join();
     if (t2.joinable())
         t2.join();
-
-    // delete ricom;
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
@@ -791,23 +830,30 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
 
 int main(int argc, char *argv[])
 {
-    freopen( "ricom.log", "a", stdout );
-    freopen( "ricom.log", "a", stderr );
+    if (freopen("ricom.log", "a", stdout) == NULL)
+    {
+        std::cout << "Error redirecting output to log file" << std::endl;
+    }
+    if (freopen("ricom.log", "a", stderr) == NULL)
+    {
+        std::cout << "Error redirecting error output to log file" << std::endl;
+    }
 
     time_t timetoday;
     time(&timetoday);
-    std::cout << std::endl << "##########################################################################" << std::endl;
-    std::cout << "Ricom started at " << asctime(localtime(&timetoday)) << std::endl;
-    std::cout << std::endl << "##########################################################################" << std::endl;
+    std::cout << std::endl
+              << "##########################################################################" << std::endl;
+    std::cout << "              Ricom started at " << asctime(localtime(&timetoday));
+    std::cout << "##########################################################################" << std::endl;
 
-    Ricom *ricom = new Ricom();
+    Ricom ricom;
+    Ricom* ricom_ptr = &ricom;
     if (argc == 1)
     {
-        return run_gui(ricom);
+        return run_gui(ricom_ptr);
     }
     else
     {
-        return run_cli(argc, argv, ricom);
+        return run_cli(argc, argv, ricom_ptr);
     }
-    delete ricom;
 }

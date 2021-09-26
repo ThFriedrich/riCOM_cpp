@@ -37,8 +37,8 @@ private:
     size_t ds_timpix;
     
 public:
-    void read_com_ti(std::vector<size_t> &dose_map,
-                     std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, size_t img_size);
+    void read_com_ti(int &idx, std::vector<size_t> &dose_map,
+                     std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, int first_frame, int end_frame);
     void read_data_from_file_ti(e_event &ev);
     void timepix_init(RICOM::modes mode);
     void close_file();
@@ -47,7 +47,7 @@ public:
     std::string t3p_path;
     size_t nx_timpix;
     size_t ny_timpix;
-    size_t dwell_time; // unit: ns
+    int dwell_time; // unit: ns
     int probe_position_now;
 
     TimpixInterface() : mode(), t3p_stream(), ds_timpix(65536), nx_timpix(256), ny_timpix(256), dwell_time(1000), probe_position_now(0){};
