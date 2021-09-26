@@ -471,10 +471,15 @@ void Ricom::process_frames()
             idx = iy * nx;
             for (int ix = 0; ix < nx; ix++)
             {
+                std::cout << fr_count;
                 read_data<T>(data);
+                std::cout << " data read, ";
                 com<T>(data, com_xy, dose_sum);
+                std::cout << "com process'd, ";
                 icom(com_xy, ix, iy);
+                std::cout << "icom process'd, "
                 set_ricom_image_kernel(ix, iy);
+                std::cout << "image set, "
                 if (use_detector)
                 {
                     stem(data, idx + ix);
@@ -484,8 +489,9 @@ void Ricom::process_frames()
                 com_xy_sum[1] += com_xy[1];
                 fr_count_i++;
                 fr_count++;
+                std::cout << "new frame num: " << fr_count;
                 auto mil_secs = chc::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - start_perf).count();
-                if (mil_secs > 500.0 || fr_count == nxy) // ~2Hz for display
+                if (mil_secs > 500.0 || fr_count == fr_total) // ~2Hz for display
                 {
                     rescales_recomputes();
                     if (rc_quit)
@@ -508,9 +514,8 @@ void Ricom::process_frames()
                 }
                 if (fr_count < fr_total)
                 {
-                    std::cout << fr_count;
                     read_head();
-                    std::cout << ": done" << std::endl;
+                    std::cout << " head read" << std::endl;
                 }
             }
             skip_frames(skip_row, data);
