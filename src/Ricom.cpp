@@ -528,6 +528,7 @@ void Ricom::process_frames()
             dose_sum = 0;
         }
     }
+    std::cout << "total frame" << fr_count << std::endl;
     fr_count_total = 0;
 }
 
