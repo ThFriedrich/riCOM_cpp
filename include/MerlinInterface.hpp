@@ -52,13 +52,16 @@ private:
     void read_head_from_socket()
     {
         int bytesReceived;
+        std::cout << " (reading TCP) ";
         bytesReceived = recv(rc_socket, &tcp_buffer[0], tcp_buffer.size(), 0);
+        std::cout << " (TCP read) ";
         if (bytesReceived == -1)
         {
             perror("Error reading TCP header from Socket!");
         }
-
+        std::cout << " (reading head) ";
         bytesReceived = recv(rc_socket, &head_buffer[0], head_buffer.size(), 0);
+        std::cout << " (head read) ";
         if (bytesReceived == -1)
         {
             perror("Error reading Frame header from Socket!");
@@ -191,6 +194,7 @@ public:
         int bytes_payload_count = 0;
         int bytes_payload_total = 0;
 
+        std::cout << " (reading data) ";
         while (bytes_payload_total < data_size)
         {
             bytes_payload_count = recv(rc_socket,
@@ -211,6 +215,7 @@ public:
             }
             bytes_payload_total += bytes_payload_count;
         }
+        std::cout << " (data read) ";
     }
 
     void flush_socket()
