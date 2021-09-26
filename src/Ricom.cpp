@@ -477,9 +477,9 @@ void Ricom::process_frames()
                 com<T>(data, com_xy, dose_sum);
                 std::cout << "com process'd, ";
                 icom(com_xy, ix, iy);
-                std::cout << "icom process'd, "
+                std::cout << "icom process'd, ";
                 set_ricom_image_kernel(ix, iy);
-                std::cout << "image set, "
+                std::cout << "image set, ";
                 if (use_detector)
                 {
                     stem(data, idx + ix);
