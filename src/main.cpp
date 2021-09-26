@@ -514,7 +514,7 @@ int run_gui(Ricom *ricom)
                 // std::filesystem::path temp_path = std::filesystem::temp_directory_path();
                 // std::filesystem::path file = "m_list.txt";
                 // std::ofstream m_list (temp_path / file);
-                int fr_total = ricom->nx * ricom->ny * ricom->rep;
+                int fr_total = ((ricom->nx + ricom->skip_row) * ricom->ny + ricom->skip_img) * ricom->rep;
 
                 std::ofstream m_list("m_list.py");
                 m_list << "from merlin_interface.merlin_interface import MerlinInterface" << '\n';
@@ -526,7 +526,7 @@ int run_gui(Ricom *ricom)
                 m_list << "m.counterdepth = " << ricom->depth << '\n';
                 m_list << "m.acquisitiontime = " << m_dwell_time << '\n';
                 m_list << "m.acquisitionperiod = " << m_dwell_time << '\n';
-                m_list << "m.numframestoacquire = " << fr_total << '\n';
+                m_list << "m.numframestoacquire = " << fr_total+1 << '\n'; // Ich verstehe nicht warum, aber er werkt.
                 m_list << "m.fileenable = " << (int)m_save << '\n';
                 m_list << "m.runheadless = " << (int)m_headless << '\n';
                 m_list << "m.fileformat = " << (int)m_raw * 2 << '\n';
