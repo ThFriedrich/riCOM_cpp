@@ -508,8 +508,9 @@ void Ricom::process_frames()
                 }
                 if (fr_count < fr_total)
                 {
-                    std::cout << fr_count << std::endl;
+                    std::cout << fr_count;
                     read_head();
+                    std::cout << ": done" << std::endl;
                 }
             }
             skip_frames(skip_row, data);
