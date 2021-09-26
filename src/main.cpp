@@ -395,6 +395,7 @@ int run_gui(Ricom *ricom)
                 if (ImGui::Button("Start Acquisition", ImVec2(-1.0f, 0.0f)))
                 {
                     t1 = std::thread(run_live, ricom);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
                     t2 = std::thread(run_connection_script);
 
                     // t2 = std::thread(run_fake_merlin);

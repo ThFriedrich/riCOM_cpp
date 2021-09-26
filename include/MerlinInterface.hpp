@@ -213,6 +213,7 @@ public:
 
     void flush_socket()
     {
+        close_socket();
         connect_socket();
         char *buffer = {0};
         int bytes_count = 0;
