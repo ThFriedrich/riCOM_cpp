@@ -471,6 +471,7 @@ void Ricom::process_frames()
             idx = iy * nx;
             for (int ix = 0; ix < nx; ix++)
             {
+                std::cout << "x, y: " << ix << ", " << iy << ", ";
                 std::cout << fr_count;
                 read_data<T>(data);
                 std::cout << " data read, ";
