@@ -34,7 +34,7 @@ if (WIN32)
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GL")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Oi")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Ox")
     endif()
 
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "IntelLLVM")
