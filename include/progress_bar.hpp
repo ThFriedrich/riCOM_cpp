@@ -1,7 +1,7 @@
 #ifndef _PROGRESS_BAR_
 #define _PROGRESS_BAR_
 
-#ifndef _WINDOWS
+#ifndef _WIN32
     #include <sys/ioctl.h>
 #endif
 

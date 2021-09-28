@@ -1,7 +1,7 @@
 #ifndef MERLIN_INTERFACE_H
 #define MERLIN_INTERFACE_H
 
-#ifdef WIN32
+#ifdef _WIN32
 #pragma comment(lib, "ws2_32.lib")
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <winsock2.h>

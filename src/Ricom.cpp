@@ -1,5 +1,5 @@
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <io.h>
 #else
 #include <unistd.h>
@@ -464,23 +464,23 @@ void Ricom::process_frames()
         ricom_data.assign(im_size, 0);
         stem_data.assign(nxy, 0);
         reset_limits();
-        std::cout << "total frame number: " << fr_total << std::endl;
+        // std::cout << "total frame number: " << fr_total << std::endl;
 
         for (int iy = 0; iy < ny; iy++)
         {
             idx = iy * nx;
             for (int ix = 0; ix < nx; ix++)
             {
-                std::cout << "x, y: " << ix << ", " << iy << ", ";
-                std::cout << fr_count;
+                // std::cout << "x, y: " << ix << ", " << iy << ", ";
+                // std::cout << fr_count;
                 read_data<T>(data);
-                std::cout << " data read, ";
+                // std::cout << " data read, ";
                 com<T>(data, com_xy, dose_sum);
-                std::cout << "com process'd, ";
+                // std::cout << "com process'd, ";
                 icom(com_xy, ix, iy);
-                std::cout << "icom process'd, ";
+                // std::cout << "icom process'd, ";
                 set_ricom_image_kernel(ix, iy);
-                std::cout << "image set, ";
+                // std::cout << "image set, ";
                 if (use_detector)
                 {
                     stem(data, idx + ix);
@@ -490,7 +490,7 @@ void Ricom::process_frames()
                 com_xy_sum[1] += com_xy[1];
                 fr_count_i++;
                 fr_count++;
-                std::cout << "new frame num: " << fr_count;
+                // std::cout << "new frame num: " << fr_count;
                 auto mil_secs = chc::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - start_perf).count();
                 if (mil_secs > 500.0 || fr_count == fr_total) // ~2Hz for display
                 {
@@ -516,7 +516,7 @@ void Ricom::process_frames()
                 if (fr_count < fr_total)
                 {
                     read_head();
-                    std::cout << " head read" << std::endl;
+                    // std::cout << " head read" << std::endl;
                 }
             }
             skip_frames(skip_row, data);
@@ -535,7 +535,7 @@ void Ricom::process_frames()
             dose_sum = 0;
         }
     }
-    std::cout << "total frame" << fr_count << std::endl;
+    // std::cout << "total frame" << fr_count << std::endl;
     fr_count_total = 0;
 }
 
