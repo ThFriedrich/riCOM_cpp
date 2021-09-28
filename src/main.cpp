@@ -221,7 +221,7 @@ int run_gui(Ricom *ricom)
     std::string filename = "";
 
     auto start_perf = chc::high_resolution_clock::now();
-    typedef std::chrono::duration<float, std::milli> double_ms;
+    typedef std::chrono::duration<float, std::milli> float_ms;
 
     // Merlin Parameter;
     int m_threshold0 = 0;
@@ -274,7 +274,7 @@ int run_gui(Ricom *ricom)
         }
 
         const ImGuiViewport *viewport = ImGui::GetMainViewport();
-        auto mil_secs = std::chrono::duration_cast<double_ms>(chc::high_resolution_clock::now() - start_perf).count();
+        auto mil_secs = std::chrono::duration_cast<float_ms>(chc::high_resolution_clock::now() - start_perf).count();
         if (mil_secs > 350.0)
         {
             b_redraw = true;
@@ -714,9 +714,21 @@ int run_gui(Ricom *ricom)
     return 0;
 }
 
+void update_image(SDL_Texture* tex, SDL_Renderer* renderer, SDL_Surface* srf)
+{
+    if (SDL_UpdateTexture(tex, NULL,  srf->pixels, srf->pitch) == -1)
+    {
+        std::cout << "SDL_UpdateTexture failed: " << SDL_GetError() << std::endl;
+    }
+    if (SDL_RenderCopy(renderer, tex, NULL, NULL) == -1)
+    {
+        std::cout << "SDL_RenderCopy failed: " << SDL_GetError() << std::endl;
+    }
+    SDL_RenderPresent(renderer);
+}
+
 int run_cli(int argc, char *argv[], Ricom *ricom)
 {
-
     // command line arguments
     for (int i = 1; i < argc; i++)
     {
@@ -817,13 +829,78 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
             }
         }
     }
+
+    // Initializing SDL
+    SDL_Window* window = NULL;     // Pointer for the window
+    SDL_Renderer* renderer = NULL; // Pointer for the renderer
+    SDL_Surface* srf = NULL;       // Surface for the window;
+    SDL_Texture* tex = NULL;       // Texture for the window;
+    SDL_DisplayMode DM;            // To get the current display size
+    SDL_Event event;               // Event variable
+    SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_GetCurrentDisplayMode(0, &DM);
+    float scale = std::min(((float)DM.w) / ricom->nx, ((float)DM.h) /  ricom->ny) * 0.8;
+
+    // Creating window
+    window = SDL_CreateWindow("riCOM", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, scale * ricom->nx, scale * ricom->ny, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+    if (window == NULL)
+    {
+        std::cout << "Window could not be created! SDL Error: " << SDL_GetError() << std::endl;
+    }
+    // Creating Renderer
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (renderer == NULL)
+    {
+        std::cout << "Renderer could not be created! SDL Error: " << SDL_GetError() << std::endl;
+    }
+    // Creating texture for hardware rendering
+    tex = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STATIC, ricom->nx, ricom->ny);
+    if (tex == NULL)
+    {
+        std::cout << "Texture could not be created! SDL Error: " << SDL_GetError() << std::endl;
+    }
+    // Maintain Pixel aspect ratio on resizing
+    if (SDL_RenderSetLogicalSize(renderer, scale * ricom->nx, scale * ricom->ny) < 0)
+    {
+        std::cout << "Logical size could not be set! SDL Error: " << SDL_GetError() << std::endl;
+    }
+
+    std::thread t1;
     if (ricom->mode == RICOM::LIVE)
     {
-        run_live(ricom);
+        t1 = std::thread(run_live, ricom);
+        t1.detach();
     }
     else if (ricom->mode == RICOM::FILE)
     {
-        run_file(ricom);
+        t1 = std::thread(run_file, ricom);
+        t1.detach();
+    }
+
+    auto start_perf = chc::high_resolution_clock::now();
+    typedef std::chrono::duration<float, std::milli> float_ms;
+    
+
+    while (1)
+    {   
+        auto mil_secs = std::chrono::duration_cast<float_ms>(chc::high_resolution_clock::now() - start_perf).count();
+        if (mil_secs > 500)
+        {
+            start_perf = chc::high_resolution_clock::now();
+            update_image(tex, renderer, ricom->srf_ricom);
+        }
+
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_QUIT ||
+                (event.type == SDL_WINDOWEVENT &&
+                    event.window.event == SDL_WINDOWEVENT_CLOSE))
+            {
+                return 0;
+            }
+        }
+
+        SDL_Delay(10);
     }
     return 0;
 }

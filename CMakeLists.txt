@@ -20,9 +20,8 @@ endif(UNIX)
 if (WIN32)
     set(SDL2_INCLUDE_DIR C:/SDL2_VC/include/)
     set(SDL2_LIB_DIR C:/SDL2_VC/lib/x64)
+    set(BUILD_DIR ${PROJECT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
     MESSAGE(STATUS ${PROJECT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
-    file(COPY ${SDL2_LIB_DIR}/SDL2.dll DESTINATION ${PROJECT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
-    file(COPY ${SDL2_LIB_DIR}/SDL2_image.dll DESTINATION ${PROJECT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
     link_directories(${SDL2_LIB_DIR})
 
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
@@ -39,13 +38,18 @@ if (WIN32)
     endif()
 
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "IntelLLVM")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Qstd:c++17")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Qstd:c++17 /Ofast")
         set(MMD_LIB C:/Program\ Files\ \(x86\)/Intel/oneAPI/compiler/latest/windows/redist/intel64_win/compiler)
-        file(COPY ${MMD_LIB}/libmmd.dll DESTINATION ${PROJECT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
-        file(COPY ${MMD_LIB}/svml_dispmd.dll DESTINATION ${PROJECT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+        set(BUILD_DIR ${PROJECT_BINARY_DIR})
+        file(COPY ${MMD_LIB}/libmmd.dll DESTINATION ${BUILD_DIR})
+        file(COPY ${MMD_LIB}/svml_dispmd.dll DESTINATION ${BUILD_DIR})
     endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "IntelLLVM")
 
+    file(COPY ${SDL2_LIB_DIR}/SDL2.dll DESTINATION ${BUILD_DIR})
+    file(COPY ${SDL2_LIB_DIR}/SDL2_image.dll DESTINATION ${BUILD_DIR})
+
 endif (WIN32)
+
 
 add_executable(RICOM src/main.cpp)
 
@@ -74,3 +78,4 @@ target_include_directories( RICOM PUBLIC
 find_package(OpenGL REQUIRED)
 target_link_libraries(RICOM PUBLIC ${OPENGL_LIBRARIES})
 target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image ${CMAKE_DL_LIBS})
+
