@@ -55,8 +55,8 @@ void save_com( std::vector<float> com_map_x, std::vector<float> com_map_y, std::
 {
     std::ofstream comx_file( filename + "_comx.bin", std::ofstream::out | std::ofstream::binary );
     std::ofstream comy_file( filename + "_comy.bin", std::ofstream::out | std::ofstream::binary );
-    comx_file.write( reinterpret_cast<const char*>(&com_map_x), sizeof(com_map_x) );
-    comy_file.write( reinterpret_cast<const char*>(&com_map_y), sizeof(com_map_y) );
+    comx_file.write( reinterpret_cast<const char*>(&com_map_x), com_map_x.size() * sizeof(float) );
+    comy_file.write( reinterpret_cast<const char*>(&com_map_y), com_map_y.size() * sizeof(float) );
     comx_file.close();
     comy_file.close();
 }
