@@ -619,10 +619,6 @@ int run_gui(Ricom *ricom)
                     else
                     {
                         std::string com_file = saveFileDialog.GetSelected().string();
-                        if (com_file.substr(com_file.size() - 4, 4) != ".bin" && com_file.substr(com_file.size() - 4, 4) != ".BIN")
-                        {
-                            com_file += ".bin";
-                        }
                         saveFileDialog.ClearSelected();
                         save_com(ricom->com_map_x, ricom->com_map_y, com_file);
                     }
