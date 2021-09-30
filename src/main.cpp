@@ -51,12 +51,12 @@ void run_live(Ricom *r)
     r->run();
 }
 
-void save_com( std::vector<float> com_map_x, std::vector<float> com_map_y, std::string filename )
+void save_com( std::vector<float> com_map_x, std::vector<float> com_map_y, int datasize, std::string filename )
 {
     std::ofstream comx_file( filename + "_comx.bin", std::ofstream::out | std::ofstream::binary );
     std::ofstream comy_file( filename + "_comy.bin", std::ofstream::out | std::ofstream::binary );
-    comx_file.write( reinterpret_cast<const char*>(&com_map_x), com_map_x.size() * sizeof(float) );
-    comy_file.write( reinterpret_cast<const char*>(&com_map_y), com_map_y.size() * sizeof(float) );
+    comx_file.write( reinterpret_cast<const char*>(&com_map_x), datasize * sizeof(float) );
+    comy_file.write( reinterpret_cast<const char*>(&com_map_y), datasize * sizeof(float) );
     comx_file.close();
     comy_file.close();
 }
@@ -620,7 +620,7 @@ int run_gui(Ricom *ricom)
                     {
                         std::string com_file = saveFileDialog.GetSelected().string();
                         saveFileDialog.ClearSelected();
-                        save_com(ricom->com_map_x, ricom->com_map_y, com_file);
+                        save_com(ricom->com_map_x, ricom->com_map_y, ricom->nxy, com_file);
                     }
                 }
 
