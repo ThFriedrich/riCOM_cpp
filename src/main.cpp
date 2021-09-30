@@ -12,6 +12,8 @@
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 
+#include "HDFql.h"
+
 #include <stdio.h>
 #include <SDL.h>
 #include <SDL_image.h>
@@ -48,6 +50,29 @@ void run_live(Ricom *r)
     r->reset();
     r->mode = RICOM::modes::LIVE;
     r->run();
+}
+
+void save_com(int com_map_x, int com_map_y, std::string filename)
+{
+    std::string create_string{ "CREATE FILE " + filename };
+    std::string use_string{ "USE FILE " + filename };
+    std::string create_group_string{ "CREATE GROUP data" };
+    int datasize[2] = { 
+        sizeof(com_map_x) / sizeof(com_map_x[0]), 
+        sizeof(com_map_x[0]) / sizeof(com_map_x[0][0]) };
+    std::string create_datasetx_string{ 
+        "CREATE DATASET data/com_map_x AS INT(" + 
+        to_string(datasize[0])) + ", " + std::to_string(datasize[1])) + ")" };
+    std::string create_datasety_string{ 
+        "CREATE DATASET data/com_map_y AS INT(" + 
+        to_string(datasize[0])) + ", " + std::to_string(datasize[1])) + ")" };
+
+    HDFql::execute(create_string);
+    HDFql::execute(use_string);
+    HDFql::execute(create_group_string);
+    HDFql::execute(create_datasetx_string);
+    HDFql::execute(create_datasety_string);
+    HDFql::execute(“CLOSE FILE”);
 }
 
 #ifdef _WIN32
@@ -593,6 +618,24 @@ int run_gui(Ricom *ricom)
                     }
                     saveFileDialog.ClearSelected();
                     IMG_SavePNG(ricom->srf_ricom, img_file.c_str());
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Save COM..."))
+                {
+                    saveFileDialog.Open();
+                }
+                saveFileDialog.Display();
+                if (saveFileDialog.HasSelected())
+                {
+                    std::string com_file = saveFileDialog.GetSelected().string();
+                    if (com_file.substr(com_file.size() - 5, 5) != ".hdf5" && com_file.substr(com_file.size() - 5, 5) != ".hdf5" 
+                        && com_file.substr(com_file.size() - 3, 3) != ".h5" && com_file.substr(com_file.size() - 3, 3) != ".h5")
+                    {
+                        com_file += ".h5";
+                    }
+                    saveFileDialog.ClearSelected();
+                    save_com(ricom->com_map_x, ricom->com_map_y, com_file);
                 }
 
                 ImVec2 vMin = ImGui::GetWindowContentRegionMin();

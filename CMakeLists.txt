@@ -40,7 +40,7 @@ if (WIN32)
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "IntelLLVM")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Qstd:c++17 /Ox /Qopenmp")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Qopt-assume-no-loop-carried-dep[=2]")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /QxKABYLAKE")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /QxCOFFEELAKE")
         set(MMD_LIB C:/Program\ Files\ \(x86\)/Intel/oneAPI/compiler/latest/windows/redist/intel64_win/compiler)
         set(BUILD_DIR ${PROJECT_BINARY_DIR})
         file(COPY ${MMD_LIB}/libmmd.dll DESTINATION ${BUILD_DIR})
@@ -67,6 +67,7 @@ target_sources( RICOM PRIVATE
     src/TimpixInterface.cpp
     src/Ricom.cpp 
     src/main.cpp
+    hdfql/include/HDFql.h
     )
 
 target_include_directories( RICOM PUBLIC
@@ -75,6 +76,7 @@ target_include_directories( RICOM PUBLIC
     ${SDL2_INCLUDE_DIR}
     include
     src
+    hdfql/include
     )
 
 find_package(OpenGL REQUIRED)

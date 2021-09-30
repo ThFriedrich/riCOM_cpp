@@ -1,0 +1,87 @@
+FREEWARE LICENSE
+
+This software is copyrighted and the founders of HDFql claim all exclusive
+rights, except as licensed to users hereunder.
+
+If you comply with the below terms, we grant you the right to install and use
+the software HDFql both in commercial and non-commercial products.
+
+
+TERMS
+
+=====================
+1. DEFINITIONS
+=====================
+1.1 This is a legal agreement between you (hereafter, the "USER") and the
+founders of HDFql.
+
+1.2 Downloading or using the software Hierarchical Data Format query language,
+HDFql, (hereafter, the "SOFTWARE") indicates the acceptance of the terms by the
+USER, and shall be effective and bind the USER immediately upon downloading or
+using the SOFTWARE. The SOFTWARE is considered in use on a computer when it is
+loaded into temporary memory or installed into permanent memory.
+
+
+=====================
+2. PROPRIETARY RIGHTS
+=====================
+2.1 The SOFTWARE is owned exclusively and copyrighted by the founders of HDFql,
+and this license does not transfer any proprietary rights to the USER.
+
+
+=====================
+3. NON-PERMITTED USES
+=====================
+3.1 The USER may not translate, disassemble, decompile, modify, enhance, or
+otherwise reverse engineer the SOFTWARE from its current state.
+
+3.2 The USER may not distribute, publish, assign, sell, bargain, convey,
+transfer, pledge, lease or grant any further rights to use the SOFTWARE.
+
+
+=====================
+4. GRANT OF LICENSE
+=====================
+4.1 The founders of HDFql hereby grant the USER a non-exclusive license and the
+right to use the SOFTWARE.
+
+4.2 The USER is only granted a license for the machine-readable, object code
+portion of the SOFTWARE.
+
+4.3 Use within the scope of this license is free of charge and no royalty or
+licensing fees shall be payable by the USER. Use beyond the scope of this
+license shall constitute copyright infringement.
+
+
+=====================
+5. NO WARRANTY
+=====================
+5.1 The SOFTWARE is licensed to the USER on an "AS IS" with all faults basis,
+and without any warranty of any kind, whether oral, written, express, implied
+or statutory regarding any aspect of the SOFTWARE, including but not limited to
+warranties of merchantability or fitness for a particular purpose.
+
+
+=====================
+6. LIMITATION OF LIABILITY
+=====================
+6.1 The USER understands and agrees that in no event will the founders of HDFql
+be liable or responsible for special or consequential damages which might arise
+out of or in connection with the performance or non-performance of this License
+or of the SOFTWARE, even if the founders of HDFql have been advised of the
+possibility of such damages, including, but not limited to, lost profits due to
+errors, inaccuracies, omissions, incompleteness or insufficiency of the
+SOFTWARE or materials, nor for the usefulness of the SOFTWARE to the USER.
+
+6.2 The founders of HDFql shall not be liable for any damages, injuries or
+liabilities whatsoever arising directly or indirectly out of or related to the
+use of or inability to use the SOFTWARE, including but not limited to direct,
+indirect, special, incidental, or consequential damages.
+
+6.3 The failure to enforce any rights specified in this License or its
+copyright by the founders of HDFql shall not be construed as amending this
+License or waiving any of the founders of HDFql's rights under any provision
+of law. If any part of this License is found invalid or unenforceable by a
+court of competent jurisdiction, the remainder of this License shall be
+interpreted so as to reasonably express the intention of the founders of HDFql.
+

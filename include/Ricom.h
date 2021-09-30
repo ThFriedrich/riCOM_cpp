@@ -67,6 +67,8 @@ private:
     std::array<size_t, 256> sum_x;
     std::array<size_t, 256> sum_y;
     std::vector<float> ricom_data;
+    int com_map_x;
+    int com_map_y;
     std::vector<int> update_list;
 
     // Scan Area Variables
