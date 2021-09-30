@@ -67,12 +67,10 @@ private:
     std::array<size_t, 256> sum_x;
     std::array<size_t, 256> sum_y;
     std::vector<float> ricom_data;
-    int com_map_x;
-    int com_map_y;
     std::vector<int> update_list;
+    
 
     // Scan Area Variables
-    int nxy;
     int img_px;
     int px_per_row; // not sure what is this for
 
@@ -121,12 +119,15 @@ public:
     std::array<float, 2> offset;
     std::array<float, 2> com_public;
     int depth;
+    std::vector<float> com_map_x;
+    std::vector<float> com_map_y;
 
     RICOM::Detector_type detector_type;
 
     // Scan Area Variables
     int nx;
     int ny;
+    int nxy;
     int rep;
     int fr_total;
     int skip_row;

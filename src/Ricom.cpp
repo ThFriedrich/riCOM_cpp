@@ -444,8 +444,7 @@ void Ricom::process_frames()
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
     int dose_sum = 0;
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
-    int cmx[nx][ny];
-    int cmy[nx][ny];
+
 
     // Initialize Progress bar
     ProgressBar bar(fr_total);
@@ -488,8 +487,8 @@ void Ricom::process_frames()
                     stem(data, idx + ix);
                     set_stem_pixel(ix, iy);
                 }
-                cmx[ix][iy] = com_xy[0];
-                cmy[ix][iy] = com_xy[1];
+                com_map_x[idx + ix] = com_xy[0];
+                com_map_y[idx + ix] = com_xy[1];
                 com_xy_sum[0] += com_xy[0];
                 com_xy_sum[1] += com_xy[1];
                 fr_count_i++;
@@ -541,8 +540,6 @@ void Ricom::process_frames()
     }
     // std::cout << "total frame" << fr_count << std::endl;
     fr_count_total = 0;
-    com_map_x = cmx;
-    com_map_y = cmy;
 }
 
 void Ricom::run_merlin()
@@ -742,6 +739,8 @@ void Ricom::run()
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
     ricom_data.reserve(im_size);
     update_list = calculate_update_list();
+    com_map_x.reserve(nxy);
+    com_map_y.reserve(nxy);
 
     init_uv();
 
