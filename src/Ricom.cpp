@@ -1,5 +1,5 @@
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <io.h>
 #else
 #include <unistd.h>
@@ -201,7 +201,7 @@ void Ricom::com(std::vector<T> &data, std::array<float, 2> &com, int &dose_sum)
     float dose = 0;
     T px;
     size_t sum_x_temp;
-
+    
     com[0] = 0;
     com[1] = 0;
 
@@ -445,6 +445,7 @@ void Ricom::process_frames()
     int dose_sum = 0;
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
 
+
     // Initialize Progress bar
     ProgressBar bar(fr_total);
 
@@ -464,28 +465,37 @@ void Ricom::process_frames()
         ricom_data.assign(im_size, 0);
         stem_data.assign(nxy, 0);
         reset_limits();
-        std::cout << "total frame number: " << fr_total << std::endl;
+        // std::cout << "total frame number: " << fr_total << std::endl;
 
         for (int iy = 0; iy < ny; iy++)
         {
             idx = iy * nx;
             for (int ix = 0; ix < nx; ix++)
             {
+                // std::cout << "x, y: " << ix << ", " << iy << ", ";
+                // std::cout << fr_count;
                 read_data<T>(data);
+                // std::cout << " data read, ";
                 com<T>(data, com_xy, dose_sum);
+                // std::cout << "com process'd, ";
                 icom(com_xy, ix, iy);
+                // std::cout << "icom process'd, ";
                 set_ricom_image_kernel(ix, iy);
+                // std::cout << "image set, ";
                 if (use_detector)
                 {
                     stem(data, idx + ix);
                     set_stem_pixel(ix, iy);
                 }
+                com_map_x[idx + ix] = com_xy[0];
+                com_map_y[idx + ix] = com_xy[1];
                 com_xy_sum[0] += com_xy[0];
                 com_xy_sum[1] += com_xy[1];
                 fr_count_i++;
                 fr_count++;
+                // std::cout << "new frame num: " << fr_count;
                 auto mil_secs = chc::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - start_perf).count();
-                if (mil_secs > 500.0 || fr_count == nxy) // ~2Hz for display
+                if (mil_secs > 500.0 || fr_count == fr_total) // ~2Hz for display
                 {
                     rescales_recomputes();
                     if (rc_quit)
@@ -509,6 +519,7 @@ void Ricom::process_frames()
                 if (fr_count < fr_total)
                 {
                     read_head();
+                    // std::cout << " head read" << std::endl;
                 }
             }
             skip_frames(skip_row, data);
@@ -527,6 +538,7 @@ void Ricom::process_frames()
             dose_sum = 0;
         }
     }
+    // std::cout << "total frame" << fr_count << std::endl;
     fr_count_total = 0;
 }
 
@@ -729,6 +741,8 @@ void Ricom::run()
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
     ricom_data.reserve(im_size);
     update_list = calculate_update_list();
+    com_map_x.reserve(nxy);
+    com_map_y.reserve(nxy);
 
     init_uv();
 

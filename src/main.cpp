@@ -2,6 +2,7 @@
 #include <thread>
 #include <chrono>
 #include <stdlib.h>
+#include <fstream>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
@@ -48,6 +49,16 @@ void run_live(Ricom *r)
     r->reset();
     r->mode = RICOM::modes::LIVE;
     r->run();
+}
+
+void save_com( std::vector<float> com_map_x, std::vector<float> com_map_y, int datasize, std::string filename )
+{
+    std::ofstream comx_file( filename + "_comx.bin", std::ofstream::out | std::ofstream::binary );
+    std::ofstream comy_file( filename + "_comy.bin", std::ofstream::out | std::ofstream::binary );
+    comx_file.write( reinterpret_cast<const char*>(&com_map_x), datasize * sizeof(float) );
+    comy_file.write( reinterpret_cast<const char*>(&com_map_y), datasize * sizeof(float) );
+    comx_file.close();
+    comy_file.close();
 }
 
 #ifdef _WIN32
@@ -221,7 +232,7 @@ int run_gui(Ricom *ricom)
     std::string filename = "";
 
     auto start_perf = chc::high_resolution_clock::now();
-    typedef std::chrono::duration<float, std::milli> double_ms;
+    typedef std::chrono::duration<float, std::milli> float_ms;
 
     // Merlin Parameter;
     int m_threshold0 = 0;
@@ -274,7 +285,7 @@ int run_gui(Ricom *ricom)
         }
 
         const ImGuiViewport *viewport = ImGui::GetMainViewport();
-        auto mil_secs = std::chrono::duration_cast<double_ms>(chc::high_resolution_clock::now() - start_perf).count();
+        auto mil_secs = std::chrono::duration_cast<float_ms>(chc::high_resolution_clock::now() - start_perf).count();
         if (mil_secs > 350.0)
         {
             b_redraw = true;
@@ -369,6 +380,7 @@ int run_gui(Ricom *ricom)
                 if (ImGui::Button("Start Acquisition", ImVec2(-1.0f, 0.0f)))
                 {
                     t1 = std::thread(run_live, ricom);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
                     t2 = std::thread(run_connection_script);
                     b_running = true;
                     t1.detach();
@@ -513,7 +525,7 @@ int run_gui(Ricom *ricom)
                 // std::filesystem::path temp_path = std::filesystem::temp_directory_path();
                 // std::filesystem::path file = "m_list.txt";
                 // std::ofstream m_list (temp_path / file);
-                int fr_total = ricom->nx * ricom->ny * ricom->rep;
+                int fr_total = ((ricom->nx + ricom->skip_row) * ricom->ny + ricom->skip_img) * ricom->rep;
 
                 std::ofstream m_list("m_list.py");
                 m_list << "from merlin_interface.merlin_interface import MerlinInterface" << '\n';
@@ -525,7 +537,7 @@ int run_gui(Ricom *ricom)
                 m_list << "m.counterdepth = " << ricom->depth << '\n';
                 m_list << "m.acquisitiontime = " << m_dwell_time << '\n';
                 m_list << "m.acquisitionperiod = " << m_dwell_time << '\n';
-                m_list << "m.numframestoacquire = " << fr_total << '\n';
+                m_list << "m.numframestoacquire = " << fr_total+1 << '\n'; // Ich verstehe nicht warum, aber er werkt.
                 m_list << "m.fileenable = " << (int)m_save << '\n';
                 m_list << "m.runheadless = " << (int)m_headless << '\n';
                 m_list << "m.fileformat = " << (int)m_raw * 2 << '\n';
@@ -578,20 +590,38 @@ int run_gui(Ricom *ricom)
                     }
                 }
                 ImGui::SameLine();
+                bool b_button;
                 if (ImGui::Button("Save Image as..."))
                 {
+                    b_button = true;
                     saveFileDialog.Open();
                 }
+                ImGui::SameLine();
+                if (ImGui::Button("Save COM..."))
+                {
+                    b_button = false;
+                    saveFileDialog.Open();
+                }
+
                 saveFileDialog.Display();
                 if (saveFileDialog.HasSelected())
                 {
-                    std::string img_file = saveFileDialog.GetSelected().string();
-                    if (img_file.substr(img_file.size() - 4, 4) != ".png" && img_file.substr(img_file.size() - 4, 4) != ".PNG")
+                    if ( b_button )
                     {
-                        img_file += ".png";
+                        std::string img_file = saveFileDialog.GetSelected().string();
+                        if (img_file.substr(img_file.size() - 4, 4) != ".png" && img_file.substr(img_file.size() - 4, 4) != ".PNG")
+                        {
+                            img_file += ".png";
+                        }
+                        saveFileDialog.ClearSelected();
+                        IMG_SavePNG(ricom->srf_ricom, img_file.c_str());
                     }
-                    saveFileDialog.ClearSelected();
-                    IMG_SavePNG(ricom->srf_ricom, img_file.c_str());
+                    else
+                    {
+                        std::string com_file = saveFileDialog.GetSelected().string();
+                        saveFileDialog.ClearSelected();
+                        save_com(ricom->com_map_x, ricom->com_map_y, ricom->nxy, com_file);
+                    }
                 }
 
                 ImVec2 vMin = ImGui::GetWindowContentRegionMin();
@@ -713,9 +743,21 @@ int run_gui(Ricom *ricom)
     return 0;
 }
 
+void update_image(SDL_Texture* tex, SDL_Renderer* renderer, SDL_Surface* srf)
+{
+    if (SDL_UpdateTexture(tex, NULL,  srf->pixels, srf->pitch) == -1)
+    {
+        std::cout << "SDL_UpdateTexture failed: " << SDL_GetError() << std::endl;
+    }
+    if (SDL_RenderCopy(renderer, tex, NULL, NULL) == -1)
+    {
+        std::cout << "SDL_RenderCopy failed: " << SDL_GetError() << std::endl;
+    }
+    SDL_RenderPresent(renderer);
+}
+
 int run_cli(int argc, char *argv[], Ricom *ricom)
 {
-
     // command line arguments
     for (int i = 1; i < argc; i++)
     {
@@ -816,13 +858,78 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
             }
         }
     }
+
+    // Initializing SDL
+    SDL_Window* window = NULL;     // Pointer for the window
+    SDL_Renderer* renderer = NULL; // Pointer for the renderer
+    SDL_Surface* srf = NULL;       // Surface for the window;
+    SDL_Texture* tex = NULL;       // Texture for the window;
+    SDL_DisplayMode DM;            // To get the current display size
+    SDL_Event event;               // Event variable
+    SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_GetCurrentDisplayMode(0, &DM);
+    float scale = std::min(((float)DM.w) / ricom->nx, ((float)DM.h) /  ricom->ny) * 0.8;
+
+    // Creating window
+    window = SDL_CreateWindow("riCOM", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, scale * ricom->nx, scale * ricom->ny, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+    if (window == NULL)
+    {
+        std::cout << "Window could not be created! SDL Error: " << SDL_GetError() << std::endl;
+    }
+    // Creating Renderer
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (renderer == NULL)
+    {
+        std::cout << "Renderer could not be created! SDL Error: " << SDL_GetError() << std::endl;
+    }
+    // Creating texture for hardware rendering
+    tex = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STATIC, ricom->nx, ricom->ny);
+    if (tex == NULL)
+    {
+        std::cout << "Texture could not be created! SDL Error: " << SDL_GetError() << std::endl;
+    }
+    // Maintain Pixel aspect ratio on resizing
+    if (SDL_RenderSetLogicalSize(renderer, scale * ricom->nx, scale * ricom->ny) < 0)
+    {
+        std::cout << "Logical size could not be set! SDL Error: " << SDL_GetError() << std::endl;
+    }
+
+    std::thread t1;
     if (ricom->mode == RICOM::LIVE)
     {
-        run_live(ricom);
+        t1 = std::thread(run_live, ricom);
+        t1.detach();
     }
     else if (ricom->mode == RICOM::FILE)
     {
-        run_file(ricom);
+        t1 = std::thread(run_file, ricom);
+        t1.detach();
+    }
+
+    auto start_perf = chc::high_resolution_clock::now();
+    typedef std::chrono::duration<float, std::milli> float_ms;
+    
+
+    while (1)
+    {   
+        auto mil_secs = std::chrono::duration_cast<float_ms>(chc::high_resolution_clock::now() - start_perf).count();
+        if (mil_secs > 500)
+        {
+            start_perf = chc::high_resolution_clock::now();
+            update_image(tex, renderer, ricom->srf_ricom);
+        }
+
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_QUIT ||
+                (event.type == SDL_WINDOWEVENT &&
+                    event.window.event == SDL_WINDOWEVENT_CLOSE))
+            {
+                return 0;
+            }
+        }
+
+        SDL_Delay(10);
     }
     return 0;
 }

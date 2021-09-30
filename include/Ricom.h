@@ -68,9 +68,9 @@ private:
     std::array<size_t, 256> sum_y;
     std::vector<float> ricom_data;
     std::vector<int> update_list;
+    
 
     // Scan Area Variables
-    int nxy;
     int img_px;
     int px_per_row; // not sure what is this for
 
@@ -119,12 +119,15 @@ public:
     std::array<float, 2> offset;
     std::array<float, 2> com_public;
     int depth;
+    std::vector<float> com_map_x;
+    std::vector<float> com_map_y;
 
     RICOM::Detector_type detector_type;
 
     // Scan Area Variables
     int nx;
     int ny;
+    int nxy;
     int rep;
     int fr_total;
     int skip_row;
@@ -156,7 +159,7 @@ public:
     void plot_cbed(std::vector<T> &data);
 
     // Constructor
-    Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), sum_x{0}, sum_y{0}, ricom_data(), nxy(0), img_px(0),px_per_row(0), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), mode(RICOM::FILE), update_dose_lowbound(6), update_offset(false), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), multi_scan(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0,0.0},  depth(1), detector_type(RICOM::MERLIN), nx(257), ny(256), rep(1), fr_total(0), skip_row(0), skip_img(0), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(8), srf_stem(NULL), stem_cmap(8), srf_cbed(NULL), cbed_cmap(9){};
+    Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), sum_x{0}, sum_y{0}, ricom_data(), nxy(0), img_px(0),px_per_row(0), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), mode(RICOM::FILE), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), multi_scan(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0,0.0},  depth(1), detector_type(RICOM::MERLIN), nx(257), ny(256), rep(1), fr_total(0), skip_row(0), skip_img(0), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9){};
 
     // Destructor
     ~Ricom();
