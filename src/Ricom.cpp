@@ -591,7 +591,7 @@ void Ricom::process_timepix_stream()
 
     std::array<float, 2> com_xy = {0.0, 0.0};
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
-    // int dose_sum = 0;
+    int dose_sum = 0;
     int idx = 0;
     int idxx = 0;    
     int ix; 
@@ -642,6 +642,7 @@ void Ricom::process_timepix_stream()
             comy_map[idxx] = com_xy[1];
             com_xy_sum[0] += com_xy[0];
             com_xy_sum[1] += com_xy[1];
+            dose_sum += dose_map[idxx];
 
             ix = idxx % nx;
             iy = floor(idxx / nx);
@@ -691,6 +692,7 @@ void Ricom::process_timepix_stream()
         if (idx >= fr_total)
         {
             b_while = false;
+            std::cout << "dose sum" << dose_sum << std::endl;
         }
     }
 }
