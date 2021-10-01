@@ -13,6 +13,7 @@
 #include <chrono>
 #include <algorithm>
 #include <thread>
+#include <future>
 #include "tinycolormap.hpp"
 
 #include "Ricom.h"
@@ -81,14 +82,14 @@ void Ricom_detector::compute_detector()
     float d2;
     id_list.clear();
 
-    for (size_t iy = 0; iy < ny_merlin; iy++)
+    for (size_t iy = 0; iy < ny_cam; iy++)
     {
-        for (size_t ix = 0; ix < nx_merlin; ix++)
+        for (size_t ix = 0; ix < nx_cam; ix++)
         {
             d2 = pow((float)ix - offset[0], 2) + pow((float)iy - offset[1], 2);
             if (d2 > rad_in2 && d2 <= rad_out2)
             {
-                id_list.push_back(iy * nx_merlin + ix);
+                id_list.push_back(iy * nx_cam + ix);
             }
         }
     }
@@ -100,21 +101,21 @@ void Ricom_detector::compute_detector(std::array<float, 2> &offset)
     float d2;
     id_list.clear();
 
-    for (size_t iy = 0; iy < ny_merlin; iy++)
+    for (size_t iy = 0; iy < ny_cam; iy++)
     {
-        for (size_t ix = 0; ix < nx_merlin; ix++)
+        for (size_t ix = 0; ix < nx_cam; ix++)
         {
             d2 = pow((float)ix - offset[0], 2) + pow((float)iy - offset[1], 2);
             if (d2 > rad_in2 && d2 <= rad_out2)
             {
-                id_list.push_back(iy * nx_merlin + ix);
+                id_list.push_back(iy * nx_cam + ix);
             }
         }
     }
 }
 
 ////////////////////////////////////////////////
-//           SDL plotting methods             //
+//               SDL plotting                 //
 ////////////////////////////////////////////////
 void Ricom::init_surface(unsigned int width, unsigned int height)
 {
@@ -155,6 +156,9 @@ Ricom::~Ricom(){};
 
 void Ricom::init_uv()
 {
+    u.assign(nx_merlin, 0);
+    v.assign(nx_merlin, 0);
+
     if (b_raw)
     // raw format: pixel sequence flipped every 64 bit
     {
@@ -196,12 +200,13 @@ void Ricom::init_uv()
 }
 
 template <typename T>
-void Ricom::com(std::vector<T> &data, std::array<float, 2> &com, int &dose_sum)
+void Ricom::com(std::vector<T> *data, std::array<float, 2> &com, int *dose_sum)
 {
     float dose = 0;
     T px;
     size_t sum_x_temp;
-
+    std::array<size_t, 256> sum_x = {0};
+    std::array<size_t, 256> sum_y = {0};
     com[0] = 0;
     com[1] = 0;
 
@@ -212,7 +217,7 @@ void Ricom::com(std::vector<T> &data, std::array<float, 2> &com, int &dose_sum)
         sum_x_temp = 0;
         for (size_t idx = 0; idx < nx_merlin; idx++)
         {
-            px = data[y_nx + idx];
+            px = data->at(y_nx + idx);
             byte_swap(px);
             sum_x_temp += px;
             sum_y[idx] += px;
@@ -227,28 +232,27 @@ void Ricom::com(std::vector<T> &data, std::array<float, 2> &com, int &dose_sum)
         for (size_t i = 0; i < nx_merlin; i++)
         {
             com[0] += sum_x[i] * v[i];
-            sum_x[i] = 0;
         }
         for (size_t i = 0; i < ny_merlin; i++)
         {
             com[1] += sum_y[i] * u[i];
-            sum_y[i] = 0;
         }
-
-        com[0] = (com[0] / dose);
-        com[1] = (com[1] / dose);
-        dose_sum += dose;
+        for (int i = 0; i < 2; i++)
+        {
+            com[i] = (com[i] / dose);
+        }
+        dose_sum[0] += (int)dose;
     }
 }
 
 template <typename T>
-void Ricom::stem(std::vector<T> &data, size_t id_stem)
+void Ricom::stem(std::vector<T> *data, size_t id_stem)
 {
     T px;
     size_t stem_temp = 0;
     for (size_t id : detector.id_list)
     {
-        px = data[id];
+        px = data->at(id);
         byte_swap(px);
         stem_temp += px;
     }
@@ -269,13 +273,16 @@ void Ricom::icom(std::array<float, 2> &com, int x, int y)
 {
     float com_x = com[0] - offset[0];
     float com_y = com[1] - offset[1];
-    int idr = 0;
-    int idc = x + y * px_per_row; 
+    id_x_y idr;
+    int idc = x + y * nx;
 
-    for ( int id = 0; id < kernel.k_area; id ++ )
+    for (int id = 0; id < kernel.k_area; id++)
     {
         idr = update_list[id] + idc;
-        ricom_data[idr] += com_x * kernel.kernel_x[id] + com_y * kernel.kernel_y[id];
+        if (idr.valid)
+        {
+            ricom_data[idr.id] += com_x * kernel.kernel_x[id] + com_y * kernel.kernel_y[id];
+        }
     }
     if (ricom_data[idc] > ricom_max)
     {
@@ -289,15 +296,15 @@ void Ricom::icom(std::array<float, 2> &com, int x, int y)
     }
 }
 
-std::vector<int> Ricom::calculate_update_list()
+std::vector<id_x_y> Ricom::calculate_update_list()
 {
-    std::vector<int> ul(kernel.k_area);
+    std::vector<id_x_y> ul(kernel.k_area);
     int idul = 0;
-    for (int idy = 0; idy < kernel.k_width_sym; idy++)
+    for (int idy = -kernel.kernel_size; idy <= kernel.kernel_size; idy++)
     {
-        for (int idx = 0; idx < kernel.k_width_sym; idx++)
+        for (int idx = -kernel.kernel_size; idx <= kernel.kernel_size; idx++)
         {
-            ul[idul] = idy * px_per_row + idx;
+            ul[idul] = {(idy * nx + idx), idx, idy, nx, ny, false};
             idul++;
         }
     }
@@ -306,6 +313,7 @@ std::vector<int> Ricom::calculate_update_list()
 
 void Ricom::rescale_ricom_image()
 {
+    std::lock_guard<std::mutex> lock(ricom_mutex);
     for (int y = 0; y < ny; y++)
     {
         for (int x = 0; x < nx; x++)
@@ -318,19 +326,30 @@ void Ricom::rescale_ricom_image()
 
 void Ricom::set_ricom_image_kernel(int ix, int iy)
 {
-    for (int y = (std::max)((iy - kernel.kernel_size), 0); y <= iy; y++)
+    id_x_y idr;
+    int idc = ix + iy * nx;
+
+    for (int id = 0; id < kernel.k_area; id++)
     {
-        for (int x = (std::max)((ix - kernel.kernel_size), 0); x <= ix; x++)
+        idr = update_list[id] + idc;
+        if (idr.valid)
         {
-            set_ricom_pixel(x, y);
+            set_ricom_pixel(idr);
         }
     }
 }
 
-void Ricom::set_ricom_pixel(size_t idx, size_t idy)
+void Ricom::set_ricom_pixel(id_x_y idr)
+{
+    // Update pixel at location [idr.x idr.y]
+    float val = (ricom_data[idr.id] - ricom_min) / (ricom_max - ricom_min);
+    draw_pixel(srf_ricom, idr.x, idr.y, val, ricom_cmap);
+}
+
+void Ricom::set_ricom_pixel(int idx, int idy)
 {
     // determine location index of value in memory
-    int idr = (kernel.kernel_size + idy) * px_per_row + (idx + kernel.kernel_size);
+    int idr = idy * nx + idx;
     float val = (ricom_data[idr] - ricom_min) / (ricom_max - ricom_min);
 
     // Update pixel at location
@@ -348,9 +367,8 @@ void Ricom::set_stem_pixel(size_t idx, size_t idy)
 }
 
 template <typename T>
-void Ricom::plot_cbed(std::vector<T> &data)
+void Ricom::plot_cbed(std::vector<T> cbed_data)
 {
-    std::vector<T> cbed_data = data;
     float v_min = INFINITY;
     float v_max = 0.0;
     float vl_f;
@@ -386,6 +404,7 @@ void Ricom::plot_cbed(std::vector<T> &data)
 
 void Ricom::rescale_stem_image()
 {
+    std::lock_guard<std::mutex> lock(stem_mutex);
     for (int y = 0; y < ny; y++)
     {
         for (int x = 0; x < nx; x++)
@@ -396,7 +415,22 @@ void Ricom::rescale_stem_image()
     rescale_stem = false;
 }
 
-inline void Ricom::rescales_recomputes()
+// For synchronization. Before recomputing kernel or detector all threads must
+// finish their current computation, so that the kernel or detector isn't chaged
+// half way through processing a frame. Could be avoided using mutex's on the
+// kernel and detector objects, but this is easier and may be faster.
+inline void get_futures(std::vector<std::future<void>> &futures)
+{
+    for (auto &f : futures)
+    {
+        if (f.valid())
+        {
+            f.get();
+        }
+    }
+}
+
+inline void Ricom::rescales_recomputes(std::vector<std::future<void>> &futures)
 {
     if (rescale_ricom)
     {
@@ -409,7 +443,23 @@ inline void Ricom::rescales_recomputes()
             rescale_stem_image();
         };
     };
+    if (b_recompute_detector)
+    {
+        get_futures(futures);
+        detector.compute_detector(offset);
+        b_recompute_detector = false;
+    }
+    if (b_recompute_kernel)
+    {
+        get_futures(futures);
+        kernel.compute_kernel();
+        update_list = calculate_update_list();
+        b_recompute_kernel = false;
+    }
+}
 
+inline void Ricom::rescales_recomputes()
+{
     if (b_recompute_detector)
     {
         detector.compute_detector(offset);
@@ -418,8 +468,21 @@ inline void Ricom::rescales_recomputes()
     if (b_recompute_kernel)
     {
         kernel.compute_kernel();
+        update_list = calculate_update_list();
         b_recompute_kernel = false;
     }
+
+    if (rescale_ricom)
+    {
+        rescale_ricom_image();
+    };
+    if (use_detector)
+    {
+        if (rescale_stem)
+        {
+            rescale_stem_image();
+        };
+    };
 }
 
 template <typename T>
@@ -427,12 +490,32 @@ inline void Ricom::skip_frames(int n_skip, std::vector<T> &data)
 {
     for (int si = 0; si < n_skip; si++)
     {
-        read_data<T>(data);
-        fr_count++;
-        fr_count_total++;
-        if (fr_count_total < fr_total)
-            read_head();
+        if (fr_count < fr_total)
+        {
+            read_data<T>(data, true);
+            fr_count++;
+        }      
     }
+}
+
+template <typename T>
+void Ricom::com_icom(std::vector<T> data, int ix, int iy, int *dose_sum, std::array<float, 2> *com_xy_sum)
+{
+    std::array<float, 2> com_xy = {0.0, 0.0};
+    std::vector<T> *data_ptr = &data;
+
+    com<T>(data_ptr, com_xy, dose_sum);
+    icom(com_xy, ix, iy);
+    set_ricom_image_kernel(ix, iy);
+    if (use_detector)
+    {
+        stem(data_ptr, iy * nx + ix);
+        set_stem_pixel(ix, iy);
+    }
+
+    com_xy_sum->at(0) += com_xy[0];
+    com_xy_sum->at(1) += com_xy[1];
+    fr_count++;
 }
 
 template <typename T>
@@ -440,10 +523,8 @@ void Ricom::process_frames()
 {
     // Memory allocation
     std::vector<T> data(ds_merlin);
-    std::array<float, 2> com_xy = {0.0, 0.0};
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
     int dose_sum = 0;
-    size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
 
     // Initialize Progress bar
     ProgressBar bar(fr_total);
@@ -456,50 +537,34 @@ void Ricom::process_frames()
     float fr_avg = 0;      // Average frequency
     size_t fr_count_a = 0; // Count measured points for averaging
 
-    size_t idx = 0;
-    fr_count_total = 0;
-
     for (int ir = 0; ir < rep; ir++)
     {
-        ricom_data.assign(im_size, 0);
+        ricom_data.assign(nxy, 0);
         stem_data.assign(nxy, 0);
         reset_limits();
-        // std::cout << "total frame number: " << fr_total << std::endl;
+        std::vector<std::future<void>> futures;
+        futures.reserve(4028);
 
+        bool b_not_first = false;
         for (int iy = 0; iy < ny; iy++)
         {
-            idx = iy * nx;
             for (int ix = 0; ix < nx; ix++)
             {
-                // std::cout << "x, y: " << ix << ", " << iy << ", ";
-                // std::cout << fr_count;
-                read_data<T>(data);
-                // std::cout << " data read, ";
-                com<T>(data, com_xy, dose_sum);
-                // std::cout << "com process'd, ";
-                icom(com_xy, ix, iy);
-                // std::cout << "icom process'd, ";
-                set_ricom_image_kernel(ix, iy);
-                // std::cout << "image set, ";
-                if (use_detector)
-                {
-                    stem(data, idx + ix);
-                    set_stem_pixel(ix, iy);
-                }
-                com_xy_sum[0] += com_xy[0];
-                com_xy_sum[1] += com_xy[1];
+                read_data<T>(data, b_not_first);
+                b_not_first = true;
+                // com_icom<T>(ix, iy, &dose_sum, &com_xy_sum);
+                futures.push_back(std::async(&Ricom::com_icom<T>, this, data, ix, iy, &dose_sum, &com_xy_sum));
                 fr_count_i++;
-                fr_count++;
-                // std::cout << "new frame num: " << fr_count;
+
                 auto mil_secs = chc::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - start_perf).count();
                 if (mil_secs > 500.0 || fr_count == fr_total) // ~2Hz for display
                 {
-                    rescales_recomputes();
+                    rescales_recomputes(futures);
                     if (rc_quit)
                     {
                         return;
                     };
-                    plot_cbed<T>(data);
+                    auto fut_cbed = std::async(&Ricom::plot_cbed<T>, this, data);
                     fr = fr_count_i / mil_secs;
                     fr_avg += fr;
                     fr_count_a++;
@@ -513,15 +578,12 @@ void Ricom::process_frames()
                     }
                     fr_count_i = 0;
                 }
-                if (fr_count < fr_total)
-                {
-                    read_head();
-                    // std::cout << " head read" << std::endl;
-                }
             }
             skip_frames(skip_row, data);
         }
         skip_frames(skip_img, data);
+
+        get_futures(futures);
 
         if (mode == RICOM::modes::FILE)
         {
@@ -535,8 +597,6 @@ void Ricom::process_frames()
             dose_sum = 0;
         }
     }
-    // std::cout << "total frame" << fr_count << std::endl;
-    fr_count_total = 0;
 }
 
 void Ricom::run_merlin()
@@ -602,12 +662,12 @@ void Ricom::process_timepix_stream()
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
     // int dose_sum = 0;
     int idx = 0;
-    int idxx = 0;    
-    int ix; 
+    int idxx = 0;
+    int ix;
     int iy;
     int img_num = 0;
     int first_frame = img_num * nxy;
-    int end_frame = (img_num+1) * nxy;
+    int end_frame = (img_num + 1) * nxy;
     bool b_while = true;
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
 
@@ -627,7 +687,7 @@ void Ricom::process_timepix_stream()
     sumy_map.assign(nxy, 0);
     comx_map.assign(nxy, 0);
     comy_map.assign(nxy, 0);
-    ricom_data.assign(im_size, 0);
+    ricom_data.assign(nxy, 0);
     stem_data.assign(nxy, 0);
 
     while (b_while)
@@ -635,7 +695,7 @@ void Ricom::process_timepix_stream()
         read_com_ti(idx, dose_map, sumx_map, sumy_map, first_frame, end_frame);
         // std::cout << idx << std::endl;
         idxx = idx - nxy * img_num - 2;
-        if (idxx>=0)
+        if (idxx >= 0)
         {
             if (dose_map[idxx] == 0)
             {
@@ -662,7 +722,7 @@ void Ricom::process_timepix_stream()
         if (mil_secs > 500.0 || idx == fr_total) // ~50Hz for display
         {
             rescales_recomputes();
-            std::cout << idx << " rescale'd" << std::endl;  
+            std::cout << idx << " rescale'd" << std::endl;
             if (rc_quit)
             {
                 return;
@@ -681,21 +741,21 @@ void Ricom::process_timepix_stream()
             }
             fr_count_i = 0;
             bar.Progressed(fr_count, fr_avg / fr_count_a, "kHz");
-            std::cout << idx << " progress'd" << std::endl;  
+            std::cout << idx << " progress'd" << std::endl;
         }
         if (idx >= end_frame && idx != fr_total)
         {
             img_num++;
             first_frame = img_num * nxy;
-            end_frame = (img_num+1) * nxy;
+            end_frame = (img_num + 1) * nxy;
             reset_limits();
-                dose_map.assign(nxy, 0);
-                sumx_map.assign(nxy, 0);
-                sumy_map.assign(nxy, 0);
-                comx_map.assign(nxy, 0);
-                comy_map.assign(nxy, 0);
-                ricom_data.assign(im_size, 0);
-                stem_data.assign(nxy, 0);
+            dose_map.assign(nxy, 0);
+            sumx_map.assign(nxy, 0);
+            sumy_map.assign(nxy, 0);
+            comx_map.assign(nxy, 0);
+            comy_map.assign(nxy, 0);
+            ricom_data.assign(nxy, 0);
+            stem_data.assign(nxy, 0);
         }
         if (idx >= fr_total)
         {
@@ -719,7 +779,8 @@ void Ricom::run()
     nxy = nx * ny;
     img_px = nxy + (ny * skip_row) + skip_img;
     fr_total = img_px * rep;
-
+    fr_count = 0;
+    
     init_surface(nx, ny);
 
     if (use_detector)
@@ -730,11 +791,9 @@ void Ricom::run()
 
     // Compute the integration Kenel
     kernel.compute_kernel();
-    px_per_row = (kernel.k_width_sym + nx - 1);
 
     // Allocate the ricom image, including zero padding for kernel size
-    size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
-    ricom_data.reserve(im_size);
+    ricom_data.reserve(nxy);
     update_list = calculate_update_list();
 
     init_uv();
@@ -755,7 +814,6 @@ void Ricom::run()
     }
 
     // Cleaning up
-
     switch (detector_type)
     {
     case RICOM::MERLIN:
@@ -772,7 +830,6 @@ void Ricom::run()
 
 void Ricom::reset_limits()
 {
-    fr_count = 0;
     ricom_max = -FLT_MAX;
     ricom_min = FLT_MAX;
     stem_max = -FLT_MAX;

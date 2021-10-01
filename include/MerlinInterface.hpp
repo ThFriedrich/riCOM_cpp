@@ -46,30 +46,18 @@ private:
     void read_head_from_file()
     {
         mib_stream.read(&head_buffer[0], head_buffer.size());
-        rcv.assign(head_buffer.cbegin(), head_buffer.cend());
     }
 
     void read_head_from_socket()
     {
-        int bytesReceived;
-        // std::cout << " (reading TCP) ";
-        bytesReceived = recv(rc_socket, &tcp_buffer[0], tcp_buffer.size(), 0);
-        // std::cout << " (TCP read) ";
-        if (bytesReceived == -1)
+        if (recv(rc_socket, &tcp_buffer[0], tcp_buffer.size(), 0) == -1)
         {
             perror("Error reading TCP header from Socket!");
         }
-        // std::cout << " (reading head) ";
-        bytesReceived = recv(rc_socket, &head_buffer[0], head_buffer.size(), 0);
-        // std::cout << " (head read) ";
-        if (bytesReceived == -1)
+        if (recv(rc_socket, &head_buffer[0], head_buffer.size(), 0) == -1)
         {
             perror("Error reading Frame header from Socket!");
         }
-        else
-        {
-            rcv.assign(head_buffer.cbegin(), head_buffer.cend());
-        }  
     }
 
 public:
@@ -137,7 +125,7 @@ public:
     }
 
     // Reading and decoding header data
-    bool read_head()
+    bool read_head(bool decode = true)
     {
         try
         {
@@ -149,7 +137,10 @@ public:
             {
                 read_head_from_file();
             }
-            decode_head();
+            if (decode)
+            {
+                decode_head();
+            }
             return true;
         }
         catch (const std::exception &e)
@@ -158,9 +149,14 @@ public:
             return false;
         }
     }
+    
     template <typename T>
-    void read_data(std::vector<T> &data)
+    void read_data(std::vector<T> &data, bool dump_head = false)
     {
+        if (dump_head)
+        {
+            read_head(false);
+        }
         int data_size = static_cast<int>(ds_merlin * sizeof(T));
         char *buffer = reinterpret_cast<char *>(&data[0]);
         if (b_binary)
@@ -184,7 +180,7 @@ public:
     };
 
     // Reading data stream from File
-    void read_data_from_file(char *buffer, int data_size)
+    inline void read_data_from_file(char *buffer, int data_size)
     {
         mib_stream.read(buffer, data_size);
     };
@@ -276,8 +272,7 @@ public:
 
     int read_aquisition_header()
     {
-        int er = recv(rc_socket, &tcp_buffer[0], tcp_buffer.size(), 0);
-        if (er == -1)
+        if (recv(rc_socket, &tcp_buffer[0], tcp_buffer.size(), 0) == -1)
         {
             std::cout << "Error on recv() reading TCP-Header" << std::endl;
             return -1;
@@ -316,6 +311,7 @@ public:
 
     inline void decode_head()
     {
+        rcv.assign(head_buffer.cbegin(), head_buffer.cend());
         // splitting the header string into a vector of strings
         size_t i = 0;
         head.fill("");

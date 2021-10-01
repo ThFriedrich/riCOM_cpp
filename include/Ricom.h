@@ -9,6 +9,8 @@
 #include "MerlinInterface.hpp"
 #include "TimpixInterface.h"
 #include <SDL.h>
+#include <mutex>
+#include <future>
 
 class Ricom_kernel
 {
@@ -31,21 +33,55 @@ public:
     ~Ricom_kernel(){};
 };
 
+////////////////////////////////////////////////
+//    Helper class for ricom data indexing    //
+////////////////////////////////////////////////
+class id_x_y
+{
+public:
+    int id;
+    int x;
+    int y;
+    int nx_ricom;
+    int ny_ricom;
+    bool valid;
+    id_x_y(): id(0), x(0), y(0), nx_ricom(0), ny_ricom(0), valid(true){};
+
+    id_x_y(int id, int x, int y, int nx_ricom, int ny_ricom, bool valid){
+        this->id = id;
+        this->x = x;
+        this->y = y;
+        this->nx_ricom = nx_ricom;
+        this->ny_ricom = ny_ricom;
+        this->valid = valid;
+    };
+
+    friend id_x_y operator+(id_x_y &c1, const int& c2) 
+    {
+        id_x_y res = c1;
+        res.id = c1.id + c2;
+        res.y = res.id/c1.nx_ricom;
+        res.x = res.id%c1.nx_ricom;
+        res.valid = res.y > 0 && res.y < c1.ny_ricom && res.x < c1.nx_ricom && res.x > 0;
+        return res;
+    };
+};
+
 class Ricom_detector
 {
 public:
     // Properties
     std::array<float, 2> radius;
     std::array<float, 2> offset;
-    size_t nx_merlin;
-    size_t ny_merlin;
+    size_t nx_cam;
+    size_t ny_cam;
     std::vector<int> id_list;
 
     // Methods
     void compute_detector();
     void compute_detector(std::array<float, 2> &offset);
     // Constructor
-    Ricom_detector() : radius{0.0, 0.0}, offset{127.5, 127.5}, nx_merlin(256), ny_merlin(256), id_list()
+    Ricom_detector() : radius{0.0, 0.0}, offset{127.5, 127.5}, nx_cam(256), ny_cam(256), id_list()
     {
         compute_detector();
     };
@@ -62,21 +98,22 @@ private:
     float stem_min;
 
     // ricom variables
-    std::array<int, 256> u;
-    std::array<int, 256> v;
-    std::array<size_t, 256> sum_x;
-    std::array<size_t, 256> sum_y;
+    std::vector<int> u;
+    std::vector<int> v;
     std::vector<float> ricom_data;
-    std::vector<int> update_list;
+    std::vector<id_x_y> update_list;
 
     // Scan Area Variables
     int nxy;
     int img_px;
-    int px_per_row; // not sure what is this for
 
     // Variables for potting in the SDL2 frame
     float ricom_max;
     float ricom_min;
+
+    // Thread Synchronization Variables
+    std::mutex ricom_mutex;
+    std::mutex stem_mutex;
 
     // Private Methods - General
     void init_uv();
@@ -87,7 +124,8 @@ private:
     void draw_pixel(SDL_Surface *surface, int x, int y, float val, int color_map);
     void reset_limits();
     void reset_file();
-    std::vector<int> calculate_update_list();
+    std::vector<id_x_y> calculate_update_list();
+    inline void rescales_recomputes(std::vector<std::future<void>> &futures);
     inline void rescales_recomputes();
     template <typename T>
     inline void skip_frames(int n_skip, std::vector<T> &data);
@@ -95,15 +133,18 @@ private:
     // Private Methods - riCOM
     void icom(std::array<float, 2> &com, int x, int y);
     template <typename T>
-    void com(std::vector<T> &data, std::array<float,2> &com, int &dose_sum);
+    void com(std::vector<T> *data, std::array<float,2> &com, int *dose_sum);
     template <typename T>
     void read_com_merlin(std::vector<T> &data, std::array<float, 2> &com, int &dose_sum);
     void set_ricom_image_kernel(int idx, int idy);
-    void set_ricom_pixel(size_t idx, size_t idy);
+    void set_ricom_pixel(id_x_y idr);
+    void set_ricom_pixel(int idx, int idy);
+    template <typename T>
+    void com_icom(std::vector<T> data, int ix, int iy, int *dose_sum, std::array<float, 2> *com_xy_sum);
 
     // Private Methods - vSTEM
     template <typename T>
-    void stem(std::vector<T> &data, size_t id_stem);
+    void stem(std::vector<T> *data, size_t id_stem);
     void set_stem_pixel(size_t idx, size_t idy);
 
 public:
@@ -153,10 +194,10 @@ public:
     void run_timepix();
     void reset();
     template <typename T>
-    void plot_cbed(std::vector<T> &data);
+    void plot_cbed(std::vector<T> data);
 
     // Constructor
-    Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), sum_x{0}, sum_y{0}, ricom_data(), nxy(0), img_px(0),px_per_row(0), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), mode(RICOM::FILE), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), multi_scan(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0,0.0},  depth(1), detector_type(RICOM::MERLIN), nx(257), ny(256), rep(1), fr_total(0), skip_row(0), skip_img(0), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9){};
+    Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), nxy(0), img_px(0), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), ricom_mutex(), stem_mutex(), mode(RICOM::FILE), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), multi_scan(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0,0.0},  depth(1), detector_type(RICOM::MERLIN), nx(257), ny(256), rep(1), fr_total(0), skip_row(0), skip_img(0), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9){};
 
     // Destructor
     ~Ricom();
