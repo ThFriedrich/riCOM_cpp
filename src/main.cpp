@@ -2,6 +2,7 @@
 #include <thread>
 #include <chrono>
 #include <stdlib.h>
+#include <fstream>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
@@ -61,6 +62,28 @@ void run_live(Ricom *r)
     r->reset();
     r->mode = RICOM::modes::LIVE;
     r->run();
+}
+
+void save_com( std::vector<float> &com_map_x, std::vector<float> &com_map_y, int datasize, std::string filename )
+{
+    std::cout << com_map_x.size() << std::endl;
+    std::cout << datasize * sizeof(float) << std::endl;
+
+    // std::ofstream comx_file( filename + "_comx.txt", std::ofstream::binary );
+    // comx_file.write( reinterpret_cast<char*>(&com_map_x), datasize * sizeof(float) );
+    // comx_file.close();
+    // std::ofstream comy_file( filename + "_comy.txt", std::ofstream::binary );
+    // comy_file.write( reinterpret_cast<char*>(&com_map_y), datasize * sizeof(float) );
+    // comy_file.close();
+
+
+    std::ofstream comx_file( filename + "_comx.txt" );
+    for (const auto &e : com_map_x) comx_file << e << ",";
+    comx_file.close();
+
+    std::ofstream comy_file( filename + "_comy.txt" );
+    for (const auto &e : com_map_y) comy_file << e << ",";
+    comy_file.close();
 }
 
 #ifdef _WIN32
@@ -600,20 +623,38 @@ int run_gui(Ricom *ricom)
                     }
                 }
                 ImGui::SameLine();
+                bool b_button;
                 if (ImGui::Button("Save Image as..."))
                 {
+                    b_button = true;
                     saveFileDialog.Open();
                 }
+                ImGui::SameLine();
+                if (ImGui::Button("Save COM..."))
+                {
+                    b_button = false;
+                    saveFileDialog.Open();
+                }
+
                 saveFileDialog.Display();
                 if (saveFileDialog.HasSelected())
                 {
-                    std::string img_file = saveFileDialog.GetSelected().string();
-                    if (img_file.substr(img_file.size() - 4, 4) != ".png" && img_file.substr(img_file.size() - 4, 4) != ".PNG")
+                    if ( b_button )
                     {
-                        img_file += ".png";
+                        std::string img_file = saveFileDialog.GetSelected().string();
+                        if (img_file.substr(img_file.size() - 4, 4) != ".png" && img_file.substr(img_file.size() - 4, 4) != ".PNG")
+                        {
+                            img_file += ".png";
+                        }
+                        saveFileDialog.ClearSelected();
+                        IMG_SavePNG(ricom->srf_ricom, img_file.c_str());
                     }
-                    saveFileDialog.ClearSelected();
-                    IMG_SavePNG(ricom->srf_ricom, img_file.c_str());
+                    else
+                    {
+                        std::string com_file = saveFileDialog.GetSelected().string();
+                        saveFileDialog.ClearSelected();
+                        save_com(ricom->com_map_x, ricom->com_map_y, ricom->nxy, com_file);
+                    }
                 }
 
                 ImVec2 vMin = ImGui::GetWindowContentRegionMin();

@@ -513,8 +513,11 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, int *dose_sum, std::ar
         set_stem_pixel(ix, iy);
     }
 
+    int id = iy * nx + ix;
     com_xy_sum->at(0) += com_xy[0];
     com_xy_sum->at(1) += com_xy[1];
+    com_map_x[id] = com_xy[0];
+    com_map_y[id] = com_xy[1];
     fr_count++;
 }
 
@@ -525,6 +528,7 @@ void Ricom::process_frames()
     std::vector<T> data(ds_merlin);
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
     int dose_sum = 0;
+
 
     // Initialize Progress bar
     ProgressBar bar(fr_total);
@@ -541,6 +545,8 @@ void Ricom::process_frames()
     {
         ricom_data.assign(nxy, 0);
         stem_data.assign(nxy, 0);
+        com_map_x.assign(nxy, 0);
+        com_map_y.assign(nxy, 0);
         reset_limits();
         std::vector<std::future<void>> futures;
         futures.reserve(4028);
@@ -660,7 +666,7 @@ void Ricom::process_timepix_stream()
 
     std::array<float, 2> com_xy = {0.0, 0.0};
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
-    // int dose_sum = 0;
+    int dose_sum = 0;
     int idx = 0;
     int idxx = 0;
     int ix;
@@ -711,6 +717,7 @@ void Ricom::process_timepix_stream()
             comy_map[idxx] = com_xy[1];
             com_xy_sum[0] += com_xy[0];
             com_xy_sum[1] += com_xy[1];
+            dose_sum += dose_map[idxx];
 
             ix = idxx % nx;
             iy = floor(idxx / nx);
@@ -760,6 +767,7 @@ void Ricom::process_timepix_stream()
         if (idx >= fr_total)
         {
             b_while = false;
+            std::cout << "dose sum" << dose_sum << std::endl;
         }
     }
 }
@@ -792,9 +800,11 @@ void Ricom::run()
     // Compute the integration Kenel
     kernel.compute_kernel();
 
-    // Allocate the ricom image, including zero padding for kernel size
+    // Allocate the ricom image
     ricom_data.reserve(nxy);
     update_list = calculate_update_list();
+    com_map_x.reserve(nxy);
+    com_map_y.reserve(nxy);
 
     init_uv();
 
