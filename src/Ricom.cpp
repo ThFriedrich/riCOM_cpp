@@ -680,7 +680,6 @@ void Ricom::process_timepix_stream()
     int first_frame = img_num * nxy;
     int end_frame = (img_num + 1) * nxy;
     bool b_while = true;
-    size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
 
     // Initialize Progress bar
     ProgressBar bar(fr_total, "kHz", !b_print2file);

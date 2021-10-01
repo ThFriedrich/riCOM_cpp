@@ -1,6 +1,10 @@
 #ifndef MERLIN_INTERFACE_H
 #define MERLIN_INTERFACE_H
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4333)
+#endif
+
 #ifdef _WIN32
 #pragma comment(lib, "ws2_32.lib")
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
@@ -149,7 +153,7 @@ public:
             return false;
         }
     }
-    
+
     template <typename T>
     void read_data(std::vector<T> &data, bool dump_head = false)
     {

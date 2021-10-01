@@ -614,7 +614,7 @@ int run_gui(Ricom *ricom)
                     }
                 }
                 ImGui::SameLine();
-                bool b_button;
+                bool b_button = true;
                 if (ImGui::Button("Save Image as..."))
                 {
                     b_button = true;
@@ -884,7 +884,6 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
     // Initializing SDL
     SDL_Window* window = NULL;     // Pointer for the window
     SDL_Renderer* renderer = NULL; // Pointer for the renderer
-    SDL_Surface* srf = NULL;       // Surface for the window;
     SDL_Texture* tex = NULL;       // Texture for the window;
     SDL_DisplayMode DM;            // To get the current display size
     SDL_Event event;               // Event variable
@@ -930,7 +929,6 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
 
     auto start_perf = chc::high_resolution_clock::now();
     typedef std::chrono::duration<float, std::milli> float_ms;
-    
 
     while (1)
     {   

@@ -48,6 +48,10 @@
 #ifndef TINYCOLORMAP_HPP_
 #define TINYCOLORMAP_HPP_
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4067)
+#endif
+
 #include <cmath>
 #include <cstdint>
 
