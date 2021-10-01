@@ -679,8 +679,6 @@ int run_gui(Ricom *ricom)
                 ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 
                 ImGui::Begin("vSTEM", &ricom->use_detector, ImGuiWindowFlags_NoScrollbar);
-
-                
                 
                 if (ImGui::Combo("Colormap", &ricom->stem_cmap, cmaps, IM_ARRAYSIZE(cmaps)))
                 {
@@ -956,7 +954,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
     return 0;
 }
 
-int main(int argc, char *argv[])
+void log2file(Ricom *ricom)
 {
     if (freopen("ricom.log", "a", stdout) == NULL)
     {
@@ -966,18 +964,24 @@ int main(int argc, char *argv[])
     {
         std::cout << "Error redirecting error output to log file" << std::endl;
     }
-
+    ricom->b_print2file = true;
     time_t timetoday;
     time(&timetoday);
     std::cout << std::endl
               << "##########################################################################" << std::endl;
     std::cout << "              Ricom started at " << asctime(localtime(&timetoday));
     std::cout << "##########################################################################" << std::endl;
+}
+
+int main(int argc, char *argv[])
+{
+    
 
     Ricom ricom;
     Ricom* ricom_ptr = &ricom;
     if (argc == 1)
     {
+        log2file(ricom_ptr);
         return run_gui(ricom_ptr);
     }
     else

@@ -19,20 +19,20 @@ public:
     const static int DEFAULT_WIDTH;
 
     ProgressBar();
-    ProgressBar(unsigned long n_, const char *description_="", std::ostream& out_=std::cerr);
+    ProgressBar(unsigned long n_, const char *unit_="", bool b_bar_=true, std::ostream& out_=std::cerr);
 
     void SetStyle(const char* unit_bar_, const char* unit_space_);		
 
-    void Progressed(unsigned long idx_);
-    void Progressed(unsigned long idx_, float print_val, std::string const &unit);
+    void Progressed(unsigned long idx_, float print_val);
 
 private:
 	
+    bool b_bar;
     unsigned long n;
     unsigned int desc_width;
     std::ostream* out;
 		
-    const char *description;
+    const char *unit;
     const char *unit_bar;
     const char *unit_space;
 		
