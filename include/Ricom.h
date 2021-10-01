@@ -62,7 +62,7 @@ public:
         res.id = c1.id + c2;
         res.y = res.id/c1.nx_ricom;
         res.x = res.id%c1.nx_ricom;
-        res.valid = res.y > 0 && res.y < c1.ny_ricom && res.x < c1.nx_ricom && res.x > 0;
+        res.valid = res.y >= 0 && res.y < c1.ny_ricom && res.x < c1.nx_ricom && res.x >= 0;
         return res;
     };
 };
@@ -113,6 +113,7 @@ private:
     // Thread Synchronization Variables
     std::mutex ricom_mutex;
     std::mutex stem_mutex;
+    std::mutex counter_mutex;
 
     // Private Methods - General
     void init_uv();
@@ -148,12 +149,12 @@ private:
 
 public:
     RICOM::modes mode;
+    bool b_print2file;
     float update_dose_lowbound;
     bool update_offset;
     bool use_detector;
     bool b_recompute_detector;
     bool b_recompute_kernel;
-    bool multi_scan;
     Ricom_detector detector;
     Ricom_kernel kernel;
     std::array<float, 2> offset;
@@ -199,7 +200,7 @@ public:
     void plot_cbed(std::vector<T> data);
 
     // Constructor
-    Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), img_px(0), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), ricom_mutex(), stem_mutex(), mode(RICOM::FILE), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), multi_scan(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0,0.0},  depth(1), com_map_x(), com_map_y(), detector_type(RICOM::MERLIN), nx(257), ny(256), nxy(0), rep(1), fr_total(0), skip_row(0), skip_img(0), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9){};
+    Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), img_px(0), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), ricom_mutex(), stem_mutex(), counter_mutex(), mode(RICOM::FILE), b_print2file(false), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0,0.0},  depth(1), com_map_x(), com_map_y(), detector_type(RICOM::MERLIN), nx(257), ny(256), nxy(0), rep(1), fr_total(0), skip_row(0), skip_img(0), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9){};
 
     // Destructor
     ~Ricom();

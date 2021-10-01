@@ -313,7 +313,6 @@ std::vector<id_x_y> Ricom::calculate_update_list()
 
 void Ricom::rescale_ricom_image()
 {
-    std::lock_guard<std::mutex> lock(ricom_mutex);
     for (int y = 0; y < ny; y++)
     {
         for (int x = 0; x < nx; x++)
@@ -343,7 +342,9 @@ void Ricom::set_ricom_pixel(id_x_y idr)
 {
     // Update pixel at location [idr.x idr.y]
     float val = (ricom_data[idr.id] - ricom_min) / (ricom_max - ricom_min);
+    ricom_mutex.lock();
     draw_pixel(srf_ricom, idr.x, idr.y, val, ricom_cmap);
+    ricom_mutex.unlock();
 }
 
 void Ricom::set_ricom_pixel(int idx, int idy)
@@ -353,7 +354,9 @@ void Ricom::set_ricom_pixel(int idx, int idy)
     float val = (ricom_data[idr] - ricom_min) / (ricom_max - ricom_min);
 
     // Update pixel at location
+    ricom_mutex.lock();
     draw_pixel(srf_ricom, idx, idy, val, ricom_cmap);
+    ricom_mutex.unlock();
 }
 
 void Ricom::set_stem_pixel(size_t idx, size_t idy)
@@ -363,7 +366,9 @@ void Ricom::set_stem_pixel(size_t idx, size_t idy)
     float val = (stem_data[idr] - stem_min) / (stem_max - stem_min);
 
     // Update pixel at location
+    stem_mutex.lock();
     draw_pixel(srf_stem, idx, idy, val, stem_cmap);
+    stem_mutex.unlock();
 }
 
 template <typename T>
@@ -404,7 +409,6 @@ void Ricom::plot_cbed(std::vector<T> cbed_data)
 
 void Ricom::rescale_stem_image()
 {
-    std::lock_guard<std::mutex> lock(stem_mutex);
     for (int y = 0; y < ny; y++)
     {
         for (int x = 0; x < nx; x++)
@@ -514,11 +518,13 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, int *dose_sum, std::ar
     }
 
     int id = iy * nx + ix;
+    counter_mutex.lock();
     com_xy_sum->at(0) += com_xy[0];
     com_xy_sum->at(1) += com_xy[1];
     com_map_x[id] = com_xy[0];
     com_map_y[id] = com_xy[1];
     fr_count++;
+    counter_mutex.unlock();
 }
 
 template <typename T>
@@ -529,9 +535,8 @@ void Ricom::process_frames()
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
     int dose_sum = 0;
 
-
     // Initialize Progress bar
-    ProgressBar bar(fr_total);
+    ProgressBar bar(fr_total, "kHz", !b_print2file);
 
     // Performance measurement
     auto start_perf = chc::high_resolution_clock::now();
@@ -558,7 +563,7 @@ void Ricom::process_frames()
             {
                 read_data<T>(data, b_not_first);
                 b_not_first = true;
-                // com_icom<T>(ix, iy, &dose_sum, &com_xy_sum);
+                // com_icom<T>(data, ix, iy, &dose_sum, &com_xy_sum);
                 futures.push_back(std::async(&Ricom::com_icom<T>, this, data, ix, iy, &dose_sum, &com_xy_sum));
                 fr_count_i++;
 
@@ -576,7 +581,7 @@ void Ricom::process_frames()
                     fr_count_a++;
                     start_perf = chc::high_resolution_clock::now();
                     fr_freq = fr_avg / fr_count_a;
-                    bar.Progressed(fr_count, fr_avg / fr_count_a, "kHz");
+                    bar.Progressed(fr_count, fr_avg / fr_count_a);
                     for (int i = 0; i < 2; i++)
                     {
                         com_public[i] = com_xy_sum[i] / fr_count_i;
@@ -590,7 +595,8 @@ void Ricom::process_frames()
         skip_frames(skip_img, data);
 
         get_futures(futures);
-
+        bar.Progressed(fr_count, fr_avg / fr_count_a);
+        
         if (mode == RICOM::modes::FILE)
         {
             reset_file();
@@ -619,7 +625,6 @@ void Ricom::run_merlin()
     // Run the main loop
     if (read_head())
     {
-        fr_count++;
         if (dtype == "U08")
         {
             process_frames<unsigned char>();
@@ -678,7 +683,7 @@ void Ricom::process_timepix_stream()
     size_t im_size = (nx + kernel.kernel_size * 2) * (ny + kernel.kernel_size * 2);
 
     // Initialize Progress bar
-    ProgressBar bar(fr_total);
+    ProgressBar bar(fr_total, "kHz", !b_print2file);
 
     // Performance measurement
     auto start_perf = chc::high_resolution_clock::now();
@@ -747,7 +752,7 @@ void Ricom::process_timepix_stream()
                 com_xy_sum[i] = 0;
             }
             fr_count_i = 0;
-            bar.Progressed(fr_count, fr_avg / fr_count_a, "kHz");
+            bar.Progressed(fr_count, fr_avg / fr_count_a);
             std::cout << idx << " progress'd" << std::endl;
         }
         if (idx >= end_frame && idx != fr_total)
