@@ -64,11 +64,11 @@ void save_com( std::vector<float> &com_map_x, std::vector<float> &com_map_y, int
     // comy_file.close();
 
 
-    std::ofstream comx_file( filename + "_comx.csv" );
+    std::ofstream comx_file( filename + "_comx.txt" );
     for (const auto &e : com_map_x) comx_file << e << ",";
     comx_file.close();
 
-    std::ofstream comy_file( filename + "_comy.csv" );
+    std::ofstream comy_file( filename + "_comy.txt" );
     for (const auto &e : com_map_y) comy_file << e << ",";
     comy_file.close();
 }
