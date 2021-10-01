@@ -50,6 +50,6 @@ public:
     int dwell_time; // unit: ns
     int probe_position_now;
 
-    TimpixInterface() : mode(), t3p_stream(), ds_timpix(65536), nx_timpix(256), ny_timpix(256), dwell_time(1000), probe_position_now(0){};
+    TimpixInterface() : mode(), t3p_stream(), ds_timpix(65536), t3p_path(), nx_timpix(256), ny_timpix(256), dwell_time(1000), probe_position_now(0){};
 };
 #endif // __TI_H__

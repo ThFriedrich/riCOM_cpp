@@ -25,13 +25,26 @@
 namespace chc = std::chrono;
 
 // Visual Studio warnings
+#ifdef __INTEL_COMPILER
+#pragma warning(disable : 4067)
+#pragma warning(disable : 4333)
+#pragma warning(disable : 4312)
+#pragma warning(disable : 4996)
+#endif
+
 #ifdef _MSC_VER
 #pragma warning(disable : 4067)
 #pragma warning(disable : 4333)
 #pragma warning(disable : 4312)
+#pragma warning(disable : 4996)
 #endif
 
 #if defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
+
+#if defined(__clang__)
 #pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
 #pragma GCC diagnostic ignored "-Wformat-security"
 #endif
@@ -295,9 +308,9 @@ int run_gui(Ricom *ricom)
             if (ImGui::CollapsingHeader("General Settings", ImGuiTreeNodeFlags_DefaultOpen))
             {
                 ImGui::Text("Scan Area");
-                ImGui::DragInt("nx", &ricom->nx, 1, 1);
-                ImGui::DragInt("ny", &ricom->ny, 1, 1);
-                ImGui::DragInt("Repetitions", &ricom->rep, 1, 1);
+                ImGui::DragInt("nx", &ricom->nx, 1, 1, SDL_MAX_SINT32);
+                ImGui::DragInt("ny", &ricom->ny, 1, 1, SDL_MAX_SINT32);
+                ImGui::DragInt("Repetitions", &ricom->rep, 1, 1, SDL_MAX_SINT32);
 
                 ImGui::Text("CBED Centre");
                 bool offset_changed = ImGui::DragFloat2("Centre", &ricom->offset[0], 0.1f, 0.0, 256.0);
@@ -396,6 +409,9 @@ int run_gui(Ricom *ricom)
                 if (file_selected)
                 {
                     ImGui::Text("File: %s", filename.c_str());
+
+                    if (ricom->detector_type == RICOM::MERLIN)
+                    {
                     ImGui::BeginGroup();
                     ImGui::Text("Depth");
                     ImGui::RadioButton("1", &ricom->depth, 1);
@@ -404,11 +420,16 @@ int run_gui(Ricom *ricom)
                     ImGui::SameLine();
                     ImGui::RadioButton("12", &ricom->depth, 12);
                     ImGui::EndGroup();
-                    ImGui::DragInt("dwell time (.t3p)", &ricom->dwell_time, 1, 1);
                     if (ImGui::IsItemHovered())
                     {
                         ImGui::SetTooltip("Only applicable for handling recorded files, \n recorded in raw mode.");
                     }
+                    }
+                    if (ricom->detector_type == RICOM::TIMEPIX)
+                    {
+                        ImGui::DragInt("dwell time (.t3p)", &ricom->dwell_time, 1, 1);
+                    }
+                    
                     if (ImGui::Button("Run File", ImVec2(-1.0f, 0.0f)))
                     {
                         t1 = std::thread(run_file, ricom);
@@ -422,7 +443,7 @@ int run_gui(Ricom *ricom)
 
             if (b_running)
             {
-                ImGui::ProgressBar(ricom->fr_count_total / (ricom->fr_total), ImVec2(-1.0f, 0.0f));
+                ImGui::ProgressBar(ricom->fr_count / (ricom->fr_total), ImVec2(-1.0f, 0.0f));
                 ImGui::Text("Speed: %.2f kHz", ricom->fr_freq);
                 if (ImGui::Button("Quit", ImVec2(-1.0f, 0.0f)))
                 {
@@ -899,8 +920,6 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
                 return 0;
             }
         }
-
-        SDL_Delay(10);
     }
     return 0;
 }
