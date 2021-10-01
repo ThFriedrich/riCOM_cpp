@@ -53,12 +53,23 @@ void run_live(Ricom *r)
 
 void save_com( std::vector<float> &com_map_x, std::vector<float> &com_map_y, int datasize, std::string filename )
 {
-    std::cout << datasize << std::endl;
-    std::ofstream comx_file( filename + "_comx.bin", std::ofstream::out | std::ofstream::binary );
-    comx_file.write( reinterpret_cast<const char*>(&com_map_x), datasize * sizeof(float) );
+    std::cout << com_map_x.size() << std::endl;
+    std::cout << datasize * sizeof(float) << std::endl;
+
+    // std::ofstream comx_file( filename + "_comx.txt", std::ofstream::binary );
+    // comx_file.write( reinterpret_cast<char*>(&com_map_x), datasize * sizeof(float) );
+    // comx_file.close();
+    // std::ofstream comy_file( filename + "_comy.txt", std::ofstream::binary );
+    // comy_file.write( reinterpret_cast<char*>(&com_map_y), datasize * sizeof(float) );
+    // comy_file.close();
+
+
+    std::ofstream comx_file( filename + "_comx.csv" );
+    for (const auto &e : com_map_x) comx_file << e << ",";
     comx_file.close();
-    std::ofstream comy_file( filename + "_comy.bin", std::ofstream::out | std::ofstream::binary );
-    comy_file.write( reinterpret_cast<const char*>(&com_map_y), datasize * sizeof(float) );
+
+    std::ofstream comy_file( filename + "_comy.csv" );
+    for (const auto &e : com_map_y) comy_file << e << ",";
     comy_file.close();
 }
 

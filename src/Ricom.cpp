@@ -464,6 +464,8 @@ void Ricom::process_frames()
     {
         ricom_data.assign(im_size, 0);
         stem_data.assign(nxy, 0);
+        com_map_x.assign(nxy, 0);
+        com_map_y.assign(nxy, 0);
         reset_limits();
         // std::cout << "total frame number: " << fr_total << std::endl;
 
