@@ -64,26 +64,17 @@ void run_live(Ricom *r)
     r->run();
 }
 
-void save_com( std::vector<float> &com_map_x, std::vector<float> &com_map_y, int datasize, std::string filename )
+void save_com( Ricom *ricom, std::string filename )
 {
-    std::cout << com_map_x.size() << std::endl;
-    std::cout << datasize * sizeof(float) << std::endl;
 
-    // std::ofstream comx_file( filename + "_comx.txt", std::ofstream::binary );
-    // comx_file.write( reinterpret_cast<char*>(&com_map_x), datasize * sizeof(float) );
-    // comx_file.close();
-    // std::ofstream comy_file( filename + "_comy.txt", std::ofstream::binary );
-    // comy_file.write( reinterpret_cast<char*>(&com_map_y), datasize * sizeof(float) );
-    // comy_file.close();
+    float meta[8] = { (float)ricom->nxy*2, (float)ricom->nx, (float)ricom->ny, 0, 0, 0, 0, 0 };
+    
+    std::ofstream com_file( filename + "_com.dat",  std::ios::out | std::ios::binary );
+    com_file.write( reinterpret_cast<char*>(&meta[0]), 8 * sizeof(float) );
+    com_file.write( reinterpret_cast<char*>(&ricom->com_map_x[0]), ricom->nxy * sizeof(float) );
+    com_file.write( reinterpret_cast<char*>(&ricom->com_map_y[0]), ricom->nxy * sizeof(float) );
+    com_file.close();
 
-
-    std::ofstream comx_file( filename + "_comx.txt" );
-    for (const auto &e : com_map_x) comx_file << e << ",";
-    comx_file.close();
-
-    std::ofstream comy_file( filename + "_comy.txt" );
-    for (const auto &e : com_map_y) comy_file << e << ",";
-    comy_file.close();
 }
 
 #ifdef _WIN32
@@ -653,7 +644,7 @@ int run_gui(Ricom *ricom)
                     {
                         std::string com_file = saveFileDialog.GetSelected().string();
                         saveFileDialog.ClearSelected();
-                        save_com(ricom->com_map_x, ricom->com_map_y, ricom->nxy, com_file);
+                        save_com(ricom, com_file);
                     }
                 }
 
