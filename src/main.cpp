@@ -341,6 +341,8 @@ int run_gui(Ricom *ricom)
             {
                 bool kernel_changed = ImGui::DragInt("Kernel Size", &ricom->kernel.kernel_size, 1, 1, 300);
                 bool rot_changed = ImGui::SliderFloat("Rotation", &ricom->kernel.rotation, 0.0f, 360.0f, "%.1f deg");
+                ImGui::Checkbox("Use filter?", &ricom->kernel.b_filter);
+                ImGui::DragInt2("high / low", &ricom->kernel.kernel_filter_frequency[0], 1, 0, SDL_MAX_SINT32);
                 if (rot_changed || kernel_changed)
                 {
                     ricom->b_recompute_kernel = true;

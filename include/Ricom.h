@@ -17,6 +17,8 @@ class Ricom_kernel
 public:
     // Properties
     int kernel_size;
+    bool b_filter;
+    std::array<int, 2> kernel_filter_frequency;
     int k_width_sym;
     int k_area;
     float rotation;

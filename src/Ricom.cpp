@@ -70,6 +70,57 @@ void Ricom_kernel::compute_kernel()
             }
         }
     }
+
+    // Compute filter
+    if ( b_filter )
+    {
+        int filter_size = kernel_filter_frequency[0] * 2 + 1;
+        int dist = 0;
+        int ic = 0;
+        int id = 0;
+        std::vector<int> filter( filter_size ^ 2, 0 );
+        std::vector<int> conv_list( filter_size ^ 2, 0 );
+
+
+        for ( int iy = 0; iy < filter_size; iy++ )
+        {
+            for ( int ix = 0; ix < filter_size; ix++ )
+            {
+                dist = (ix ^ 2) + (iy ^ 2);
+                ic = iy * filter_size + ix;
+                if ( dist <= ( kernel_filter_frequency[0] ^ 2 ) && dist > ( kernel_filter_frequency[1] ^ 2 ) )
+                {
+                    filter[ic] = 1;
+                }
+                conv_list[ic] = ( ix - floor( ( filter_size - 1 ) / 2 ) ) + 
+                                ( iy - floor( ( filter_size - 1 ) / 2 ) ) * k_width_sym;
+            }
+        }
+
+    // Integration to kernel
+        float conv_val_x, conv_val_y;
+        for ( int iy = 0; iy < k_width_sym; iy++ )
+        {
+            for ( int ix = 0; ix < k_width_sym; ix ++)
+            {
+                conv_val_x = 0;
+                conv_val_y = 0;
+                id = iy * k_width_sym + ix;
+                for ( int ic = 0; ic < filter_size; ic++ )
+                {
+                    if ( conv_list[ic] + id >= 0 )
+                    {
+                        conv_val_x += filter[ic] * kernel_x[conv_list[ic] + id];
+                        conv_val_y += filter[ic] * kernel_y[conv_list[ic] + id];
+                    }
+                    kernel_x[id] = conv_val_x;
+                    kernel_y[id] = conv_val_y;
+                }
+
+            }
+        }
+    }
+
 }
 
 ///////////////////////////////////////////////////
