@@ -12,6 +12,7 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 if (UNIX)
     set(SDL2_INCLUDE_DIR /usr/include/SDL2)
+    set(FFTW3_INCLUDE_DIR /usr/include)
     set(CMAKE_CXX_FLAGS "-Wall -Wextra -pthread")
     set(CMAKE_CXX_FLAGS_DEBUG "-g")
     set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
@@ -78,6 +79,7 @@ target_include_directories( RICOM PUBLIC
     imgui
     imgui/backends
     ${SDL2_INCLUDE_DIR}
+    ${FFTW3_INCLUDE_DIR}
     include
     src
     )
@@ -85,4 +87,4 @@ target_include_directories( RICOM PUBLIC
 find_package(OpenGL REQUIRED)
 target_link_libraries(RICOM PUBLIC ${OPENGL_LIBRARIES})
 target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image ${CMAKE_DL_LIBS})
-
+target_link_libraries(RICOM PUBLIC fftw3)
