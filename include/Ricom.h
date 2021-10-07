@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <cmath>
+#include <complex>
 #include <cfloat>
 #include <vector>
 #include <string>
@@ -19,15 +20,21 @@ class Ricom_kernel
 public:
     // Properties
     int kernel_size;
+    bool b_filter;
+    std::array<int, 2> kernel_filter_frequency;
     int k_width_sym;
     int k_area;
     float rotation;
     std::vector<float> kernel_x;
     std::vector<float> kernel_y;
+    std::vector<float> kernel_filter;
     // Methods
     void compute_kernel();
+    void compute_filter();
+    void absorb_filter();
+    std::vector<int> fftshift_map(int x, int y);
     // Constructor
-    Ricom_kernel() : kernel_size(5), k_width_sym(0), rotation(0.0), kernel_x(), kernel_y()
+    Ricom_kernel() : kernel_size(5), b_filter(false), kernel_filter_frequency{20, 1}, k_width_sym(0), rotation(0.0), kernel_x(), kernel_y()
     {
         compute_kernel();
     };
