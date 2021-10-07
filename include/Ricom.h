@@ -6,11 +6,13 @@
 #include <cfloat>
 #include <vector>
 #include <string>
-#include "MerlinInterface.hpp"
-#include "TimpixInterface.h"
 #include <SDL.h>
 #include <mutex>
 #include <future>
+
+#include "MerlinInterface.hpp"
+#include "TimpixInterface.h"
+#include "ProgressMonitor.hpp"
 
 class Ricom_kernel
 {
@@ -56,7 +58,7 @@ public:
         this->valid = valid;
     };
 
-    friend id_x_y operator+(id_x_y &c1, const int& c2) 
+    friend id_x_y operator+(id_x_y &c1, const int &c2) 
     {
         id_x_y res = c1;
         res.id = c1.id + c2;
@@ -111,6 +113,9 @@ private:
     float ricom_min;
 
     // Thread Synchronization Variables
+    unsigned int n_threads;
+    // thread_pool pool;
+    
     std::mutex ricom_mutex;
     std::mutex stem_mutex;
     std::mutex counter_mutex;
@@ -122,25 +127,25 @@ private:
     void process_timepix_stream();
     void init_surface(unsigned int width, unsigned int height);
     void draw_pixel(SDL_Surface *surface, int x, int y, float val, int color_map);
+    void reinit_vectors_limits();
     void reset_limits();
     void reset_file();
     std::vector<id_x_y> calculate_update_list();
-    inline void rescales_recomputes(std::vector<std::future<void>> &futures);
     inline void rescales_recomputes();
     template <typename T>
     inline void skip_frames(int n_skip, std::vector<T> &data);
 
     // Private Methods - riCOM
-    void icom(std::array<float, 2> &com, int x, int y);
+    void icom(std::array<std::atomic<float>, 2> &com, int x, int y);
     template <typename T>
-    void com(std::vector<T> *data, std::array<float,2> &com, int *dose_sum);
+    void com(std::vector<T> *data, std::array<std::atomic<float>, 2> &com, std::atomic<int> *dose_sum);
     template <typename T>
     void read_com_merlin(std::vector<T> &data, std::array<float, 2> &com, int &dose_sum);
     void set_ricom_image_kernel(int idx, int idy);
     void set_ricom_pixel(id_x_y idr);
     void set_ricom_pixel(int idx, int idy);
     template <typename T>
-    void com_icom(std::vector<T> data, int ix, int iy, int *dose_sum, std::array<float, 2> *com_xy_sum);
+    void com_icom(int ix, int iy, std::atomic<int> *dose_sum, std::array<std::atomic<float>, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
 
     // Private Methods - vSTEM
     template <typename T>
@@ -200,7 +205,7 @@ public:
     void plot_cbed(std::vector<T> data);
 
     // Constructor
-    Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), img_px(0), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), ricom_mutex(), stem_mutex(), counter_mutex(), mode(RICOM::FILE), b_print2file(false), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0,0.0},  depth(1), com_map_x(), com_map_y(), detector_type(RICOM::MERLIN), nx(257), ny(256), nxy(0), rep(1), fr_total(0), skip_row(0), skip_img(0), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9){};
+    Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), img_px(0), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), n_threads(0), ricom_mutex(), stem_mutex(), counter_mutex(), mode(RICOM::FILE), b_print2file(false), update_dose_lowbound(6), update_offset(false), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0,0.0},  depth(1), com_map_x(), com_map_y(), detector_type(RICOM::MERLIN), nx(257), ny(256), nxy(0), rep(1), fr_total(0), skip_row(0), skip_img(0), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9){};
 
     // Destructor
     ~Ricom();

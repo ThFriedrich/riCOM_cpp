@@ -17,7 +17,8 @@
 #include "tinycolormap.hpp"
 
 #include "Ricom.h"
-#include "progress_bar.hpp"
+#include "BoundedThreadPool.hpp"
+#include "ProgressMonitor.hpp"
 
 namespace chc = std::chrono;
 namespace cmap = tinycolormap;
@@ -200,7 +201,7 @@ void Ricom::init_uv()
 }
 
 template <typename T>
-void Ricom::com(std::vector<T> *data, std::array<float, 2> &com, int *dose_sum)
+void Ricom::com(std::vector<T> *data, std::array<std::atomic<float>, 2> &com, std::atomic<int> *dose_sum)
 {
     float dose = 0;
     T px;
@@ -269,7 +270,7 @@ void Ricom::stem(std::vector<T> *data, size_t id_stem)
     stem_data[id_stem] = stem_temp;
 }
 
-void Ricom::icom(std::array<float, 2> &com, int x, int y)
+void Ricom::icom(std::array<std::atomic<float>, 2> &com, int x, int y)
 {
     float com_x = com[0] - offset[0];
     float com_y = com[1] - offset[1];
@@ -313,6 +314,7 @@ std::vector<id_x_y> Ricom::calculate_update_list()
 
 void Ricom::rescale_ricom_image()
 {
+    std::scoped_lock lock(ricom_mutex);
     for (int y = 0; y < ny; y++)
     {
         for (int x = 0; x < nx; x++)
@@ -327,7 +329,7 @@ void Ricom::set_ricom_image_kernel(int ix, int iy)
 {
     id_x_y idr;
     int idc = ix + iy * nx;
-
+    std::scoped_lock lock(ricom_mutex);
     for (int id = 0; id < kernel.k_area; id++)
     {
         idr = update_list[id] + idc;
@@ -342,9 +344,7 @@ void Ricom::set_ricom_pixel(id_x_y idr)
 {
     // Update pixel at location [idr.x idr.y]
     float val = (ricom_data[idr.id] - ricom_min) / (ricom_max - ricom_min);
-    ricom_mutex.lock();
     draw_pixel(srf_ricom, idr.x, idr.y, val, ricom_cmap);
-    ricom_mutex.unlock();
 }
 
 void Ricom::set_ricom_pixel(int idx, int idy)
@@ -354,9 +354,7 @@ void Ricom::set_ricom_pixel(int idx, int idy)
     float val = (ricom_data[idr] - ricom_min) / (ricom_max - ricom_min);
 
     // Update pixel at location
-    ricom_mutex.lock();
     draw_pixel(srf_ricom, idx, idy, val, ricom_cmap);
-    ricom_mutex.unlock();
 }
 
 void Ricom::set_stem_pixel(size_t idx, size_t idy)
@@ -366,9 +364,7 @@ void Ricom::set_stem_pixel(size_t idx, size_t idy)
     float val = (stem_data[idr] - stem_min) / (stem_max - stem_min);
 
     // Update pixel at location
-    stem_mutex.lock();
     draw_pixel(srf_stem, idx, idy, val, stem_cmap);
-    stem_mutex.unlock();
 }
 
 template <typename T>
@@ -409,6 +405,7 @@ void Ricom::plot_cbed(std::vector<T> cbed_data)
 
 void Ricom::rescale_stem_image()
 {
+    std::scoped_lock lock(stem_mutex);
     for (int y = 0; y < ny; y++)
     {
         for (int x = 0; x < nx; x++)
@@ -417,49 +414,6 @@ void Ricom::rescale_stem_image()
         }
     }
     rescale_stem = false;
-}
-
-// For synchronization. Before recomputing kernel or detector all threads must
-// finish their current computation, so that the kernel or detector isn't chaged
-// half way through processing a frame. Could be avoided using mutex's on the
-// kernel and detector objects, but this is easier and may be faster.
-inline void get_futures(std::vector<std::future<void>> &futures)
-{
-    for (auto &f : futures)
-    {
-        if (f.valid())
-        {
-            f.get();
-        }
-    }
-}
-
-inline void Ricom::rescales_recomputes(std::vector<std::future<void>> &futures)
-{
-    if (rescale_ricom)
-    {
-        rescale_ricom_image();
-    };
-    if (use_detector)
-    {
-        if (rescale_stem)
-        {
-            rescale_stem_image();
-        };
-    };
-    if (b_recompute_detector)
-    {
-        get_futures(futures);
-        detector.compute_detector(offset);
-        b_recompute_detector = false;
-    }
-    if (b_recompute_kernel)
-    {
-        get_futures(futures);
-        kernel.compute_kernel();
-        update_list = calculate_update_list();
-        b_recompute_kernel = false;
-    }
 }
 
 inline void Ricom::rescales_recomputes()
@@ -498,16 +452,21 @@ inline void Ricom::skip_frames(int n_skip, std::vector<T> &data)
         {
             read_data<T>(data, true);
             fr_count++;
-        }      
+        }
     }
 }
 
 template <typename T>
-void Ricom::com_icom(std::vector<T> data, int ix, int iy, int *dose_sum, std::array<float, 2> *com_xy_sum)
+void Ricom::com_icom(int ix, int iy, std::atomic<int> *dose_sum, std::array<std::atomic<float>, 2> *com_xy_sum, ProgressMonitor *p_prog_mon)
 {
-    std::array<float, 2> com_xy = {0.0, 0.0};
+    std::vector<T> data(ds_merlin);
     std::vector<T> *data_ptr = &data;
+    stem_mutex.lock();
+    read_data<T>(data, !p_prog_mon->first_frame);
+    p_prog_mon->first_frame = false;
+    stem_mutex.unlock();
 
+    std::array<std::atomic<float>, 2> com_xy = {0.0, 0.0};
     com<T>(data_ptr, com_xy, dose_sum);
     icom(com_xy, ix, iy);
     set_ricom_image_kernel(ix, iy);
@@ -517,86 +476,69 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, int *dose_sum, std::ar
         set_stem_pixel(ix, iy);
     }
 
-    int id = iy * nx + ix;
-    counter_mutex.lock();
     com_xy_sum->at(0) += com_xy[0];
     com_xy_sum->at(1) += com_xy[1];
+
+    int id = iy * nx + ix;
+    counter_mutex.lock();
+    ++(*p_prog_mon);
     com_map_x[id] = com_xy[0];
     com_map_y[id] = com_xy[1];
-    fr_count++;
+    fr_count = p_prog_mon->fr_count;
+    if (p_prog_mon->report_set)
+    {
+        rescales_recomputes();
+        plot_cbed<T>(data);
+        for (int i = 0; i < 2; i++)
+        {
+            com_public[i] = com_xy_sum->at(i) / p_prog_mon->fr_count_i;
+            com_xy_sum->at(i) = 0;
+        }
+        p_prog_mon->reset_flags();
+    }
     counter_mutex.unlock();
 }
 
 template <typename T>
 void Ricom::process_frames()
 {
-    // Memory allocation
+    // Start Thread Pool
+    BoundedThreadPool pool(4);
+
+    // Memory allocation (dummy for skip frames)
     std::vector<T> data(ds_merlin);
-    std::array<float, 2> com_xy_sum = {0.0, 0.0};
-    int dose_sum = 0;
+    
+    std::atomic<int> dose_sum = 0;
+    std::atomic<int> *p_dose_sum = &dose_sum;
 
-    // Initialize Progress bar
-    ProgressBar bar(fr_total, "kHz", !b_print2file);
+    std::array<std::atomic<float>, 2> com_xy_sum = {0.0, 0.0};
+    std::array<std::atomic<float>, 2> *p_com_xy_sum = &com_xy_sum;
 
-    // Performance measurement
-    auto start_perf = chc::high_resolution_clock::now();
-
-    float fr = 0;          // Frequncy per frame
-    float fr_count_i = 0;  // Frame count in interval
-    float fr_avg = 0;      // Average frequency
-    size_t fr_count_a = 0; // Count measured points for averaging
+    // Initialize ProgressMonitor Object
+    ProgressMonitor prog_mon(fr_total, !b_print2file);
+    ProgressMonitor *p_prog_mon = &prog_mon;
 
     for (int ir = 0; ir < rep; ir++)
     {
-        ricom_data.assign(nxy, 0);
-        stem_data.assign(nxy, 0);
-        com_map_x.assign(nxy, 0);
-        com_map_y.assign(nxy, 0);
-        reset_limits();
-        std::vector<std::future<void>> futures;
-        futures.reserve(4028);
-
-        bool b_not_first = false;
+        reinit_vectors_limits();
         for (int iy = 0; iy < ny; iy++)
         {
             for (int ix = 0; ix < nx; ix++)
             {
-                read_data<T>(data, b_not_first);
-                b_not_first = true;
-                // com_icom<T>(data, ix, iy, &dose_sum, &com_xy_sum);
-                futures.push_back(std::async(&Ricom::com_icom<T>, this, data, ix, iy, &dose_sum, &com_xy_sum));
-                fr_count_i++;
+                pool.push_task([=,this]
+                               { com_icom<T>(ix, iy, p_dose_sum, p_com_xy_sum, p_prog_mon); });
 
-                auto mil_secs = chc::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - start_perf).count();
-                if (mil_secs > 500.0 || fr_count == fr_total) // ~2Hz for display
+                if (rc_quit)
                 {
-                    rescales_recomputes(futures);
-                    if (rc_quit)
-                    {
-                        return;
-                    };
-                    auto fut_cbed = std::async(&Ricom::plot_cbed<T>, this, data);
-                    fr = fr_count_i / mil_secs;
-                    fr_avg += fr;
-                    fr_count_a++;
-                    start_perf = chc::high_resolution_clock::now();
-                    fr_freq = fr_avg / fr_count_a;
-                    bar.Progressed(fr_count, fr_avg / fr_count_a);
-                    for (int i = 0; i < 2; i++)
-                    {
-                        com_public[i] = com_xy_sum[i] / fr_count_i;
-                        com_xy_sum[i] = 0;
-                    }
-                    fr_count_i = 0;
-                }
+                    return;
+                };
             }
             skip_frames(skip_row, data);
         }
         skip_frames(skip_img, data);
 
-        get_futures(futures);
-        bar.Progressed(fr_count, fr_avg / fr_count_a);
-        
+        pool.wait_for_completion();
+
         if (mode == RICOM::modes::FILE)
         {
             reset_file();
@@ -669,7 +611,7 @@ void Ricom::process_timepix_stream()
     std::vector<size_t> comx_map(nxy);
     std::vector<size_t> comy_map(nxy);
 
-    std::array<float, 2> com_xy = {0.0, 0.0};
+    std::array<std::atomic<float>, 2> com_xy = {0.0, 0.0};
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
     int dose_sum = 0;
     int idx = 0;
@@ -682,7 +624,7 @@ void Ricom::process_timepix_stream()
     bool b_while = true;
 
     // Initialize Progress bar
-    ProgressBar bar(fr_total, "kHz", !b_print2file);
+    // ProgressBar bar(fr_total, "kHz", !b_print2file);
 
     // Performance measurement
     auto start_perf = chc::high_resolution_clock::now();
@@ -751,7 +693,7 @@ void Ricom::process_timepix_stream()
                 com_xy_sum[i] = 0;
             }
             fr_count_i = 0;
-            bar.Progressed(fr_count, fr_avg / fr_count_a);
+            // bar.Progressed(fr_count, fr_avg / fr_count_a);
             std::cout << idx << " progress'd" << std::endl;
         }
         if (idx >= end_frame && idx != fr_total)
@@ -792,7 +734,7 @@ void Ricom::run()
     img_px = nxy + (ny * skip_row) + skip_img;
     fr_total = img_px * rep;
     fr_count = 0;
-    
+
     init_surface(nx, ny);
 
     if (use_detector)
@@ -842,6 +784,15 @@ void Ricom::run()
     std::cout << "All done." << std::endl;
 }
 
+void Ricom::reinit_vectors_limits()
+{
+    ricom_data.assign(nxy, 0);
+    stem_data.assign(nxy, 0);
+    com_map_x.assign(nxy, 0);
+    com_map_y.assign(nxy, 0);
+    reset_limits();
+}
+
 void Ricom::reset_limits()
 {
     ricom_max = -FLT_MAX;
@@ -854,7 +805,6 @@ void Ricom::reset_file()
 {
     mib_stream.clear();
     mib_stream.seekg(0, std::ios::beg);
-    read_head();
 }
 
 void Ricom::reset()

@@ -1,7 +1,7 @@
 ﻿cmake_minimum_required(VERSION 3.17.0)
 
 project(RICOM LANGUAGES C CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -14,7 +14,7 @@ if (UNIX)
     set(SDL2_INCLUDE_DIR /usr/include/SDL2)
     set(CMAKE_CXX_FLAGS "-Wall -Wextra -pthread")
     set(CMAKE_CXX_FLAGS_DEBUG "-g")
-    set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
+    set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=skylake")
 endif(UNIX)
 
 if (WIN32)
@@ -25,13 +25,13 @@ if (WIN32)
     link_directories(${SDL2_LIB_DIR})
 
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-        set(CMAKE_CXX_FLAGS "-Wall -Wextra -pthread")
+        set(CMAKE_CXX_FLAGS "-Wall -Wextra -pthread -std=c++20")
         set(CMAKE_CXX_FLAGS_DEBUG "-g")
         set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
     endif()
 
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /nologo")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GL")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GA")
@@ -43,7 +43,7 @@ if (WIN32)
     endif()
 
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "IntelLLVM")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Qstd:c++17 /Ox")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Qstd:c++20 /Ox")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Qopt-assume-no-loop-carried-dep=2")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /QxKABYLAKE")
         set(MMD_LIB C:/Program\ Files\ \(x86\)/Intel/oneAPI/compiler/latest/windows/redist/intel64_win/compiler)
@@ -68,7 +68,7 @@ target_sources( RICOM PRIVATE
     imgui/imgui.cpp
     imgui/backends/imgui_impl_opengl3.cpp
     imgui/backends/imgui_impl_sdl.cpp
-    src/progress_bar.cpp
+    src/ProgressMonitor.cpp
     src/TimpixInterface.cpp
     src/Ricom.cpp 
     src/main.cpp
