@@ -947,6 +947,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
             {
                 return 0;
             }
+            SDL_Delay(10);   
         }
     }
     return 0;
