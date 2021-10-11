@@ -25,14 +25,6 @@
 
 namespace chc = std::chrono;
 
-// Visual Studio warnings
-#ifdef __INTEL_COMPILER
-#pragma warning(disable : 4067)
-#pragma warning(disable : 4333)
-#pragma warning(disable : 4312)
-#pragma warning(disable : 4996)
-#endif
-
 #ifdef _MSC_VER
 #pragma warning(disable : 4067)
 #pragma warning(disable : 4333)

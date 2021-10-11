@@ -52,13 +52,13 @@ if (WIN32)
         set(MMD_LIB C:/Program\ Files\ \(x86\)/Intel/oneAPI/compiler/latest/windows/redist/intel64_win/compiler)
         set(BUILD_DIR ${PROJECT_BINARY_DIR})
         file(COPY ${MMD_LIB}/libmmd.dll DESTINATION ${BUILD_DIR})
+        file(COPY ${MMD_LIB}/libmmdd.dll DESTINATION ${BUILD_DIR})
         file(COPY ${MMD_LIB}/svml_dispmd.dll DESTINATION ${BUILD_DIR})
     endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "IntelLLVM")
 
     file(COPY ${SDL2_LIB_DIR}/SDL2.dll DESTINATION ${BUILD_DIR})
     file(COPY ${SDL2_LIB_DIR}/SDL2_image.dll DESTINATION ${BUILD_DIR})
     file(COPY ${FFTW3_DIR}/libfftw3-3.dll DESTINATION ${BUILD_DIR})
-    file(COPY ${FFTW3_DIR}/libfftw3-3.lib DESTINATION ${BUILD_DIR})
 endif (WIN32)
 
 
