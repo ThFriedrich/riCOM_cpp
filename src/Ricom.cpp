@@ -254,10 +254,10 @@ void Ricom_detector::compute_detector(std::array<float, 2> &offset)
 ////////////////////////////////////////////////
 //               SDL plotting                 //
 ////////////////////////////////////////////////
-void Ricom::init_surface(unsigned int width, unsigned int height)
+void Ricom::init_surface()
 {
     // Creating Surface (holding the ricom image in CPU memory)
-    srf_ricom = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
+    srf_ricom = SDL_CreateRGBSurface(0, nx, ny, 32, 0, 0, 0, 0);
     if (srf_ricom == NULL)
     {
         std::cout << "Surface could not be created! SDL Error: " << SDL_GetError() << std::endl;
@@ -288,6 +288,10 @@ void Ricom::draw_pixel(SDL_Surface *surface, int x, int y, float val, int col_ma
 ////////////////////////////////////////////////
 //     RICOM class method implementations     //
 ////////////////////////////////////////////////
+Ricom::Ricom(): stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), img_px(0), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), ricom_mutex(), stem_mutex(), counter_mutex(), mode(RICOM::FILE), b_print2file(false), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0,0.0}, com_map_x(), com_map_y(), detector_type(RICOM::MERLIN), nx(257), ny(256), nxy(0), rep(1), fr_total(0), skip_row(0), skip_img(0), n_threads(1), queue_size(8), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9){
+    n_threads_max = std::thread::hardware_concurrency();
+    n_threads = n_threads_max;
+}
 
 Ricom::~Ricom(){};
 
@@ -324,13 +328,13 @@ void Ricom::init_uv()
     }
     else
     {
-        for (size_t i = 0; i < nx_merlin; i++)
+        for (int i = 0; i < nx_merlin; i++)
         {
             u[i] = i;
         }
     }
 
-    for (size_t i = 0; i < ny_merlin; i++)
+    for (int i = 0; i < ny_merlin; i++)
     {
         v[i] = i;
     }
@@ -348,11 +352,11 @@ void Ricom::com(std::vector<T> *data, std::array<std::atomic<float>, 2> &com, st
     com[1] = 0;
 
     size_t y_nx;
-    for (size_t idy = 0; idy < ny_merlin; idy++)
+    for (int idy = 0; idy < ny_merlin; idy++)
     {
         y_nx = idy * nx_merlin;
         sum_x_temp = 0;
-        for (size_t idx = 0; idx < nx_merlin; idx++)
+        for (int idx = 0; idx < nx_merlin; idx++)
         {
             px = data->at(y_nx + idx);
             byte_swap(px);
@@ -366,11 +370,11 @@ void Ricom::com(std::vector<T> *data, std::array<std::atomic<float>, 2> &com, st
 
     if (dose > 0)
     {
-        for (size_t i = 0; i < nx_merlin; i++)
+        for (int i = 0; i < nx_merlin; i++)
         {
             com[0] += sum_x[i] * v[i];
         }
-        for (size_t i = 0; i < ny_merlin; i++)
+        for (int i = 0; i < ny_merlin; i++)
         {
             com[1] += sum_y[i] * u[i];
         }
@@ -458,7 +462,6 @@ void Ricom::rescale_ricom_image()
             set_ricom_pixel(x, y);
         }
     }
-    rescale_ricom = false;
 }
 
 void Ricom::set_ricom_image_kernel(int ix, int iy)
@@ -524,11 +527,11 @@ void Ricom::plot_cbed(std::vector<T> cbed_data)
         }
     }
 
-    size_t iy_t;
-    for (size_t ix = 0; ix < ny_merlin; ix++)
+    int iy_t;
+    for (int ix = 0; ix < ny_merlin; ix++)
     {
         iy_t = v[ix] * nx_merlin;
-        for (size_t iy = 0; iy < nx_merlin; iy++)
+        for (int iy = 0; iy < nx_merlin; iy++)
         {
             T vl = cbed_data[iy_t + u[iy]];
             byte_swap(vl);
@@ -549,7 +552,6 @@ void Ricom::rescale_stem_image()
             set_stem_pixel(x, y);
         }
     }
-    rescale_stem = false;
 }
 
 inline void Ricom::rescales_recomputes()
@@ -568,12 +570,14 @@ inline void Ricom::rescales_recomputes()
 
     if (rescale_ricom)
     {
+        rescale_ricom = false;
         rescale_ricom_image();
     };
     if (use_detector)
     {
         if (rescale_stem)
         {
+            rescale_stem = false;
             rescale_stem_image();
         };
     };
@@ -593,14 +597,9 @@ inline void Ricom::skip_frames(int n_skip, std::vector<T> &data)
 }
 
 template <typename T>
-void Ricom::com_icom(int ix, int iy, std::atomic<int> *dose_sum, std::array<std::atomic<float>, 2> *com_xy_sum, ProgressMonitor *p_prog_mon)
+void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose_sum, std::array<std::atomic<float>, 2> *com_xy_sum, ProgressMonitor *p_prog_mon)
 {
-    std::vector<T> data(ds_merlin);
     std::vector<T> *data_ptr = &data;
-    stem_mutex.lock();
-    read_data<T>(data, !p_prog_mon->first_frame);
-    p_prog_mon->first_frame = false;
-    stem_mutex.unlock();
 
     std::array<std::atomic<float>, 2> com_xy = {0.0, 0.0};
     com<T>(data_ptr, com_xy, dose_sum);
@@ -623,6 +622,7 @@ void Ricom::com_icom(int ix, int iy, std::atomic<int> *dose_sum, std::array<std:
     fr_count = p_prog_mon->fr_count;
     if (p_prog_mon->report_set)
     {
+        fr_freq = p_prog_mon->fr_freq;
         rescales_recomputes();
         plot_cbed<T>(data);
         for (int i = 0; i < 2; i++)
@@ -639,7 +639,7 @@ template <typename T>
 void Ricom::process_frames()
 {
     // Start Thread Pool
-    BoundedThreadPool pool(4);
+    BoundedThreadPool pool(n_threads, queue_size);
 
     // Memory allocation (dummy for skip frames)
     std::vector<T> data(ds_merlin);
@@ -661,9 +661,10 @@ void Ricom::process_frames()
         {
             for (int ix = 0; ix < nx; ix++)
             {
+                read_data<T>(data, !p_prog_mon->first_frame);
+                p_prog_mon->first_frame = false;
                 pool.push_task([=,this]
-                               { com_icom<T>(ix, iy, p_dose_sum, p_com_xy_sum, p_prog_mon); });
-
+                               { com_icom<T>(data, ix, iy, p_dose_sum, p_com_xy_sum, p_prog_mon); });
                 if (rc_quit)
                 {
                     return;
@@ -871,7 +872,7 @@ void Ricom::run()
     fr_total = img_px * rep;
     fr_count = 0;
 
-    init_surface(nx, ny);
+    init_surface();
 
     if (use_detector)
     {

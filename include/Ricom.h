@@ -103,8 +103,8 @@ class Ricom : public MerlinInterface, public TimpixInterface
 private:
     // vSTEM Variables
     std::vector<float> stem_data;
-    float stem_max;
-    float stem_min;
+    std::atomic<float> stem_max;
+    std::atomic<float> stem_min;
 
     // ricom variables
     std::vector<int> u;
@@ -116,13 +116,10 @@ private:
     int img_px;
 
     // Variables for potting in the SDL2 frame
-    float ricom_max;
-    float ricom_min;
+    std::atomic<float> ricom_max;
+    std::atomic<float> ricom_min;
 
     // Thread Synchronization Variables
-    unsigned int n_threads;
-    // thread_pool pool;
-    
     std::mutex ricom_mutex;
     std::mutex stem_mutex;
     std::mutex counter_mutex;
@@ -132,7 +129,7 @@ private:
     template <typename T>
     void process_frames();
     void process_timepix_stream();
-    void init_surface(unsigned int width, unsigned int height);
+    void init_surface();
     void draw_pixel(SDL_Surface *surface, int x, int y, float val, int color_map);
     void reinit_vectors_limits();
     void reset_limits();
@@ -152,7 +149,7 @@ private:
     void set_ricom_pixel(id_x_y idr);
     void set_ricom_pixel(int idx, int idy);
     template <typename T>
-    void com_icom(int ix, int iy, std::atomic<int> *dose_sum, std::array<std::atomic<float>, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
+    void com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose_sum, std::array<std::atomic<float>, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
 
     // Private Methods - vSTEM
     template <typename T>
@@ -171,7 +168,6 @@ public:
     Ricom_kernel kernel;
     std::array<float, 2> offset;
     std::array<float, 2> com_public;
-    int depth;
     std::vector<float> com_map_x;
     std::vector<float> com_map_y;
 
@@ -187,11 +183,14 @@ public:
     int skip_img;
 
     // Variables for progress and performance
+    int n_threads;
+    int n_threads_max;
+    int queue_size;
     float fr_freq;  // Frequncy per frame
     float fr_count; // Count all Frames processed in an image
     float fr_count_total; // Count all Frames in a scanning session
-    bool rescale_ricom;
-    bool rescale_stem;
+    std::atomic<bool> rescale_ricom;
+    std::atomic<bool> rescale_stem;
     bool rc_quit;
     
     SDL_Surface *srf_ricom; // Surface for the window;
@@ -212,7 +211,7 @@ public:
     void plot_cbed(std::vector<T> data);
 
     // Constructor
-    Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), img_px(0), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), n_threads(0), ricom_mutex(), stem_mutex(), counter_mutex(), mode(RICOM::FILE), b_print2file(false), update_dose_lowbound(6), update_offset(false), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0,0.0},  depth(1), com_map_x(), com_map_y(), detector_type(RICOM::MERLIN), nx(257), ny(256), nxy(0), rep(1), fr_total(0), skip_row(0), skip_img(0), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9){};
+    Ricom();
 
     // Destructor
     ~Ricom();
