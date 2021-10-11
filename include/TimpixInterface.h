@@ -45,8 +45,8 @@ public:
     void timepix_end();
     
     std::string t3p_path;
-    size_t nx_timpix;
-    size_t ny_timpix;
+    int nx_timpix;
+    int ny_timpix;
     int dwell_time; // unit: ns
     int probe_position_now;
 

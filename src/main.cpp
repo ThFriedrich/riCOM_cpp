@@ -296,6 +296,22 @@ int run_gui(Ricom *ricom)
                 }
                 ImGui::EndMenu();
             }
+            if (ImGui::BeginMenu("Hardware Settings"))
+            {
+                ImGui::Text("Multithreading");
+                ImGui::DragInt("Threads", &ricom->n_threads, 1, 1, *&ricom->n_threads_max);
+                ImGui::DragInt("Queue Size", &ricom->queue_size, 1, 1, 256);
+                
+                ImGui::Separator();
+                ImGui::Text("Merlin Camera");
+                ImGui::DragInt("nx", &ricom->nx_merlin, 1, 1, 512);
+                ImGui::DragInt("ny", &ricom->ny_merlin, 1, 1, 512);
+                ImGui::Separator();
+                ImGui::Text("Timepix Camera");
+                ImGui::DragInt("nx", &ricom->nx_timpix, 1, 1, 512);
+                ImGui::DragInt("ny", &ricom->ny_timpix, 1, 1, 512);
+                ImGui::EndMenu();
+            }
             menu_bar_size = ImGui::GetWindowSize();
             ImGui::EndMainMenuBar();
         }
@@ -868,6 +884,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
                 ricom->detector_type = RICOM::MERLIN;
                 i++;
             }
+            // Set number of repetitions
             if (strcmp(argv[i], "-rep") == 0)
             {
                 ricom->rep = std::stoi(argv[i + 1]);
@@ -878,6 +895,18 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
             {
                 ricom->dwell_time = std::stof(argv[i + 1]);
                 ricom->detector_type = RICOM::TIMEPIX;
+                i++;
+            }
+            // Set Number of threads
+            if (strcmp(argv[i], "-threads") == 0)
+            {
+                ricom->n_threads = std::stoi(argv[i + 1]);
+                i++;
+            }
+            // Set Number queue size
+            if (strcmp(argv[i], "-queue_size") == 0)
+            {
+                ricom->queue_size = std::stoi(argv[i + 1]);
                 i++;
             }
         }
@@ -980,6 +1009,7 @@ int main(int argc, char *argv[])
 
     Ricom ricom;
     Ricom* ricom_ptr = &ricom;
+
     if (argc == 1)
     {
         log2file(ricom_ptr);

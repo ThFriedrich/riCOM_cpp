@@ -82,10 +82,10 @@ public:
     std::ifstream mib_stream;
 
     // Data Properties
-    size_t nx_merlin = 256;
-    size_t ny_merlin = 256;
-    size_t ds_merlin = 65536;
-    size_t depth = 0;
+    int nx_merlin = 256;
+    int ny_merlin = 256;
+    int ds_merlin = 65536;
+    int depth = 1;
 
     // Default Constructor
     MerlinInterface(){};

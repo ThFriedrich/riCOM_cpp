@@ -10,8 +10,6 @@
 class BoundedThreadPool
 {
 private:
-    unsigned int limit = 8;
-
     std::vector<std::thread> threads;
     std::queue<std::function<void()>> tasks;
     std::atomic<bool> b_running;
@@ -31,7 +29,7 @@ private:
     {
         std::unique_lock<std::mutex> lock(mtx_queue);
         cnd_buffer_full.wait(lock, [this]
-                             { return (tasks.size() < limit); });
+                             { return (tasks.size() < (size_t)limit); });
     }
 
     std::function<void()> wait_for_task()
@@ -63,13 +61,14 @@ private:
 
 public:
     int n_threads;
+    int limit;
 
     template <typename T>
     void push_task(const T &task)
     {
         std::unique_lock<std::mutex> lock(mtx_queue);
         cnd_buffer_full.wait(lock, [this]
-                             { return (tasks.size() < limit); });
+                             { return ((int)tasks.size() < limit); });
         tasks.push(std::function<void()>(task));
         cnd_buffer_empty.notify_one();
     }
@@ -96,14 +95,22 @@ public:
         }
     }
 
-    BoundedThreadPool() : b_running(true)
+    BoundedThreadPool() : b_running(true), limit(8)
     {
         n_threads = std::thread::hardware_concurrency();
         create_threads();
     }
-    BoundedThreadPool(int n_threads) : b_running(true)
+
+    BoundedThreadPool(int n_threads) : b_running(true), limit(8)
     {
         this->n_threads = n_threads;
+        create_threads();
+    }
+
+    BoundedThreadPool(int n_threads, int limit) : b_running(true)
+    {
+        this->n_threads = n_threads;
+        this->limit = limit;
         create_threads();
     }
 
