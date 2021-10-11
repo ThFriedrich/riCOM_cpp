@@ -12,7 +12,7 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 if (UNIX)
     set(SDL2_INCLUDE_DIR /usr/include/SDL2)
-    set(FFTW3_INCLUDE_DIR /usr/include)
+    set(FFTW3_DIR /usr/include)
     set(CMAKE_CXX_FLAGS "-Wall -Wextra -pthread")
     set(CMAKE_CXX_FLAGS_DEBUG "-g")
     set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=skylake")
@@ -21,9 +21,11 @@ endif(UNIX)
 if (WIN32)
     set(SDL2_INCLUDE_DIR C:/SDL2_VC/include/)
     set(SDL2_LIB_DIR C:/SDL2_VC/lib/x64)
+    set(FFTW3_DIR C:/FFTW)
     set(BUILD_DIR ${PROJECT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
     MESSAGE(STATUS ${PROJECT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
     link_directories(${SDL2_LIB_DIR})
+    link_directories(${FFTW3_DIR})
 
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
         set(CMAKE_CXX_FLAGS "-Wall -Wextra -pthread -std=c++20")
@@ -55,6 +57,10 @@ if (WIN32)
 
     file(COPY ${SDL2_LIB_DIR}/SDL2.dll DESTINATION ${BUILD_DIR})
     file(COPY ${SDL2_LIB_DIR}/SDL2_image.dll DESTINATION ${BUILD_DIR})
+    file(COPY ${FFTW3_DIR}/libfftw3-3.lib DESTINATION ${BUILD_DIR})
+    file(COPY ${FFTW3_DIR}/libfftw3-3.dll DESTINATION ${BUILD_DIR})
+    file(COPY ${FFTW3_DIR}/libfftw3l-3.lib DESTINATION ${BUILD_DIR})
+    file(COPY ${FFTW3_DIR}/libfftw3f-3.lib DESTINATION ${BUILD_DIR})
 
 endif (WIN32)
 
@@ -79,7 +85,7 @@ target_include_directories( RICOM PUBLIC
     imgui
     imgui/backends
     ${SDL2_INCLUDE_DIR}
-    ${FFTW3_INCLUDE_DIR}
+    ${FFTW3_DIR}
     include
     src
     )
@@ -87,4 +93,5 @@ target_include_directories( RICOM PUBLIC
 find_package(OpenGL REQUIRED)
 target_link_libraries(RICOM PUBLIC ${OPENGL_LIBRARIES})
 target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image ${CMAKE_DL_LIBS})
-target_link_libraries(RICOM PUBLIC fftw3)
+target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image ${CMAKE_DL_LIBS})
+target_link_libraries(RICOM PUBLIC libfftw3-3 libfftw3l-3 libfftw3f-3 ${CMAKE_DL_LIBS})
