@@ -57,11 +57,7 @@ if (WIN32)
 
     file(COPY ${SDL2_LIB_DIR}/SDL2.dll DESTINATION ${BUILD_DIR})
     file(COPY ${SDL2_LIB_DIR}/SDL2_image.dll DESTINATION ${BUILD_DIR})
-    file(COPY ${FFTW3_DIR}/libfftw3-3.lib DESTINATION ${BUILD_DIR})
     file(COPY ${FFTW3_DIR}/libfftw3-3.dll DESTINATION ${BUILD_DIR})
-    file(COPY ${FFTW3_DIR}/libfftw3l-3.lib DESTINATION ${BUILD_DIR})
-    file(COPY ${FFTW3_DIR}/libfftw3f-3.lib DESTINATION ${BUILD_DIR})
-
 endif (WIN32)
 
 
@@ -92,6 +88,4 @@ target_include_directories( RICOM PUBLIC
 
 find_package(OpenGL REQUIRED)
 target_link_libraries(RICOM PUBLIC ${OPENGL_LIBRARIES})
-target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image ${CMAKE_DL_LIBS})
-target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image ${CMAKE_DL_LIBS})
-target_link_libraries(RICOM PUBLIC libfftw3-3 libfftw3l-3 libfftw3f-3 ${CMAKE_DL_LIBS})
+target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image libfftw3-3 ${CMAKE_DL_LIBS})
