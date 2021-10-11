@@ -32,14 +32,12 @@ jobs:
           curl.exe https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip --output fftw.zip
           tar -xf fftw.zip
           del fftw.zip
+          lib /def:libfftw3-3.def
           cd ..
           move FFTW C:\       
 
       - name: Build with MSVC
         run: |
-          lib /machine:x64 /def:C:/FFTW/libfftw3f-3.def
-          lib /machine:x64 /def:C:/FFTW/libfftw3-3.def
-          lib /machine:x64 /def:C:/FFTW/libfftw3l-3.def
           mkdir build
           cd build
           cmake ..
@@ -60,7 +58,7 @@ jobs:
       - name: Get SDL2, fftw3 and gcc-11
         run: |
             sudo apt-get update
-            sudo apt-get install libsdl2-dev libsdl2-image-dev libfftw3-dev gcc-11 g++-11
+            sudo apt-get install libsdl2-dev libsdl2-image-dev fftw3-dev libfftw3-dev libfftw3-3 gcc-11 g++-11
       - name: Build
         env:
           CC:   gcc-11
