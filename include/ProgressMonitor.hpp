@@ -30,7 +30,7 @@ public:
     bool first_frame;       // first frame flag
     ProgressMonitor& operator++();
     void reset_flags();
-    ProgressMonitor(unsigned long fr_total, bool b_bar = true, float report_interval = 500.0, std::ostream &out = std::cerr);
+    ProgressMonitor(unsigned long fr_total, bool b_bar = true, float report_interval = 250.0, std::ostream &out = std::cerr);
 
 private:
     bool b_bar;             // Print progress bar

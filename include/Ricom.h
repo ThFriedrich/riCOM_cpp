@@ -112,9 +112,6 @@ private:
     std::vector<float> ricom_data;
     std::vector<id_x_y> update_list;
 
-    // Scan Area Variables
-    int img_px;
-
     // Variables for potting in the SDL2 frame
     std::atomic<float> ricom_max;
     std::atomic<float> ricom_min;
@@ -123,6 +120,7 @@ private:
     std::mutex ricom_mutex;
     std::mutex stem_mutex;
     std::mutex counter_mutex;
+    int last_y;
 
     // Private Methods - General
     void init_uv();
@@ -145,8 +143,6 @@ private:
     void com(std::vector<T> *data, std::array<float, 2> &com, std::atomic<int> *dose_sum);
     template <typename T>
     void read_com_merlin(std::vector<T> &data, std::array<float, 2> &com, int &dose_sum);
-    void set_ricom_image_kernel(int idx, int idy);
-    void set_ricom_pixel(id_x_y idr);
     void set_ricom_pixel(int idx, int idy);
     template <typename T>
     void com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose_sum, std::array<std::atomic<float>, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
@@ -201,8 +197,10 @@ public:
     int cbed_cmap;
 
     // Public Methods
-    void rescale_ricom_image();
-    void rescale_stem_image();
+    void draw_ricom_image();
+    void draw_stem_image();
+    void draw_ricom_image(int y0, int ye);
+    void draw_stem_image(int y0, int ye);
     void run();
     void run_merlin();
     void run_timepix();

@@ -75,7 +75,7 @@ void Ricom_kernel::compute_kernel()
     }
 
     // Add filter
-    if ( b_filter )
+    if (b_filter)
     {
         compute_filter();
         absorb_filter();
@@ -87,16 +87,15 @@ void Ricom_kernel::compute_filter()
     int filter_size = kernel_size * 2 + 1;
     int dist = 0;
     int ic = 0;
-    kernel_filter.assign( filter_size * filter_size, 0 );
+    kernel_filter.assign(filter_size * filter_size, 0);
 
-
-    for ( int iy = 0; iy < filter_size; iy++ )
+    for (int iy = 0; iy < filter_size; iy++)
     {
-        for ( int ix = 0; ix < filter_size; ix++ )
+        for (int ix = 0; ix < filter_size; ix++)
         {
-            dist = pow( ix - kernel_size, 2 ) + pow( iy - kernel_size, 2 );
+            dist = pow(ix - kernel_size, 2) + pow(iy - kernel_size, 2);
             ic = iy * filter_size + ix;
-            if ( dist <= pow( kernel_filter_frequency[0], 2 ) && dist > pow( kernel_filter_frequency[1], 2 ) )
+            if (dist <= pow(kernel_filter_frequency[0], 2) && dist > pow(kernel_filter_frequency[1], 2))
             {
                 kernel_filter[ic] = 1;
             }
@@ -107,7 +106,7 @@ void Ricom_kernel::compute_filter()
 void Ricom_kernel::absorb_filter()
 {
     int k_width_sym = kernel_size * 2 + 1;
-    std::vector<int> map = fftshift_map( k_width_sym, k_width_sym );
+    std::vector<int> map = fftshift_map(k_width_sym, k_width_sym);
     std::complex<double> *k_x = new std::complex<double>[k_area];
     std::complex<double> *k_y = new std::complex<double>[k_area];
     std::complex<double> *k_x_f = new std::complex<double>[k_area];
@@ -115,95 +114,104 @@ void Ricom_kernel::absorb_filter()
 
     fftw_plan px, py, ipx, ipy;
 
-    for ( int id = 0; id < k_area; id++ )
+    for (int id = 0; id < k_area; id++)
     {
-        k_x[id + map[id]] = { kernel_x[id], 0 };
-        k_y[id + map[id]] = { kernel_y[id], 0 };
+        k_x[id + map[id]] = {kernel_x[id], 0};
+        k_y[id + map[id]] = {kernel_y[id], 0};
     }
 
-    px = fftw_plan_dft_2d( k_width_sym, k_width_sym, reinterpret_cast<fftw_complex*>(k_x),
-        reinterpret_cast<fftw_complex*>(k_x_f), FFTW_FORWARD, FFTW_ESTIMATE );
+    px = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_x),
+                          reinterpret_cast<fftw_complex *>(k_x_f), FFTW_FORWARD, FFTW_ESTIMATE);
     fftw_execute(px);
     fftw_destroy_plan(px);
 
-    py = fftw_plan_dft_2d( k_width_sym, k_width_sym, reinterpret_cast<fftw_complex*>(k_y),
-        reinterpret_cast<fftw_complex*>(k_y_f), FFTW_FORWARD, FFTW_ESTIMATE );    
+    py = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_y),
+                          reinterpret_cast<fftw_complex *>(k_y_f), FFTW_FORWARD, FFTW_ESTIMATE);
     fftw_execute(py);
     fftw_destroy_plan(py);
-    
 
-    for ( int id = 0; id < k_area; id++ )
+    for (int id = 0; id < k_area; id++)
     {
-        if ( kernel_filter[id + map[id]] == 0 )
+        if (kernel_filter[id + map[id]] == 0)
         {
-            k_x_f[id] = { 0, 0 };
-            k_y_f[id] = { 0, 0 };
+            k_x_f[id] = {0, 0};
+            k_y_f[id] = {0, 0};
         }
-
     }
 
-    ipx = fftw_plan_dft_2d( k_width_sym, k_width_sym, reinterpret_cast<fftw_complex*>(k_x_f),
-        reinterpret_cast<fftw_complex*>(k_x), FFTW_FORWARD, FFTW_ESTIMATE );
+    ipx = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_x_f),
+                           reinterpret_cast<fftw_complex *>(k_x), FFTW_FORWARD, FFTW_ESTIMATE);
     fftw_execute(ipx);
     fftw_destroy_plan(ipx);
 
-    ipy = fftw_plan_dft_2d( k_width_sym, k_width_sym, reinterpret_cast<fftw_complex*>(k_y_f),
-        reinterpret_cast<fftw_complex*>(k_y), FFTW_FORWARD, FFTW_ESTIMATE );
+    ipy = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_y_f),
+                           reinterpret_cast<fftw_complex *>(k_y), FFTW_FORWARD, FFTW_ESTIMATE);
     fftw_execute(ipy);
     fftw_destroy_plan(ipy);
 
-    for ( int id = 0; id < k_area; id++ )
+    for (int id = 0; id < k_area; id++)
     {
-        kernel_x[id] = k_x[id  + map[id]].real();
-        kernel_y[id] = k_y[id  + map[id]].real();
+        kernel_x[id] = k_x[id + map[id]].real();
+        kernel_y[id] = k_y[id + map[id]].real();
     }
-
 }
 
 std::vector<int> Ricom_kernel::fftshift_map(int x, int y)
 {
-    int center_x = round( x / 2 );
-    int center_y = round( y / 2 );
-    std::vector<int> map( x*y );
+    int center_x = round(x / 2);
+    int center_y = round(y / 2);
+    std::vector<int> map(x * y);
 
     int shift_x, shift_y;
-    if ( x % 2 == 0 ) { shift_x = 0; }
-    else { shift_x = 1; }
-    if ( y % 2 == 0 ) { shift_y = 0; }
-    else { shift_y = 1; }
+    if (x % 2 == 0)
+    {
+        shift_x = 0;
+    }
+    else
+    {
+        shift_x = 1;
+    }
+    if (y % 2 == 0)
+    {
+        shift_y = 0;
+    }
+    else
+    {
+        shift_y = 1;
+    }
 
-    int q1 = ( center_y + shift_y ) * x + center_x + shift_x;
-    int q2 = ( center_y + shift_y ) * x - center_x;
+    int q1 = (center_y + shift_y) * x + center_x + shift_x;
+    int q2 = (center_y + shift_y) * x - center_x;
     int q3 = -1 * center_y * x + center_x + shift_x;
     int q4 = -1 * center_y * x - center_x;
 
     int cnt = 0;
-    for ( int iy = 0; iy < center_y; iy++ )
+    for (int iy = 0; iy < center_y; iy++)
     {
-        for ( int ix = 0; ix < center_x; ix++ )
+        for (int ix = 0; ix < center_x; ix++)
         {
             map[cnt] = q1;
             cnt++;
         }
-        for ( int ix = center_x; ix < x; ix++ )
+        for (int ix = center_x; ix < x; ix++)
         {
             map[cnt] = q2;
             cnt++;
-        } 
+        }
     }
 
-    for ( int iy = center_y; iy < y; iy++ )
+    for (int iy = center_y; iy < y; iy++)
     {
-        for ( int ix = 0; ix < center_x; ix++ )
+        for (int ix = 0; ix < center_x; ix++)
         {
             map[cnt] = q3;
             cnt++;
         }
-        for ( int ix = center_x; ix < x; ix++ )
+        for (int ix = center_x; ix < x; ix++)
         {
             map[cnt] = q4;
             cnt++;
-        } 
+        }
     }
     return map;
 }
@@ -250,7 +258,6 @@ void Ricom_detector::compute_detector(std::array<float, 2> &offset)
     }
 }
 
-
 ////////////////////////////////////////////////
 //               SDL plotting                 //
 ////////////////////////////////////////////////
@@ -288,7 +295,8 @@ void Ricom::draw_pixel(SDL_Surface *surface, int x, int y, float val, int col_ma
 ////////////////////////////////////////////////
 //     RICOM class method implementations     //
 ////////////////////////////////////////////////
-Ricom::Ricom(): stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), img_px(0), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), ricom_mutex(), stem_mutex(), counter_mutex(), mode(RICOM::FILE), b_print2file(false), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0,0.0}, com_map_x(), com_map_y(), detector_type(RICOM::MERLIN), nx(257), ny(256), nxy(0), rep(1), fr_total(0), skip_row(0), skip_img(0), n_threads(1), queue_size(8), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9){
+Ricom::Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), ricom_mutex(), stem_mutex(), counter_mutex(), mode(RICOM::FILE), b_print2file(false), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0, 0.0}, com_map_x(), com_map_y(), detector_type(RICOM::MERLIN), nx(257), ny(256), nxy(0), rep(1), fr_total(0), skip_row(0), skip_img(0), n_threads(1), queue_size(8), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9)
+{
     n_threads_max = std::thread::hardware_concurrency();
     n_threads = n_threads_max;
 }
@@ -452,7 +460,7 @@ std::vector<id_x_y> Ricom::calculate_update_list()
     return ul;
 }
 
-void Ricom::rescale_ricom_image()
+void Ricom::draw_ricom_image()
 {
     std::scoped_lock lock(ricom_mutex);
     for (int y = 0; y < ny; y++)
@@ -464,26 +472,16 @@ void Ricom::rescale_ricom_image()
     }
 }
 
-void Ricom::set_ricom_image_kernel(int ix, int iy)
+void Ricom::draw_ricom_image(int y0, int ye)
 {
-    id_x_y idr;
-    int idc = ix + iy * nx;
     std::scoped_lock lock(ricom_mutex);
-    for (int id = 0; id < kernel.k_area; id++)
+    for (int y = y0; y < ye; y++)
     {
-        idr = update_list[id] + idc;
-        if (idr.valid)
+        for (int x = 0; x < nx; x++)
         {
-            set_ricom_pixel(idr);
+            set_ricom_pixel(x, y);
         }
     }
-}
-
-void Ricom::set_ricom_pixel(id_x_y idr)
-{
-    // Update pixel at location [idr.x idr.y]
-    float val = (ricom_data[idr.id] - ricom_min) / (ricom_max - ricom_min);
-    draw_pixel(srf_ricom, idr.x, idr.y, val, ricom_cmap);
 }
 
 void Ricom::set_ricom_pixel(int idx, int idy)
@@ -494,6 +492,30 @@ void Ricom::set_ricom_pixel(int idx, int idy)
 
     // Update pixel at location
     draw_pixel(srf_ricom, idx, idy, val, ricom_cmap);
+}
+
+void Ricom::draw_stem_image()
+{
+    std::scoped_lock lock(stem_mutex);
+    for (int y = 0; y < ny; y++)
+    {
+        for (int x = 0; x < nx; x++)
+        {
+            set_stem_pixel(x, y);
+        }
+    }
+}
+
+void Ricom::draw_stem_image(int y0, int ye)
+{
+    std::scoped_lock lock(stem_mutex);
+    for (int y = y0; y < ye; y++)
+    {
+        for (int x = 0; x < nx; x++)
+        {
+            set_stem_pixel(x, y);
+        }
+    }
 }
 
 void Ricom::set_stem_pixel(size_t idx, size_t idy)
@@ -542,18 +564,6 @@ void Ricom::plot_cbed(std::vector<T> cbed_data)
     }
 }
 
-void Ricom::rescale_stem_image()
-{
-    std::scoped_lock lock(stem_mutex);
-    for (int y = 0; y < ny; y++)
-    {
-        for (int x = 0; x < nx; x++)
-        {
-            set_stem_pixel(x, y);
-        }
-    }
-}
-
 inline void Ricom::rescales_recomputes()
 {
     if (b_recompute_detector)
@@ -571,14 +581,14 @@ inline void Ricom::rescales_recomputes()
     if (rescale_ricom)
     {
         rescale_ricom = false;
-        rescale_ricom_image();
+        draw_ricom_image();
     };
     if (use_detector)
     {
         if (rescale_stem)
         {
             rescale_stem = false;
-            rescale_stem_image();
+            draw_stem_image();
         };
     };
 }
@@ -588,11 +598,7 @@ inline void Ricom::skip_frames(int n_skip, std::vector<T> &data)
 {
     for (int si = 0; si < n_skip; si++)
     {
-        if (fr_count < fr_total)
-        {
-            read_data<T>(data, true);
-            fr_count++;
-        }
+        read_data<T>(data, true);
     }
 }
 
@@ -622,7 +628,12 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose
     fr_count = p_prog_mon->fr_count;
     if (p_prog_mon->report_set)
     {
-        rescale_ricom_image();
+        draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), iy);
+        if (use_detector)
+        {
+            draw_stem_image(last_y, iy);
+        }
+        last_y = iy;
         fr_freq = p_prog_mon->fr_freq;
         rescales_recomputes();
         plot_cbed<T>(data);
@@ -642,9 +653,9 @@ void Ricom::process_frames()
     // Start Thread Pool
     BoundedThreadPool pool(n_threads, queue_size);
 
-    // Memory allocation (dummy for skip frames)
+    // Memory allocation
     std::vector<T> data(ds_merlin);
-    
+
     std::atomic<int> dose_sum = 0;
     std::atomic<int> *p_dose_sum = &dose_sum;
 
@@ -664,7 +675,7 @@ void Ricom::process_frames()
             {
                 read_data<T>(data, !p_prog_mon->first_frame);
                 p_prog_mon->first_frame = false;
-                pool.push_task([=,this]
+                pool.push_task([=, this]
                                { com_icom<T>(data, ix, iy, p_dose_sum, p_com_xy_sum, p_prog_mon); });
                 if (rc_quit)
                 {
@@ -869,8 +880,7 @@ void Ricom::run()
 {
     // Initializations
     nxy = nx * ny;
-    img_px = nxy + (ny * skip_row) + skip_img;
-    fr_total = img_px * rep;
+    fr_total = nxy * rep;
     fr_count = 0;
 
     init_surface();
@@ -928,6 +938,7 @@ void Ricom::reinit_vectors_limits()
     stem_data.assign(nxy, 0);
     com_map_x.assign(nxy, 0);
     com_map_y.assign(nxy, 0);
+    last_y = 0;
     reset_limits();
 }
 

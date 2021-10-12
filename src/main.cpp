@@ -559,7 +559,7 @@ int run_gui(Ricom *ricom)
                 // std::filesystem::path temp_path = std::filesystem::temp_directory_path();
                 // std::filesystem::path file = "m_list.txt";
                 // std::ofstream m_list (temp_path / file);
-                int fr_total = ((ricom->nx + ricom->skip_row) * ricom->ny + ricom->skip_img) * ricom->rep;
+                int m_fr_total = ((ricom->nx + ricom->skip_row) * ricom->ny + ricom->skip_img) * ricom->rep;
 
                 std::ofstream m_list("m_list.py");
                 m_list << "from merlin_interface.merlin_interface import MerlinInterface" << '\n';
@@ -571,7 +571,7 @@ int run_gui(Ricom *ricom)
                 m_list << "m.counterdepth = " << ricom->depth << '\n';
                 m_list << "m.acquisitiontime = " << m_dwell_time << '\n';
                 m_list << "m.acquisitionperiod = " << m_dwell_time << '\n';
-                m_list << "m.numframestoacquire = " << fr_total+1 << '\n'; // Ich verstehe nicht warum, aber er werkt.
+                m_list << "m.numframestoacquire = " << m_fr_total+1 << '\n'; // Ich verstehe nicht warum, aber er werkt.
                 m_list << "m.fileenable = " << (int)m_save << '\n';
                 m_list << "m.runheadless = " << (int)m_headless << '\n';
                 m_list << "m.fileformat = " << (int)m_raw * 2 << '\n';
@@ -616,7 +616,7 @@ int run_gui(Ricom *ricom)
                 {
                     if (ricom->fr_count_total == 0)
                     {
-                        ricom->rescale_ricom_image();
+                        ricom->draw_ricom_image();
                     }
                     else
                     {
@@ -624,7 +624,7 @@ int run_gui(Ricom *ricom)
                     }
                 }
                 ImGui::SameLine();
-                bool b_button = true;
+                bool b_button;
                 if (ImGui::Button("Save Image as..."))
                 {
                     b_button = true;
@@ -694,7 +694,7 @@ int run_gui(Ricom *ricom)
                 {
                     if (ricom->fr_count_total == 0)
                     {
-                        ricom->rescale_stem_image();
+                        ricom->draw_stem_image();
                     }
                     else
                     {
