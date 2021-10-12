@@ -32,15 +32,18 @@ private:
                              { return (tasks.size() < (size_t)limit); });
     }
 
-    std::function<void()> wait_for_task()
+    void wait_for_task()
     {
         std::unique_lock<std::mutex> lock(mtx_queue);
         cnd_buffer_empty.wait(lock, [this]
-                              { return !tasks.empty(); });
-        std::function<void()> task = std::move(tasks.front());
-        tasks.pop();
-        cnd_buffer_full.notify_one();
-        return task;
+                              { return !tasks.empty() || !b_running; });
+        if (!tasks.empty())
+        {
+            std::function<void()> task = std::move(tasks.front());
+            tasks.pop();
+            cnd_buffer_full.notify_one();
+            task();
+        }
     }
 
     void worker()
@@ -49,12 +52,11 @@ private:
         {
             try
             {
-                std::function<void()> task = wait_for_task();
-                task();
+                wait_for_task();
             }
             catch (const std::exception &e)
             {
-                std::cerr << e.what() << '\n';
+                std::cerr << e.what() << std::endl;
             }
         }
     }
@@ -84,7 +86,7 @@ public:
     {
         std::unique_lock<std::mutex> lock(mtx_queue);
         cnd_buffer_full.wait(lock, [this]
-                              { return tasks.empty(); });
+                             { return tasks.empty(); });
     }
 
     void join_threads()
@@ -116,7 +118,9 @@ public:
 
     ~BoundedThreadPool()
     {
+        wait_for_completion();
         b_running = false;
+        cnd_buffer_empty.notify_all();
         join_threads();
     }
 };
