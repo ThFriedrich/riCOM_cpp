@@ -341,7 +341,7 @@ void Ricom::init_uv()
 }
 
 template <typename T>
-void Ricom::com(std::vector<T> *data, std::array<std::atomic<float>, 2> &com, std::atomic<int> *dose_sum)
+void Ricom::com(std::vector<T> *data, std::array<float, 2> &com, std::atomic<int> *dose_sum)
 {
     float dose = 0;
     T px;
@@ -358,7 +358,7 @@ void Ricom::com(std::vector<T> *data, std::array<std::atomic<float>, 2> &com, st
         sum_x_temp = 0;
         for (int idx = 0; idx < nx_merlin; idx++)
         {
-            px = data->at(y_nx + idx);
+            px = (*data)[y_nx + idx];
             byte_swap(px);
             sum_x_temp += px;
             sum_y[idx] += px;
@@ -410,7 +410,7 @@ void Ricom::stem(std::vector<T> *data, size_t id_stem)
     stem_data[id_stem] = stem_temp;
 }
 
-void Ricom::icom(std::array<std::atomic<float>, 2> &com, int x, int y)
+void Ricom::icom(std::array<float, 2> &com, int x, int y)
 {
     float com_x = com[0] - offset[0];
     float com_y = com[1] - offset[1];
@@ -601,10 +601,10 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose
 {
     std::vector<T> *data_ptr = &data;
 
-    std::array<std::atomic<float>, 2> com_xy = {0.0, 0.0};
+    std::array<float, 2> com_xy = {0.0, 0.0};
     com<T>(data_ptr, com_xy, dose_sum);
     icom(com_xy, ix, iy);
-    set_ricom_image_kernel(ix, iy);
+    // set_ricom_image_kernel(ix, iy);
     if (use_detector)
     {
         stem(data_ptr, iy * nx + ix);
@@ -622,6 +622,7 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose
     fr_count = p_prog_mon->fr_count;
     if (p_prog_mon->report_set)
     {
+        rescale_ricom_image();
         fr_freq = p_prog_mon->fr_freq;
         rescales_recomputes();
         plot_cbed<T>(data);
@@ -748,7 +749,7 @@ void Ricom::process_timepix_stream()
     std::vector<size_t> comx_map(nxy);
     std::vector<size_t> comy_map(nxy);
 
-    std::array<std::atomic<float>, 2> com_xy = {0.0, 0.0};
+    std::array<float, 2> com_xy = {0.0, 0.0};
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
     int dose_sum = 0;
     int idx = 0;

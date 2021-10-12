@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.17.0)
+﻿cmake_minimum_required(VERSION 3.16.0)
 
 project(RICOM LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
@@ -89,5 +89,10 @@ target_include_directories( RICOM PUBLIC
     )
 
 find_package(OpenGL REQUIRED)
+
 target_link_libraries(RICOM PUBLIC ${OPENGL_LIBRARIES})
-target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image libfftw3-3 ${CMAKE_DL_LIBS})
+if (WIN32)
+    target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image libfftw3-3 ${CMAKE_DL_LIBS})
+else ()
+    target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image fftw3 ${CMAKE_DL_LIBS})
+endif (WIN32)

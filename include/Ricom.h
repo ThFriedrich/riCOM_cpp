@@ -140,9 +140,9 @@ private:
     inline void skip_frames(int n_skip, std::vector<T> &data);
 
     // Private Methods - riCOM
-    void icom(std::array<std::atomic<float>, 2> &com, int x, int y);
+    void icom(std::array<float, 2> &com, int x, int y);
     template <typename T>
-    void com(std::vector<T> *data, std::array<std::atomic<float>, 2> &com, std::atomic<int> *dose_sum);
+    void com(std::vector<T> *data, std::array<float, 2> &com, std::atomic<int> *dose_sum);
     template <typename T>
     void read_com_merlin(std::vector<T> &data, std::array<float, 2> &com, int &dose_sum);
     void set_ricom_image_kernel(int idx, int idy);
