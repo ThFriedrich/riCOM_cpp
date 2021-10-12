@@ -97,24 +97,33 @@ public:
         }
     }
 
-    BoundedThreadPool() : b_running(true), limit(8)
+    void init(int n_threads, int limit)
     {
-        n_threads = std::thread::hardware_concurrency();
+        int n_threads_max = std::thread::hardware_concurrency();
+        if (n_threads > n_threads_max || n_threads < 1)
+        {
+            this->n_threads = n_threads_max;
+        }
+        else
+        {
+            this->n_threads = n_threads;
+        }
+        this->limit = limit;
+        b_running = true;
         create_threads();
     }
 
     BoundedThreadPool(int n_threads) : b_running(true), limit(8)
     {
-        this->n_threads = n_threads;
-        create_threads();
+        init(n_threads, limit);
     }
 
     BoundedThreadPool(int n_threads, int limit) : b_running(true)
     {
-        this->n_threads = n_threads;
-        this->limit = limit;
-        create_threads();
+        init(n_threads, limit);
     }
+
+    BoundedThreadPool(){}
 
     ~BoundedThreadPool()
     {

@@ -529,14 +529,14 @@ void Ricom::set_stem_pixel(size_t idx, size_t idy)
 }
 
 template <typename T>
-void Ricom::plot_cbed(std::vector<T> cbed_data)
+void Ricom::plot_cbed(std::vector<T> *cbed_data)
 {
     float v_min = INFINITY;
     float v_max = 0.0;
     float vl_f;
-    for (size_t id = 0; id < cbed_data.size(); id++)
+    for (size_t id = 0; id < (*cbed_data).size(); id++)
     {
-        T vl = cbed_data[id];
+        T vl = (*cbed_data)[id];
         byte_swap(vl);
         vl_f = log(1.0 + (float)vl);
         if (vl_f > v_max)
@@ -555,7 +555,7 @@ void Ricom::plot_cbed(std::vector<T> cbed_data)
         iy_t = v[ix] * nx_merlin;
         for (int iy = 0; iy < nx_merlin; iy++)
         {
-            T vl = cbed_data[iy_t + u[iy]];
+            T vl = (*cbed_data)[iy_t + u[iy]];
             byte_swap(vl);
             vl_f = log(1 + (float)vl);
             float val = (vl_f - v_min) / (v_max - v_min);
@@ -610,11 +610,10 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose
     std::array<float, 2> com_xy = {0.0, 0.0};
     com<T>(data_ptr, com_xy, dose_sum);
     icom(com_xy, ix, iy);
-    // set_ricom_image_kernel(ix, iy);
+
     if (use_detector)
     {
         stem(data_ptr, iy * nx + ix);
-        set_stem_pixel(ix, iy);
     }
 
     com_xy_sum->at(0) += com_xy[0];
@@ -636,7 +635,7 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose
         last_y = iy;
         fr_freq = p_prog_mon->fr_freq;
         rescales_recomputes();
-        plot_cbed<T>(data);
+        plot_cbed<T>(data_ptr);
         for (int i = 0; i < 2; i++)
         {
             com_public[i] = com_xy_sum->at(i) / p_prog_mon->fr_count_i;
@@ -647,14 +646,58 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose
     counter_mutex.unlock();
 }
 
+
+template <typename T>
+void Ricom::com_icom(std::vector<T> *data_ptr, int ix, int iy, std::atomic<int> *dose_sum, std::array<std::atomic<float>, 2> *com_xy_sum, ProgressMonitor *p_prog_mon)
+{
+    std::array<float, 2> com_xy = {0.0, 0.0};
+    com<T>(data_ptr, com_xy, dose_sum);
+    icom(com_xy, ix, iy);
+
+    if (use_detector)
+    {
+        stem(data_ptr, iy * nx + ix);
+    }
+
+    com_xy_sum->at(0) += com_xy[0];
+    com_xy_sum->at(1) += com_xy[1];
+
+    int id = iy * nx + ix;
+    ++(*p_prog_mon);
+    com_map_x[id] = com_xy[0];
+    com_map_y[id] = com_xy[1];
+    fr_count = p_prog_mon->fr_count;
+    if (p_prog_mon->report_set)
+    {
+        draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), iy);
+        if (use_detector)
+        {
+            draw_stem_image(last_y, iy);
+        }
+        last_y = iy;
+        fr_freq = p_prog_mon->fr_freq;
+        rescales_recomputes();
+        plot_cbed<T>(data_ptr);
+        for (int i = 0; i < 2; i++)
+        {
+            com_public[i] = com_xy_sum->at(i) / p_prog_mon->fr_count_i;
+            com_xy_sum->at(i) = 0;
+        }
+        p_prog_mon->reset_flags();
+    }
+}
+
 template <typename T>
 void Ricom::process_frames()
 {
-    // Start Thread Pool
-    BoundedThreadPool pool(n_threads, queue_size);
-
     // Memory allocation
     std::vector<T> data(ds_merlin);
+    std::vector<T> *p_data = &data;
+    BoundedThreadPool pool;
+
+    // Start Thread Pool
+    if (n_threads > 1)
+        pool.init(n_threads, queue_size);   
 
     std::atomic<int> dose_sum = 0;
     std::atomic<int> *p_dose_sum = &dose_sum;
@@ -675,8 +718,16 @@ void Ricom::process_frames()
             {
                 read_data<T>(data, !p_prog_mon->first_frame);
                 p_prog_mon->first_frame = false;
-                pool.push_task([=, this]
+                if (n_threads > 1)
+                {
+                    pool.push_task([=, this]
                                { com_icom<T>(data, ix, iy, p_dose_sum, p_com_xy_sum, p_prog_mon); });
+                }
+                else
+                {
+                    com_icom<T>(p_data, ix, iy, p_dose_sum, p_com_xy_sum, p_prog_mon);  
+                }
+                
                 if (rc_quit)
                 {
                     return;
@@ -686,7 +737,8 @@ void Ricom::process_frames()
         }
         skip_frames(skip_img, data);
 
-        pool.wait_for_completion();
+        if (n_threads > 1)
+            pool.wait_for_completion();
 
         if (mode == RICOM::modes::FILE)
         {

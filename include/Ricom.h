@@ -146,6 +146,8 @@ private:
     void set_ricom_pixel(int idx, int idy);
     template <typename T>
     void com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose_sum, std::array<std::atomic<float>, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
+    template <typename T>
+    void com_icom(std::vector<T> *p_data, int ix, int iy, std::atomic<int> *dose_sum, std::array<std::atomic<float>, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
 
     // Private Methods - vSTEM
     template <typename T>
@@ -206,7 +208,7 @@ public:
     void run_timepix();
     void reset();
     template <typename T>
-    void plot_cbed(std::vector<T> data);
+    void plot_cbed(std::vector<T> *p_data);
 
     // Constructor
     Ricom();
