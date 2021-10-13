@@ -101,6 +101,7 @@ void Ricom_kernel::compute_filter()
             }
         }
     }
+    // kernel_filter[kernel_size * filter_size + kernel_size] = 1;
 }
 
 void Ricom_kernel::absorb_filter()
@@ -116,8 +117,8 @@ void Ricom_kernel::absorb_filter()
 
     for (int id = 0; id < k_area; id++)
     {
-        k_x[id + map[id]] = {kernel_x[id], 0};
-        k_y[id + map[id]] = {kernel_y[id], 0};
+        k_x[id] = {kernel_x[id + map[id]], 0};
+        k_y[id] = {kernel_y[id + map[id]], 0};
     }
 
     px = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_x),
@@ -140,19 +141,19 @@ void Ricom_kernel::absorb_filter()
     }
 
     ipx = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_x_f),
-                           reinterpret_cast<fftw_complex *>(k_x), FFTW_FORWARD, FFTW_ESTIMATE);
+                           reinterpret_cast<fftw_complex *>(k_x), FFTW_BACKWARD, FFTW_ESTIMATE);
     fftw_execute(ipx);
     fftw_destroy_plan(ipx);
 
     ipy = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_y_f),
-                           reinterpret_cast<fftw_complex *>(k_y), FFTW_FORWARD, FFTW_ESTIMATE);
+                           reinterpret_cast<fftw_complex *>(k_y), FFTW_BACKWARD, FFTW_ESTIMATE);
     fftw_execute(ipy);
     fftw_destroy_plan(ipy);
 
     for (int id = 0; id < k_area; id++)
     {
-        kernel_x[id] = k_x[id + map[id]].real();
-        kernel_y[id] = k_y[id + map[id]].real();
+        kernel_x[id + map[id]] = k_x[id].real();
+        kernel_y[id + map[id]] = k_y[id].real();
     }
 }
 
@@ -169,7 +170,7 @@ std::vector<int> Ricom_kernel::fftshift_map(int x, int y)
     }
     else
     {
-        shift_x = 1;
+        shift_x = -1;
     }
     if (y % 2 == 0)
     {
@@ -177,13 +178,13 @@ std::vector<int> Ricom_kernel::fftshift_map(int x, int y)
     }
     else
     {
-        shift_y = 1;
+        shift_y = -1;
     }
 
-    int q1 = (center_y + shift_y) * x + center_x + shift_x;
-    int q2 = (center_y + shift_y) * x - center_x;
-    int q3 = -1 * center_y * x + center_x + shift_x;
-    int q4 = -1 * center_y * x - center_x;
+    int q1 = center_y * x + center_x;
+    int q2 = center_y * x - ( center_x + shift_x );
+    int q3 = -1 * ( center_y + shift_y ) * x + center_x;
+    int q4 = -1 * ( center_y + shift_y ) * x - ( center_x + shift_x );
 
     int cnt = 0;
     for (int iy = 0; iy < center_y; iy++)
