@@ -182,9 +182,9 @@ std::vector<int> Ricom_kernel::fftshift_map(int x, int y)
     }
 
     int q1 = center_y * x + center_x;
-    int q2 = center_y * x - ( center_x + shift_x );
-    int q3 = -1 * ( center_y + shift_y ) * x + center_x;
-    int q4 = -1 * ( center_y + shift_y ) * x - ( center_x + shift_x );
+    int q2 = center_y * x - (center_x + shift_x);
+    int q3 = -1 * (center_y + shift_y) * x + center_x;
+    int q4 = -1 * (center_y + shift_y) * x - (center_x + shift_x);
 
     int cnt = 0;
     for (int iy = 0; iy < center_y; iy++)
@@ -296,51 +296,22 @@ void Ricom::draw_pixel(SDL_Surface *surface, int x, int y, float val, int col_ma
 ////////////////////////////////////////////////
 //     RICOM class method implementations     //
 ////////////////////////////////////////////////
-Ricom::Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), ricom_mutex(), stem_mutex(), counter_mutex(), mode(RICOM::FILE), b_print2file(false), redraw_interval(20), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0, 0.0}, com_map_x(), com_map_y(), detector_type(RICOM::MERLIN), nx(257), ny(256), nxy(0), rep(1), fr_total(0), skip_row(0), skip_img(0), n_threads(1), queue_size(8), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9)
+Ricom::Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), ricom_mutex(), stem_mutex(), counter_mutex(), mode(RICOM::FILE), b_print2file(false), redraw_interval(20), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0, 0.0}, com_map_x(), com_map_y(), detector_type(RICOM::MERLIN), nx(256), ny(256), nxy(0), rep(1), fr_total(0), skip_row(1), skip_img(0), n_threads(1), queue_size(8), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9)
 {
     n_threads_max = std::thread::hardware_concurrency();
-    n_threads = n_threads_max;
+    n_threads = 1;
 }
 
 Ricom::~Ricom(){};
 
 void Ricom::init_uv()
 {
-    u.assign(nx_merlin, 0);
-    v.assign(nx_merlin, 0);
+    u.reserve(nx_merlin);
+    v.reserve(nx_merlin);
 
-    if (b_raw)
-    // raw format: pixel sequence flipped every 64 bit
+    for (int i = 0; i < nx_merlin; i++)
     {
-        size_t num_per_flip = 64;
-        switch (depth)
-        {
-        case 1:
-            num_per_flip = 64;
-            break;
-        case 6:
-            num_per_flip = 8;
-            break;
-        case 12:
-            num_per_flip = 4;
-            break;
-        }
-        size_t cnt = 0;
-        for (size_t i = 0; i < (nx_merlin / num_per_flip); i++)
-        {
-            for (size_t j = (num_per_flip * (i + 1)); j > num_per_flip * i; j--)
-            {
-                u[cnt] = (j - 1);
-                cnt++;
-            }
-        }
-    }
-    else
-    {
-        for (int i = 0; i < nx_merlin; i++)
-        {
-            u[i] = i;
-        }
+        u[i] = i;
     }
 
     for (int i = 0; i < ny_merlin; i++)
@@ -647,7 +618,6 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose
     counter_mutex.unlock();
 }
 
-
 template <typename T>
 void Ricom::com_icom(std::vector<T> *data_ptr, int ix, int iy, std::atomic<int> *dose_sum, std::array<std::atomic<float>, 2> *com_xy_sum, ProgressMonitor *p_prog_mon)
 {
@@ -698,7 +668,7 @@ void Ricom::process_frames()
 
     // Start Thread Pool
     if (n_threads > 1)
-        pool.init(n_threads, queue_size);   
+        pool.init(n_threads, queue_size);
 
     std::atomic<int> dose_sum = 0;
     std::atomic<int> *p_dose_sum = &dose_sum;
@@ -722,13 +692,13 @@ void Ricom::process_frames()
                 if (n_threads > 1)
                 {
                     pool.push_task([=, this]
-                               { com_icom<T>(data, ix, iy, p_dose_sum, p_com_xy_sum, p_prog_mon); });
+                                   { com_icom<T>(data, ix, iy, p_dose_sum, p_com_xy_sum, p_prog_mon); });
                 }
                 else
                 {
-                    com_icom<T>(p_data, ix, iy, p_dose_sum, p_com_xy_sum, p_prog_mon);  
+                    com_icom<T>(p_data, ix, iy, p_dose_sum, p_com_xy_sum, p_prog_mon);
                 }
-                
+
                 if (rc_quit)
                 {
                     pool.wait_for_completion();
@@ -781,6 +751,7 @@ void Ricom::run_merlin()
         else if (dtype == "R64")
         {
             b_raw = true;
+            MerlinInterface::init_uv(u,v);
             b_binary = false;
             switch (depth)
             {
@@ -937,6 +908,7 @@ void Ricom::run()
     fr_total = nxy * rep;
     fr_count = 0;
 
+    init_uv();
     init_surface();
 
     if (use_detector)
@@ -953,8 +925,6 @@ void Ricom::run()
     update_list = calculate_update_list();
     com_map_x.reserve(nxy);
     com_map_y.reserve(nxy);
-
-    init_uv();
 
     // Process the Data
     switch (detector_type)

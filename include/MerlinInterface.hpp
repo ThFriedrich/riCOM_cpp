@@ -93,7 +93,6 @@ public:
     ~MerlinInterface(){};
 
     // Public Methods
-
     template <class T>
     inline void byte_swap(T &val)
     {
@@ -232,12 +231,56 @@ public:
 
             if (bytes_count <= 0)
             {
-                std::cout << "Socket flushed (" << bytes_total/1024 << " kB)" << std::endl;
+                std::cout << "Socket flushed (" << bytes_total / 1024 << " kB)" << std::endl;
                 break;
             }
             bytes_total += bytes_count;
         }
         close_socket();
+    }
+
+    void init_uv(std::vector<int> &u, std::vector<int> &v)
+    {
+        u.reserve(nx_merlin);
+        v.reserve(nx_merlin);
+
+        for (int i = 0; i < ny_merlin; i++)
+        {
+            v[i] = i;
+        }
+        if (b_raw)
+        // raw format: pixel sequence flipped every 64 bit
+        {
+            size_t num_per_flip = 64;
+            switch (depth)
+            {
+            case 1:
+                num_per_flip = 64;
+                break;
+            case 6:
+                num_per_flip = 8;
+                break;
+            case 12:
+                num_per_flip = 4;
+                break;
+            }
+            size_t cnt = 0;
+            for (size_t i = 0; i < (nx_merlin / num_per_flip); i++)
+            {
+                for (size_t j = (num_per_flip * (i + 1)); j > num_per_flip * i; j--)
+                {
+                    u[cnt] = (j - 1);
+                    cnt++;
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < nx_merlin; i++)
+            {
+                u[i] = i;
+            }
+        }
     }
 
     void merlin_init(RICOM::modes mode)
@@ -342,7 +385,7 @@ public:
                 std::cerr << e.what() << '\n';
             }
         }
-        else 
+        else
         {
             perror("Frame Header cannot be decoded!");
         }
@@ -385,37 +428,34 @@ public:
         {
             handle_socket_errors("intitializing Socket");
         }
- 
-//  #ifdef WIN32
-//         DWORD timeout = 0.5;
-//         if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
-//         {
-//             handle_socket_errors("setting socket options");
-//         }
-//         else
-//         {
-//             setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
-//         }
-//  #else
-//         struct timeval tv;
-//         tv.tv_sec = 0.5;
-//         if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
-//         {
-//             handle_socket_errors("setting socket options");
-//         }
-//         else
-//         {
-//             setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-//         }
-//  #endif
-        
+
+        //  #ifdef WIN32
+        //         DWORD timeout = 0.5;
+        //         if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
+        //         {
+        //             handle_socket_errors("setting socket options");
+        //         }
+        //         else
+        //         {
+        //             setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
+        //         }
+        //  #else
+        //         struct timeval tv;
+        //         tv.tv_sec = 0.5;
+        //         if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
+        //         {
+        //             handle_socket_errors("setting socket options");
+        //         }
+        //         else
+        //         {
+        //             setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+        //         }
+        //  #endif
+
         if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
         {
             handle_socket_errors("setting socket options");
         }
-
-
-
 
         address.sin_family = AF_INET;
         address.sin_addr.s_addr = inet_addr(ip.c_str());
