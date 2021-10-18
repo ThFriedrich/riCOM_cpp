@@ -56,34 +56,17 @@ void run_live(Ricom *r)
     r->run();
 }
 
-void save_com( Ricom *ricom, std::string filename )
+void save_com(Ricom *ricom, std::string filename)
 {
 
-    float meta[8] = { (float)ricom->nxy*2, (float)ricom->nx, (float)ricom->ny, 0, 0, 0, 0, 0 };
-    
-    std::ofstream com_file( filename + "_com.dat",  std::ios::out | std::ios::binary );
-    com_file.write( reinterpret_cast<char*>(&meta[0]), 8 * sizeof(float) );
-    com_file.write( reinterpret_cast<char*>(&ricom->com_map_x[0]), ricom->nxy * sizeof(float) );
-    com_file.write( reinterpret_cast<char*>(&ricom->com_map_y[0]), ricom->nxy * sizeof(float) );
+    float meta[8] = {(float)ricom->nxy * 2, (float)ricom->nx, (float)ricom->ny, 0, 0, 0, 0, 0};
+
+    std::ofstream com_file(filename + "_com.dat", std::ios::out | std::ios::binary);
+    com_file.write(reinterpret_cast<char *>(&meta[0]), 8 * sizeof(float));
+    com_file.write(reinterpret_cast<char *>(&ricom->com_map_x[0]), ricom->nxy * sizeof(float));
+    com_file.write(reinterpret_cast<char *>(&ricom->com_map_y[0]), ricom->nxy * sizeof(float));
     com_file.close();
-
 }
-
-#ifdef _WIN32
-void run_fake_merlin()
-{
-    std::system("/py fake_merlin.py");
-}
-#else
-void run_fake_merlin()
-{
-    int r = std::system("python3 fake_merlin.py");
-    if (r != 0)
-    {
-        std::cout << "Error running fake_merlin.py" << std::endl;
-    }
-}
-#endif
 
 #ifdef _WIN32
 void run_connection_script()
@@ -227,9 +210,11 @@ int run_gui(Ricom *ricom)
     openFileDialog.SetTypeFilters({".mib", ".t3p"});
     ImGui::FileBrowser saveFileDialog(ImGuiFileBrowserFlags_EnterNewFilename | ImGuiFileBrowserFlags_CreateNewDir);
     saveFileDialog.SetTitle("Save image as .png");
+
     // Main loop
     bool done = false;
     bool b_merlin_list = false;
+    bool b_merlin_live_menu = true;
     bool b_acq_open = false;
     bool b_running = false;
     bool file_selected = false;
@@ -297,13 +282,15 @@ int run_gui(Ricom *ricom)
                 ImGui::Separator();
 
                 ImGui::Text("Merlin Camera");
-                ImGui::DragInt("nx", &ricom->nx_merlin, 1, 1, 512);
-                ImGui::DragInt("ny", &ricom->ny_merlin, 1, 1, 512);
+                ImGui::Checkbox("Live Interface Menu", &b_merlin_live_menu);
+                ImGui::DragInt("nx Merlin", &ricom->nx_merlin, 1, 1, 512);
+                ImGui::DragInt("ny Merlin", &ricom->ny_merlin, 1, 1, 512);
                 ImGui::Separator();
 
                 ImGui::Text("Timepix Camera");
-                ImGui::DragInt("nx", &ricom->nx_timpix, 1, 1, 512);
-                ImGui::DragInt("ny", &ricom->ny_timpix, 1, 1, 512);
+                // ImGui::Checkbox("Live Interface Menu", &b_timepix_live_menu);
+                ImGui::DragInt("nx Timepix", &ricom->nx_timpix, 1, 1, 512);
+                ImGui::DragInt("ny Timepix", &ricom->ny_timpix, 1, 1, 512);
                 ImGui::EndMenu();
             }
             menu_bar_size = ImGui::GetWindowSize();
@@ -335,9 +322,18 @@ int run_gui(Ricom *ricom)
                 ImGui::DragInt("nx", &ricom->nx, 1, 1, SDL_MAX_SINT32);
                 ImGui::DragInt("ny", &ricom->ny, 1, 1, SDL_MAX_SINT32);
                 ImGui::DragInt("Repetitions", &ricom->rep, 1, 1, SDL_MAX_SINT32);
+                ImGui::BeginGroup();
+                ImGui::DragInt("skip row", &ricom->skip_row, 1, 1);
+                ImGui::DragInt("skip img", &ricom->skip_img, 1, 1);
+                ImGui::EndGroup();
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::SetTooltip("Adjustments for Flyback time:\n skip row: skip n frames after each scan line\n skip img: skip n frames after each scan (when using repetitions)");
+                }
 
                 ImGui::Text("CBED Centre");
-                bool offset_changed = ImGui::DragFloat2("Centre", &ricom->offset[0], 0.1f, 0.0, 256.0);
+                int *max_nx = (std::max)(&ricom->nx_merlin, &ricom->nx_timpix);
+                bool offset_changed = ImGui::DragFloat2("Centre", &ricom->offset[0], 0.1f, 0.0, (float)*max_nx);
                 if (offset_changed)
                 {
                     ricom->b_recompute_detector = true;
@@ -351,9 +347,9 @@ int run_gui(Ricom *ricom)
             {
                 bool kernel_changed = ImGui::DragInt("Kernel Size", &ricom->kernel.kernel_size, 1, 1, 300);
                 bool rot_changed = ImGui::SliderFloat("Rotation", &ricom->kernel.rotation, 0.0f, 360.0f, "%.1f deg");
-                ImGui::Checkbox("Use filter?", &ricom->kernel.b_filter);
-                ImGui::DragInt2("high / low", &ricom->kernel.kernel_filter_frequency[0], 1, 0, SDL_MAX_SINT32);
-                if (rot_changed || kernel_changed)
+                bool filter_changed = ImGui::Checkbox("Use filter?", &ricom->kernel.b_filter);
+                bool filter_changed2 = ImGui::DragInt2("high / low", &ricom->kernel.kernel_filter_frequency[0], 1, 0, SDL_MAX_SINT32);
+                if (rot_changed || kernel_changed || filter_changed || filter_changed2)
                 {
                     ricom->b_recompute_kernel = true;
                 }
@@ -370,52 +366,50 @@ int run_gui(Ricom *ricom)
                 }
             }
 
-            if (ImGui::CollapsingHeader("Merlin Live Mode", ImGuiTreeNodeFlags_DefaultOpen))
+            if (b_merlin_live_menu)
             {
-                if (ImGui::InputText("IP", ip, sizeof(ip)))
+                if (ImGui::CollapsingHeader("Merlin Live Mode", ImGuiTreeNodeFlags_DefaultOpen))
                 {
-                    ricom->ip = ip;
-                }
-                ImGui::InputInt("COM-Port", &c_port, 8);
-                ImGui::InputInt("Data-Port", &ricom->port, 8);
-
-                ImGui::Text("Scan Engine Settings");
-                ImGui::DragInt("skip row", &ricom->skip_row, 1, 1);
-                ImGui::DragInt("skip img", &ricom->skip_img, 1, 1);
-
-                if (ImGui::Button("Merlin Setup", ImVec2(-1.0f, 0.0f)))
-                {
-                    b_merlin_list = true;
-                }
-
-                if (ricom->b_connected)
-                {
-                    ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Connected");
-                    if (ricom->acq_header.size() > 0)
+                    if (ImGui::InputText("IP", ip, sizeof(ip)))
                     {
-                        ImGui::SameLine();
-                        if (ImGui::Button("Show Acqusition Info", ImVec2(-1.0f, 0.0f)))
+                        ricom->ip = ip;
+                    }
+                    ImGui::InputInt("COM-Port", &c_port, 8);
+                    ImGui::InputInt("Data-Port", &ricom->port, 8);
+
+                    if (ImGui::Button("Merlin Setup", ImVec2(-1.0f, 0.0f)))
+                    {
+                        b_merlin_list = true;
+                    }
+
+                    if (ricom->b_connected)
+                    {
+                        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Connected");
+                        if (ricom->acq_header.size() > 0)
                         {
-                            b_acq_open = true;
+                            ImGui::SameLine();
+                            if (ImGui::Button("Show Acqusition Info", ImVec2(-1.0f, 0.0f)))
+                            {
+                                b_acq_open = true;
+                            }
                         }
                     }
-                }
-                else
-                {
-                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Not Connected");
-                }
+                    else
+                    {
+                        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Not Connected");
+                    }
 
-                if (ImGui::Button("Start Acquisition", ImVec2(-1.0f, 0.0f)))
-                {
-                    t1 = std::thread(run_live, ricom);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                    t2 = std::thread(run_connection_script);
-                    b_running = true;
-                    t1.detach();
-                    t2.detach();
+                    if (ImGui::Button("Start Acquisition", ImVec2(-1.0f, 0.0f)))
+                    {
+                        t1 = std::thread(run_live, ricom);
+                        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                        t2 = std::thread(run_connection_script);
+                        b_running = true;
+                        t1.detach();
+                        t2.detach();
+                    }
                 }
             }
-
             if (ImGui::CollapsingHeader(".mib file reconstruction", ImGuiTreeNodeFlags_DefaultOpen))
             {
 
@@ -438,24 +432,24 @@ int run_gui(Ricom *ricom)
 
                     if (ricom->detector_type == RICOM::MERLIN)
                     {
-                    ImGui::BeginGroup();
-                    ImGui::Text("Depth");
-                    ImGui::RadioButton("1", &ricom->depth, 1);
-                    ImGui::SameLine();
-                    ImGui::RadioButton("6", &ricom->depth, 6);
-                    ImGui::SameLine();
-                    ImGui::RadioButton("12", &ricom->depth, 12);
-                    ImGui::EndGroup();
-                    if (ImGui::IsItemHovered())
-                    {
-                        ImGui::SetTooltip("Only applicable for handling recorded files, \n recorded in raw mode.");
-                    }
+                        ImGui::BeginGroup();
+                        ImGui::Text("Depth");
+                        ImGui::RadioButton("1", &ricom->depth, 1);
+                        ImGui::SameLine();
+                        ImGui::RadioButton("6", &ricom->depth, 6);
+                        ImGui::SameLine();
+                        ImGui::RadioButton("12", &ricom->depth, 12);
+                        ImGui::EndGroup();
+                        if (ImGui::IsItemHovered())
+                        {
+                            ImGui::SetTooltip("Only applicable for handling recorded files, \n recorded in raw mode.");
+                        }
                     }
                     if (ricom->detector_type == RICOM::TIMEPIX)
                     {
                         ImGui::DragInt("dwell time (.t3p)", &ricom->dwell_time, 1, 1);
                     }
-                    
+
                     if (ImGui::Button("Run File", ImVec2(-1.0f, 0.0f)))
                     {
                         t1 = std::thread(run_file, ricom);
@@ -573,7 +567,7 @@ int run_gui(Ricom *ricom)
                 m_list << "m.counterdepth = " << ricom->depth << '\n';
                 m_list << "m.acquisitiontime = " << m_dwell_time << '\n';
                 m_list << "m.acquisitionperiod = " << m_dwell_time << '\n';
-                m_list << "m.numframestoacquire = " << m_fr_total+1 << '\n'; // Ich verstehe nicht warum, aber er werkt.
+                m_list << "m.numframestoacquire = " << m_fr_total + 1 << '\n'; // Ich verstehe nicht warum, aber er werkt.
                 m_list << "m.fileenable = " << (int)m_save << '\n';
                 m_list << "m.runheadless = " << (int)m_headless << '\n';
                 m_list << "m.fileformat = " << (int)m_raw * 2 << '\n';
@@ -642,7 +636,7 @@ int run_gui(Ricom *ricom)
                 saveFileDialog.Display();
                 if (saveFileDialog.HasSelected())
                 {
-                    if ( b_button )
+                    if (b_button)
                     {
                         std::string img_file = saveFileDialog.GetSelected().string();
                         if (img_file.substr(img_file.size() - 4, 4) != ".png" && img_file.substr(img_file.size() - 4, 4) != ".PNG")
@@ -691,7 +685,7 @@ int run_gui(Ricom *ricom)
                 ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 
                 ImGui::Begin("vSTEM", &ricom->use_detector, ImGuiWindowFlags_NoScrollbar);
-                
+
                 if (ImGui::Combo("Colormap", &ricom->stem_cmap, cmaps, IM_ARRAYSIZE(cmaps)))
                 {
                     if (ricom->fr_count_total == 0)
@@ -776,9 +770,9 @@ int run_gui(Ricom *ricom)
     return 0;
 }
 
-void update_image(SDL_Texture* tex, SDL_Renderer* renderer, SDL_Surface* srf)
+void update_image(SDL_Texture *tex, SDL_Renderer *renderer, SDL_Surface *srf)
 {
-    if (SDL_UpdateTexture(tex, NULL,  srf->pixels, srf->pitch) == -1)
+    if (SDL_UpdateTexture(tex, NULL, srf->pixels, srf->pitch) == -1)
     {
         std::cout << "SDL_UpdateTexture failed: " << SDL_GetError() << std::endl;
     }
@@ -906,14 +900,14 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
     }
 
     // Initializing SDL
-    SDL_Window* window = NULL;     // Pointer for the window
-    SDL_Renderer* renderer = NULL; // Pointer for the renderer
-    SDL_Texture* tex = NULL;       // Texture for the window;
+    SDL_Window *window = NULL;     // Pointer for the window
+    SDL_Renderer *renderer = NULL; // Pointer for the renderer
+    SDL_Texture *tex = NULL;       // Texture for the window;
     SDL_DisplayMode DM;            // To get the current display size
     SDL_Event event;               // Event variable
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_GetCurrentDisplayMode(0, &DM);
-    float scale = std::min(((float)DM.w) / ricom->nx, ((float)DM.h) /  ricom->ny) * 0.8;
+    float scale = std::min(((float)DM.w) / ricom->nx, ((float)DM.h) / ricom->ny) * 0.8;
 
     // Creating window
     window = SDL_CreateWindow("riCOM", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, scale * ricom->nx, scale * ricom->ny, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
@@ -950,9 +944,9 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
         t1 = std::thread(run_file, ricom);
         t1.detach();
     }
-    SDL_Delay(ricom->redraw_interval*2);
+    SDL_Delay(ricom->redraw_interval * 2);
     while (1)
-    {   
+    {
         if (&ricom->p_prog_mon->report_set_public)
         {
             update_image(tex, renderer, ricom->srf_ricom);
@@ -963,12 +957,12 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
         {
             if (event.type == SDL_QUIT ||
                 (event.type == SDL_WINDOWEVENT &&
-                    event.window.event == SDL_WINDOWEVENT_CLOSE))
+                 event.window.event == SDL_WINDOWEVENT_CLOSE))
             {
                 ricom->rc_quit = true;
-                SDL_Delay(100);  
+                SDL_Delay(100);
                 return 0;
-            }  
+            }
         }
     }
     return 0;
@@ -995,9 +989,9 @@ void log2file(Ricom *ricom)
 
 int main(int argc, char *argv[])
 {
-    
+
     Ricom ricom;
-    Ricom* ricom_ptr = &ricom;
+    Ricom *ricom_ptr = &ricom;
 
     if (argc == 1)
     {
