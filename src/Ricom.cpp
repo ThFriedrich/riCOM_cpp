@@ -295,7 +295,7 @@ void Ricom::draw_pixel(SDL_Surface *surface, int x, int y, float val, int col_ma
 ////////////////////////////////////////////////
 //     RICOM class method implementations     //
 ////////////////////////////////////////////////
-Ricom::Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), ricom_mutex(), stem_mutex(), counter_mutex(), mode(RICOM::FILE), b_print2file(false), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0, 0.0}, com_map_x(), com_map_y(), detector_type(RICOM::MERLIN), nx(257), ny(256), nxy(0), rep(1), fr_total(0), skip_row(0), skip_img(0), n_threads(1), queue_size(8), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9)
+Ricom::Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), ricom_mutex(), stem_mutex(), counter_mutex(), mode(RICOM::FILE), b_print2file(false), redraw_interval(20), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0, 0.0}, com_map_x(), com_map_y(), detector_type(RICOM::MERLIN), nx(257), ny(256), nxy(0), rep(1), fr_total(0), skip_row(0), skip_img(0), n_threads(1), queue_size(8), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9)
 {
     n_threads_max = std::thread::hardware_concurrency();
     n_threads = n_threads_max;
@@ -706,8 +706,8 @@ void Ricom::process_frames()
     std::array<std::atomic<float>, 2> *p_com_xy_sum = &com_xy_sum;
 
     // Initialize ProgressMonitor Object
-    ProgressMonitor prog_mon(fr_total, !b_print2file);
-    ProgressMonitor *p_prog_mon = &prog_mon;
+    ProgressMonitor prog_mon(fr_total, !b_print2file, redraw_interval);
+    p_prog_mon = &prog_mon;
 
     for (int ir = 0; ir < rep; ir++)
     {
@@ -730,6 +730,7 @@ void Ricom::process_frames()
                 
                 if (rc_quit)
                 {
+                    pool.wait_for_completion();
                     return;
                 };
             }

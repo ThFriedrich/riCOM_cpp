@@ -7,7 +7,7 @@ namespace chc = std::chrono;
 
 const int ProgressMonitor::DEFAULT_WIDTH = 100;
 
-ProgressMonitor::ProgressMonitor(unsigned long fr_total, bool b_bar, float report_interval, std::ostream &out): fr_count(0), fr_count_i(0), fr_freq(0), report_set(false), first_frame(true), fr(0), fr_avg(0), fr_count_a(0)
+ProgressMonitor::ProgressMonitor(unsigned long fr_total, bool b_bar, float report_interval, std::ostream &out): fr_count(0), fr_count_i(0), fr_freq(0), report_set(false), report_set_public(false), first_frame(true), fr(0), fr_avg(0), fr_count_a(0)
 {
 
     this->fr_total = fr_total;
@@ -50,6 +50,7 @@ ProgressMonitor& ProgressMonitor::operator++()
         fr_freq = fr_avg / fr_count_a;
         Report(fr_count, fr_avg / fr_count_a);
         report_set = true;
+        report_set_public = true;
     }
     return *this;
 }

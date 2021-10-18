@@ -123,7 +123,7 @@ public:
         init(n_threads, limit);
     }
 
-    BoundedThreadPool(){}
+    BoundedThreadPool():n_threads(0){}
 
     ~BoundedThreadPool()
     {

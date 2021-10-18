@@ -239,9 +239,6 @@ int run_gui(Ricom *ricom)
 
     std::string filename = "";
 
-    auto start_perf = chc::high_resolution_clock::now();
-    typedef std::chrono::duration<float, std::milli> float_ms;
-
     // Merlin Parameter;
     int m_threshold0 = 0;
     int m_threshold1 = 511;
@@ -290,15 +287,20 @@ int run_gui(Ricom *ricom)
             }
             if (ImGui::BeginMenu("Hardware Settings"))
             {
+                ImGui::Text("Plotting");
+                ImGui::DragInt("Image Refresh Interval [ms]", &ricom->redraw_interval, 20, 10, 1000);
+                ImGui::Separator();
+
                 ImGui::Text("Multithreading");
                 ImGui::DragInt("Threads", &ricom->n_threads, 1, 1, *&ricom->n_threads_max);
                 ImGui::DragInt("Queue Size", &ricom->queue_size, 1, 1, 256);
-                
                 ImGui::Separator();
+
                 ImGui::Text("Merlin Camera");
                 ImGui::DragInt("nx", &ricom->nx_merlin, 1, 1, 512);
                 ImGui::DragInt("ny", &ricom->ny_merlin, 1, 1, 512);
                 ImGui::Separator();
+
                 ImGui::Text("Timepix Camera");
                 ImGui::DragInt("nx", &ricom->nx_timpix, 1, 1, 512);
                 ImGui::DragInt("ny", &ricom->ny_timpix, 1, 1, 512);
@@ -309,10 +311,10 @@ int run_gui(Ricom *ricom)
         }
 
         const ImGuiViewport *viewport = ImGui::GetMainViewport();
-        auto mil_secs = std::chrono::duration_cast<float_ms>(chc::high_resolution_clock::now() - start_perf).count();
-        if (mil_secs > 350.0)
+        if (&ricom->p_prog_mon->report_set_public)
         {
             b_redraw = true;
+            ricom->p_prog_mon->report_set_public = false;
         }
 
         {
@@ -749,7 +751,6 @@ int run_gui(Ricom *ricom)
         if (b_redraw)
         {
             b_redraw = false;
-            start_perf = chc::high_resolution_clock::now();
         }
     }
 
@@ -949,17 +950,13 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
         t1 = std::thread(run_file, ricom);
         t1.detach();
     }
-
-    auto start_perf = chc::high_resolution_clock::now();
-    typedef std::chrono::duration<float, std::milli> float_ms;
-
+    SDL_Delay(ricom->redraw_interval*2);
     while (1)
     {   
-        auto mil_secs = std::chrono::duration_cast<float_ms>(chc::high_resolution_clock::now() - start_perf).count();
-        if (mil_secs > 500)
+        if (&ricom->p_prog_mon->report_set_public)
         {
-            start_perf = chc::high_resolution_clock::now();
             update_image(tex, renderer, ricom->srf_ricom);
+            ricom->p_prog_mon->report_set_public = false;
         }
 
         while (SDL_PollEvent(&event))
@@ -968,9 +965,10 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
                 (event.type == SDL_WINDOWEVENT &&
                     event.window.event == SDL_WINDOWEVENT_CLOSE))
             {
+                ricom->rc_quit = true;
+                SDL_Delay(100);  
                 return 0;
-            }
-            SDL_Delay(10);   
+            }  
         }
     }
     return 0;
@@ -998,7 +996,6 @@ void log2file(Ricom *ricom)
 int main(int argc, char *argv[])
 {
     
-
     Ricom ricom;
     Ricom* ricom_ptr = &ricom;
 

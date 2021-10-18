@@ -25,9 +25,10 @@ public:
 
     std::atomic<unsigned int> fr_count;         // frame count
     std::atomic<unsigned int> fr_count_i;       // Frame count in interval
-    std::atomic<float> fr_freq;          // frame frequency
-    bool report_set;        // update flag (reset externally) 
-    bool first_frame;       // first frame flag
+    std::atomic<float> fr_freq;                 // frame frequency
+    std::atomic<bool> report_set;                            // update flag (reset internally) 
+    std::atomic<bool> report_set_public;                     // update flag (reset externally) 
+    bool first_frame;                           // first frame flag
     ProgressMonitor& operator++();
     void reset_flags();
     ProgressMonitor(unsigned long fr_total, bool b_bar = true, float report_interval = 250.0, std::ostream &out = std::cerr);
@@ -39,8 +40,8 @@ private:
 
     std::atomic<float> fr;              // Frequncy per frame
     std::atomic<float> fr_avg;          // Average frequency
-    float report_interval; // Update interval
-    std::atomic<int> fr_count_a;     // Count measured points for averaging
+    float report_interval;              // Update interval
+    std::atomic<int> fr_count_a;        // Count measured points for averaging
     
     chc::time_point<chc::high_resolution_clock> time_stamp;
 

@@ -157,6 +157,8 @@ private:
 public:
     RICOM::modes mode;
     bool b_print2file;
+    int redraw_interval;
+    ProgressMonitor *p_prog_mon;
     float update_dose_lowbound;
     bool update_offset;
     bool use_detector;
