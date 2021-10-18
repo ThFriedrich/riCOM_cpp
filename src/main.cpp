@@ -607,7 +607,23 @@ int run_gui(Ricom *ricom)
                 ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 
                 ImGui::Begin("riCOM", NULL, ImGuiWindowFlags_NoScrollbar);
+                
+                bool b_button;
+                if (ImGui::Button("Save Image as..."))
+                {
+                    b_button = true;
+                    saveFileDialog.Open();
+                }
+                
+                ImGui::SameLine();
+                if (ImGui::Button("Save COM..."))
+                {
+                    b_button = false;
+                    saveFileDialog.Open();
+                }
 
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(-1);
                 if (ImGui::Combo("Colormap", &ricom->ricom_cmap, cmaps, IM_ARRAYSIZE(cmaps)))
                 {
                     if (ricom->fr_count_total == 0)
@@ -618,19 +634,6 @@ int run_gui(Ricom *ricom)
                     {
                         ricom->rescale_ricom = true;
                     }
-                }
-                ImGui::SameLine();
-                bool b_button;
-                if (ImGui::Button("Save Image as..."))
-                {
-                    b_button = true;
-                    saveFileDialog.Open();
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Save COM..."))
-                {
-                    b_button = false;
-                    saveFileDialog.Open();
                 }
 
                 saveFileDialog.Display();
@@ -685,7 +688,13 @@ int run_gui(Ricom *ricom)
                 ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 
                 ImGui::Begin("vSTEM", &ricom->use_detector, ImGuiWindowFlags_NoScrollbar);
+                if (ImGui::Button("Save Image as..."))
+                {
+                    saveFileDialog.Open();
+                }
 
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(-1);
                 if (ImGui::Combo("Colormap", &ricom->stem_cmap, cmaps, IM_ARRAYSIZE(cmaps)))
                 {
                     if (ricom->fr_count_total == 0)
@@ -697,11 +706,8 @@ int run_gui(Ricom *ricom)
                         ricom->rescale_stem = true;
                     }
                 }
-                ImGui::SameLine();
-                if (ImGui::Button("Save Image as..."))
-                {
-                    saveFileDialog.Open();
-                }
+                
+                
                 saveFileDialog.Display();
                 if (saveFileDialog.HasSelected())
                 {

@@ -447,7 +447,7 @@ void Ricom::draw_ricom_image()
 void Ricom::draw_ricom_image(int y0, int ye)
 {
     std::scoped_lock lock(ricom_mutex);
-    for (int y = y0; y < ye; y++)
+    for (int y = y0; y <= ye; y++)
     {
         for (int x = 0; x < nx; x++)
         {
@@ -481,7 +481,7 @@ void Ricom::draw_stem_image()
 void Ricom::draw_stem_image(int y0, int ye)
 {
     std::scoped_lock lock(stem_mutex);
-    for (int y = y0; y < ye; y++)
+    for (int y = y0; y <= ye; y++)
     {
         for (int x = 0; x < nx; x++)
         {
@@ -592,10 +592,11 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose
     com_xy_sum->at(1) += com_xy[1];
 
     int id = iy * nx + ix;
-    counter_mutex.lock();
-    ++(*p_prog_mon);
     com_map_x[id] = com_xy[0];
     com_map_y[id] = com_xy[1];
+
+    counter_mutex.lock();
+    ++(*p_prog_mon);
     fr_count = p_prog_mon->fr_count;
     if (p_prog_mon->report_set)
     {
