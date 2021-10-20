@@ -3,4 +3,4 @@
 	url = git@github.com:ocornut/imgui.git
 [submodule "merlin_interface"]
 	path = merlin_interface
-	url = git@gitlab.com:tfriedrich/merlin_interface.git
+	url = https://gitlab.com/tfriedrich/merlin_interface.git
