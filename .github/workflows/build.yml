@@ -9,6 +9,9 @@ jobs:
       - uses: actions/checkout@v2
         with: 
           submodules: true
+        env: 
+          token: ${{ secrets.GITLAB_TOKEN }}
+
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: amd64_x86
