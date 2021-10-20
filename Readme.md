@@ -1,5 +1,5 @@
 [![BUILD](https://github.com/ThFriedrich/riCOM_cpp/actions/workflows/build.yml/badge.svg)](https://github.com/ThFriedrich/riCOM_cpp/blob/master/.github/workflows/build.yml)
-
+[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT) 
 # Installation
 - Just download the precompiled executable for your system from the artefacts of the automated compilation run from the Repositories "Actions" Tab, for example [here](https://github.com/ThFriedrich/riCOM_cpp/actions/runs/1365246924)!
 - Alternatively build from source as outlined below. Make sure you clone the repository including submodules: ```git clone --recurse-submodules -j2 git@github.com:ThFriedrich/riCOM_cpp.git``` 
