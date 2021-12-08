@@ -1,13 +1,24 @@
+/* Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu, 
+ * University of Antwerp - All Rights Reserved. 
+ * You may use, distribute and modify
+ * this code under the terms of the GPL3 license.
+ * You should have received a copy of the GPL3 license with
+ * this file. If not, please visit: 
+ * https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * Authors: 
+ *   Thomas Friedrich <thomas.friedrich@uantwerpen.be>
+ *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
+ */
+
 #include "ProgressMonitor.hpp"
 #include <cmath>
 #include <chrono>
-#include "ricom_types.h"
 
 namespace chc = std::chrono;
+typedef chc::duration<float, std::milli> float_ms;
 
-const int ProgressMonitor::DEFAULT_WIDTH = 100;
-
-ProgressMonitor::ProgressMonitor(unsigned long fr_total, bool b_bar, float report_interval, std::ostream &out): fr_count(0), fr_count_i(0), fr_freq(0), report_set(false), report_set_public(false), first_frame(true), fr(0), fr_avg(0), fr_count_a(0)
+ProgressMonitor::ProgressMonitor(unsigned long fr_total, bool b_bar, float report_interval, std::ostream &out) : fr_count(0), fr_count_i(0), fr_freq(0), report_set(false), report_set_public(false), first_frame(true), fr(0), fr_avg(0), fr_count_a(0)
 {
 
     this->fr_total = fr_total;
@@ -24,24 +35,24 @@ ProgressMonitor::ProgressMonitor(unsigned long fr_total, bool b_bar, float repor
 int ProgressMonitor::GetBarLength()
 {
     // get console width and according adjust the length of the progress bar
-    int bar_length = static_cast<int>((DEFAULT_WIDTH - CHARACTER_WIDTH_PERCENTAGE) / 2.);
+    int bar_length = static_cast<int>((TERMINAL_WIDTH - CHARACTER_WIDTH_PERCENTAGE) / 2.);
     return bar_length;
 }
 
 void ProgressMonitor::ClearBarField()
 {
-    for (int i = 0; i < DEFAULT_WIDTH; ++i)
+    for (int i = 0; i < TERMINAL_WIDTH; ++i)
     {
         *out << " ";
     }
     *out << "\r" << std::flush;
 }
 
-ProgressMonitor& ProgressMonitor::operator++()
+ProgressMonitor &ProgressMonitor::operator++()
 {
     fr_count_i++;
     fr_count++;
-    auto mil_secs = chc::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - time_stamp).count();
+    auto mil_secs = chc::duration_cast<float_ms>(chc::high_resolution_clock::now() - time_stamp).count();
     if (mil_secs > report_interval || fr_count == fr_total)
     {
         fr = fr_count_i / mil_secs;
@@ -111,7 +122,7 @@ void ProgressMonitor::Report(unsigned long idx, float print_val)
     catch (unsigned long e)
     {
         ClearBarField();
-        std::cerr << "PROGRESS_BAR_EXCEPTION: _idx (" << e << ") went out of bounds, greater than fr_total (" << fr_total << ")." << std::endl
+        std::cerr << "EXCEPTION: frame index (" << e << ") went out of bounds (fr_total = " << fr_total << ")." << std::endl
                   << std::flush;
     }
 }

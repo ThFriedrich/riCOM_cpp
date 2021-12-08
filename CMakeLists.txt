@@ -1,7 +1,20 @@
-﻿cmake_minimum_required(VERSION 3.16.0)
+﻿# Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu, 
+# University of Antwerp - All Rights Reserved. 
+# You may use, distribute and modify
+# this code under the terms of the GPL3 license.
+# You should have received a copy of the GPL3 license with
+# this file. If not, please visit: 
+# https://www.gnu.org/licenses/gpl-3.0.en.html
+# 
+# Authors: 
+#   Thomas Friedrich <thomas.friedrich@uantwerpen.be>
+#   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
+# 
+
+cmake_minimum_required(VERSION 3.16.0)
 
 project(RICOM LANGUAGES C CXX)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -15,7 +28,7 @@ if (UNIX)
     set(FFTW3_DIR /usr/include)
     set(CMAKE_CXX_FLAGS "-Wall -Wextra -pthread")
     set(CMAKE_CXX_FLAGS_DEBUG "-g")
-    set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=skylake")
+    set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
 endif(UNIX)
 
 if (WIN32)
@@ -28,13 +41,13 @@ if (WIN32)
     link_directories(${FFTW3_DIR})
 
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-        set(CMAKE_CXX_FLAGS "-Wall -Wextra -pthread -std=c++20")
+        set(CMAKE_CXX_FLAGS "-Wall -Wextra -pthread -std=c++17")
         set(CMAKE_CXX_FLAGS_DEBUG "-g")
         set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
     endif()
 
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /nologo")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GL")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GA")
@@ -46,7 +59,7 @@ if (WIN32)
     endif()
 
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "IntelLLVM")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Qstd:c++20 /Ox")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Qstd:c++17 /Ox")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Qopt-assume-no-loop-carried-dep=2")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /QxKABYLAKE")
         set(MMD_LIB C:/Program\ Files\ \(x86\)/Intel/oneAPI/compiler/latest/windows/redist/intel64_win/compiler)

@@ -78,7 +78,7 @@ void Ricom_kernel::compute_kernel()
     if (b_filter)
     {
         compute_filter();
-        absorb_filter();
+        include_filter();
     }
 }
 
@@ -101,10 +101,9 @@ void Ricom_kernel::compute_filter()
             }
         }
     }
-    // kernel_filter[kernel_size * filter_size + kernel_size] = 1;
 }
 
-void Ricom_kernel::absorb_filter()
+void Ricom_kernel::include_filter()
 {
     int k_width_sym = kernel_size * 2 + 1;
     std::vector<int> map = fftshift_map(k_width_sym, k_width_sym);
@@ -259,6 +258,29 @@ void Ricom_detector::compute_detector(std::array<float, 2> &offset)
     }
 }
 
+///////////////////////////////////////////////////
+//      Counter x-y position class methods       //
+///////////////////////////////////////////////////
+id_x_y::id_x_y(int id, int x, int y, int nx_ricom, int ny_ricom, bool valid)
+{
+    this->id = id;
+    this->x = x;
+    this->y = y;
+    this->nx_ricom = nx_ricom;
+    this->ny_ricom = ny_ricom;
+    this->valid = valid;
+};
+
+id_x_y operator+(id_x_y &c1, const int &c2)
+{
+    id_x_y res = c1;
+    res.id = c1.id + c2;
+    res.y = res.id / c1.nx_ricom;
+    res.x = res.id % c1.nx_ricom;
+    res.valid = res.y >= 0 && res.y < c1.ny_ricom && res.x < c1.nx_ricom && res.x >= 0;
+    return res;
+};
+
 ////////////////////////////////////////////////
 //               SDL plotting                 //
 ////////////////////////////////////////////////
@@ -296,7 +318,7 @@ void Ricom::draw_pixel(SDL_Surface *surface, int x, int y, float val, int col_ma
 ////////////////////////////////////////////////
 //     RICOM class method implementations     //
 ////////////////////////////////////////////////
-Ricom::Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), ricom_mutex(), stem_mutex(), counter_mutex(), mode(RICOM::FILE), b_print2file(false), redraw_interval(20), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0, 0.0}, com_map_x(), com_map_y(), detector_type(RICOM::MERLIN), nx(256), ny(256), nxy(0), rep(1), fr_total(0), skip_row(1), skip_img(0), n_threads(1), queue_size(8), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9)
+Ricom::Ricom() : stem_data(), stem_max(-FLT_MAX), stem_min(FLT_MAX), u(), v(), ricom_data(), update_list(), ricom_max(-FLT_MAX), ricom_min(FLT_MAX), ricom_mutex(), stem_mutex(), counter_mutex(), mode(RICOM::FILE), b_print2file(false), redraw_interval(20), p_prog_mon(nullptr), update_dose_lowbound(6), update_offset(true), use_detector(false), b_recompute_detector(false), b_recompute_kernel(false), detector(), kernel(), offset{127.5, 127.5}, com_public{0.0, 0.0}, com_map_x(), com_map_y(), detector_type(RICOM::MERLIN), nx(256), ny(256), nxy(0), rep(1), fr_total(0), skip_row(1), skip_img(0), n_threads(1), queue_size(8), fr_freq(0.0), fr_count(0.0), fr_count_total(0.0), rescale_ricom(false), rescale_stem(false), rc_quit(false), srf_ricom(NULL), ricom_cmap(9), srf_stem(NULL), stem_cmap(9), srf_cbed(NULL), cbed_cmap(9)
 {
     n_threads_max = std::thread::hardware_concurrency();
     n_threads = 1;
@@ -575,7 +597,7 @@ inline void Ricom::skip_frames(int n_skip, std::vector<T> &data)
 }
 
 template <typename T>
-void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose_sum, std::array<std::atomic<float>, 2> *com_xy_sum, ProgressMonitor *p_prog_mon)
+void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose_sum, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon)
 {
     std::vector<T> *data_ptr = &data;
 
@@ -620,7 +642,7 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose
 }
 
 template <typename T>
-void Ricom::com_icom(std::vector<T> *data_ptr, int ix, int iy, std::atomic<int> *dose_sum, std::array<std::atomic<float>, 2> *com_xy_sum, ProgressMonitor *p_prog_mon)
+void Ricom::com_icom(std::vector<T> *data_ptr, int ix, int iy, std::atomic<int> *dose_sum, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon)
 {
     std::array<float, 2> com_xy = {0.0, 0.0};
     com<T>(data_ptr, com_xy, dose_sum);
@@ -674,8 +696,8 @@ void Ricom::process_frames()
     std::atomic<int> dose_sum = 0;
     std::atomic<int> *p_dose_sum = &dose_sum;
 
-    std::array<std::atomic<float>, 2> com_xy_sum = {0.0, 0.0};
-    std::array<std::atomic<float>, 2> *p_com_xy_sum = &com_xy_sum;
+    std::array<float, 2> com_xy_sum = {0.0, 0.0};
+    std::array<float, 2> *p_com_xy_sum = &com_xy_sum;
 
     // Initialize ProgressMonitor Object
     ProgressMonitor prog_mon(fr_total, !b_print2file, redraw_interval);
@@ -752,7 +774,7 @@ void Ricom::run_merlin()
         else if (dtype == "R64")
         {
             b_raw = true;
-            MerlinInterface::init_uv(u,v);
+            MerlinInterface::init_uv(u, v);
             b_binary = false;
             switch (depth)
             {
@@ -783,45 +805,31 @@ void Ricom::process_timepix_stream()
     std::vector<size_t> dose_map(nxy);
     std::vector<size_t> sumx_map(nxy);
     std::vector<size_t> sumy_map(nxy);
-    std::vector<size_t> comx_map(nxy);
-    std::vector<size_t> comy_map(nxy);
 
     std::array<float, 2> com_xy = {0.0, 0.0};
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
     int dose_sum = 0;
-    int idx = 0;
     int idxx = 0;
-    int ix;
-    int iy;
-    int img_num = 0;
-    int first_frame = img_num * nxy;
-    int end_frame = (img_num + 1) * nxy;
-    bool b_while = true;
+    int ix = 0;
+    int iy = 0;
 
-    // Initialize Progress bar
-    // ProgressBar bar(fr_total, "kHz", !b_print2file);
+    unsigned int img_num = 0;
+    unsigned int first_frame = img_num * nxy;
+    unsigned int end_frame = (img_num + 1) * nxy;
+    unsigned int fr_total_u = (unsigned int)fr_total;
 
-    // Performance measurement
-    auto start_perf = chc::high_resolution_clock::now();
-
-    float fr = 0;          // Frequncy per frame
-    size_t fr_count_i = 0; // Frame count in interval
-    float fr_avg = 0;      // Average frequency
-    size_t fr_count_a = 0; // Count measured points for averaging
+    ProgressMonitor prog_mon(fr_total, !b_print2file, redraw_interval);
+    p_prog_mon = &prog_mon;
 
     dose_map.assign(nxy, 0);
     sumx_map.assign(nxy, 0);
     sumy_map.assign(nxy, 0);
-    comx_map.assign(nxy, 0);
-    comy_map.assign(nxy, 0);
-    ricom_data.assign(nxy, 0);
-    stem_data.assign(nxy, 0);
-
-    while (b_while)
+    reinit_vectors_limits();
+    
+    while (true)
     {
-        read_com_ti(idx, dose_map, sumx_map, sumy_map, first_frame, end_frame);
-        // std::cout << idx << std::endl;
-        idxx = idx - nxy * img_num - 2;
+        read_com_ti(prog_mon.fr_count, dose_map, sumx_map, sumy_map, first_frame, end_frame);
+        idxx = prog_mon.fr_count - nxy * img_num - 2;
         if (idxx >= 0)
         {
             if (dose_map[idxx] == 0)
@@ -834,61 +842,54 @@ void Ricom::process_timepix_stream()
                 com_xy[0] = sumx_map[idxx] / dose_map[idxx];
                 com_xy[1] = sumy_map[idxx] / dose_map[idxx];
             }
-            comx_map[idxx] = com_xy[0];
-            comy_map[idxx] = com_xy[1];
+            com_map_x[idxx] = com_xy[0];
+            com_map_y[idxx] = com_xy[1];
             com_xy_sum[0] += com_xy[0];
             com_xy_sum[1] += com_xy[1];
             dose_sum += dose_map[idxx];
 
             ix = idxx % nx;
             iy = floor(idxx / nx);
-            icom(com_xy, ix, iy); // process two frames before the probe position to avoid toa problem
+            // process two frames before the probe position to avoid toa problem
+            icom(com_xy, ix, iy);
         }
 
-        fr_count_i++;
-        auto mil_secs = std::chrono::duration_cast<RICOM::double_ms>(chc::high_resolution_clock::now() - start_perf).count();
-        if (mil_secs > 500.0 || idx == fr_total) // ~50Hz for display
-        {
-            rescales_recomputes();
-            std::cout << idx << " rescale'd" << std::endl;
-            if (rc_quit)
-            {
-                return;
-            }
+        ++prog_mon;
+        fr_count = prog_mon.fr_count;
 
-            // plot_cbed<T>(data);
-            fr = fr_count_i / mil_secs;
-            fr_avg += fr;
-            fr_count_a++;
-            start_perf = chc::high_resolution_clock::now();
-            fr_freq = fr_avg / fr_count_a;
+        if (prog_mon.report_set)
+        {
+            fr_freq = prog_mon.fr_freq;
+            rescales_recomputes();
+            draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), iy);
             for (int i = 0; i < 2; i++)
             {
-                com_public[i] = com_xy_sum[i] / fr_count_i;
+                com_public[i] = com_xy_sum[i] / prog_mon.fr_count_i;
                 com_xy_sum[i] = 0;
             }
-            fr_count_i = 0;
-            // bar.Progressed(fr_count, fr_avg / fr_count_a);
-            std::cout << idx << " progress'd" << std::endl;
+            prog_mon.reset_flags();
         }
-        if (idx >= end_frame && idx != fr_total)
+
+        if (prog_mon.fr_count >= end_frame && prog_mon.fr_count != fr_total_u)
         {
             img_num++;
             first_frame = img_num * nxy;
             end_frame = (img_num + 1) * nxy;
-            reset_limits();
+            reinit_vectors_limits();
             dose_map.assign(nxy, 0);
             sumx_map.assign(nxy, 0);
             sumy_map.assign(nxy, 0);
-            comx_map.assign(nxy, 0);
-            comy_map.assign(nxy, 0);
-            ricom_data.assign(nxy, 0);
-            stem_data.assign(nxy, 0);
+            if (update_offset && dose_sum > pow(10.0, update_dose_lowbound))
+            {
+                offset[0] = com_public[0];
+                offset[1] = com_public[1];
+                dose_sum = 0;
+            }
         }
-        if (idx >= fr_total)
+
+        if (prog_mon.fr_count == fr_total_u || rc_quit)
         {
-            b_while = false;
-            std::cout << "dose sum" << dose_sum << std::endl;
+            return;
         }
     }
 }
@@ -896,9 +897,6 @@ void Ricom::process_timepix_stream()
 void Ricom::run_timepix()
 {
     // Run the main loop
-    // dwell_time = 6000;
-    nx_timpix = 256;
-    ny_timpix = 256;
     process_timepix_stream();
 }
 

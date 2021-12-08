@@ -1,3 +1,16 @@
+/* Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu, 
+ * University of Antwerp - All Rights Reserved. 
+ * You may use, distribute and modify
+ * this code under the terms of the GPL3 license.
+ * You should have received a copy of the GPL3 license with
+ * this file. If not, please visit: 
+ * https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * Authors: 
+ *   Thomas Friedrich <thomas.friedrich@uantwerpen.be>
+ *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
+ */
+
 #include <string.h>
 #include <thread>
 #include <chrono>
@@ -298,7 +311,7 @@ int run_gui(Ricom *ricom)
         }
 
         const ImGuiViewport *viewport = ImGui::GetMainViewport();
-        if (&ricom->p_prog_mon->report_set_public)
+        if (ricom->p_prog_mon != nullptr && ricom->p_prog_mon->report_set_public)
         {
             b_redraw = true;
             ricom->p_prog_mon->report_set_public = false;
@@ -323,8 +336,8 @@ int run_gui(Ricom *ricom)
                 ImGui::DragInt("ny", &ricom->ny, 1, 1, SDL_MAX_SINT32);
                 ImGui::DragInt("Repetitions", &ricom->rep, 1, 1, SDL_MAX_SINT32);
                 ImGui::BeginGroup();
-                ImGui::DragInt("skip row", &ricom->skip_row, 1, 1);
-                ImGui::DragInt("skip img", &ricom->skip_img, 1, 1);
+                ImGui::DragInt("skip row", &ricom->skip_row, 1, 0, SDL_MAX_SINT32);
+                ImGui::DragInt("skip img", &ricom->skip_img, 1, 0, SDL_MAX_SINT32);
                 ImGui::EndGroup();
                 if (ImGui::IsItemHovered())
                 {
@@ -410,7 +423,7 @@ int run_gui(Ricom *ricom)
                     }
                 }
             }
-            if (ImGui::CollapsingHeader(".mib file reconstruction", ImGuiTreeNodeFlags_DefaultOpen))
+            if (ImGui::CollapsingHeader("File reconstruction", ImGuiTreeNodeFlags_DefaultOpen))
             {
 
                 if (ImGui::Button("Open File", ImVec2(-1.0f, 0.0f)))
@@ -607,14 +620,14 @@ int run_gui(Ricom *ricom)
                 ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 
                 ImGui::Begin("riCOM", NULL, ImGuiWindowFlags_NoScrollbar);
-                
+
                 bool b_button;
                 if (ImGui::Button("Save Image as..."))
                 {
                     b_button = true;
                     saveFileDialog.Open();
                 }
-                
+
                 ImGui::SameLine();
                 if (ImGui::Button("Save COM..."))
                 {
@@ -706,8 +719,7 @@ int run_gui(Ricom *ricom)
                         ricom->rescale_stem = true;
                     }
                 }
-                
-                
+
                 saveFileDialog.Display();
                 if (saveFileDialog.HasSelected())
                 {
@@ -861,6 +873,12 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
                 ricom->detector.offset[1] = std::stof(argv[i + 1]);
                 i++;
             }
+            // Set CBED center offset
+            if (strcmp(argv[i], "-update_offset") == 0)
+            {
+                ricom->update_offset = (bool)std::stoi(argv[i + 1]);
+                i++;
+            }
             // Set STEM radii
             if (strcmp(argv[i], "-radius") == 0)
             {
@@ -953,7 +971,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
     SDL_Delay(ricom->redraw_interval * 2);
     while (1)
     {
-        if (&ricom->p_prog_mon->report_set_public)
+        if (ricom->p_prog_mon != nullptr && ricom->p_prog_mon->report_set_public)
         {
             update_image(tex, renderer, ricom->srf_ricom);
             ricom->p_prog_mon->report_set_public = false;

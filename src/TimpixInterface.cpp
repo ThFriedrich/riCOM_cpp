@@ -1,3 +1,16 @@
+/* Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu, 
+ * University of Antwerp - All Rights Reserved. 
+ * You may use, distribute and modify
+ * this code under the terms of the GPL3 license.
+ * You should have received a copy of the GPL3 license with
+ * this file. If not, please visit: 
+ * https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * Authors: 
+ *   Thomas Friedrich <thomas.friedrich@uantwerpen.be>
+ *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
+ */
+
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <string>
@@ -7,6 +20,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <atomic>
 
 #include "TimpixInterface.h"
 
@@ -26,11 +40,11 @@ inline void TimpixInterface::read_data_from_file_ti(e_event &ev)
     t3p_stream.read((char *)&ev, sizeof(ev));
 }
 
-void TimpixInterface::read_com_ti(int &idx, std::vector<size_t> &dose_map,
-                                  std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, int first_frame, int end_frame)
+void TimpixInterface::read_com_ti(std::atomic<unsigned int> &idx, std::vector<size_t> &dose_map,
+                                  std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, int unsigned first_frame, unsigned int end_frame)
 {
     e_event ev;
-    int probe_position;
+    unsigned int probe_position;
 
     while (true)
     {

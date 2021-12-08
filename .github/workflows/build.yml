@@ -1,3 +1,15 @@
+# Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu,
+# University of Antwerp - All Rights Reserved.
+# You may use, distribute and modify
+# this code under the terms of the GPL3 license.
+# You should have received a copy of the GPL3 license with
+# this file. If not, please visit:
+# https://www.gnu.org/licenses/gpl-3.0.en.html
+
+# Authors:
+#   Thomas Friedrich <thomas.friedrich@uantwerpen.be>
+#   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
+
 name: BUILD
 
 on: [push, pull_request, workflow_dispatch]
@@ -7,12 +19,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-        with: 
+        with:
           submodules: true
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: amd64_x86
-      
+
       - name: get sdl, fftw
         run: |
           curl.exe http://www.libsdl.org/release/SDL2-devel-2.0.16-VC.zip --output sdl.zip
@@ -34,7 +46,7 @@ jobs:
           del fftw.zip
           lib /def:libfftw3-3.def
           cd ..
-          move FFTW C:\       
+          move FFTW C:\
 
       - name: Build with MSVC
         run: |
@@ -48,24 +60,24 @@ jobs:
           name: Release_Win
           path: |
             build\Release
-  
+
   build_Linux:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-        with: 
+        with:
           submodules: true
-      - name: Get SDL2, fftw3 and gcc-11
+      - name: Get SDL2, fftw3 and gcc-9
         run: |
-            sudo apt-get update
-            sudo apt-get install libsdl2-dev libsdl2-image-dev libfftw3-dev gcc-11 g++-11
+          sudo apt-get update
+          sudo apt-get install libsdl2-dev libsdl2-image-dev libfftw3-dev gcc-9 g++-9
       - name: Build
         env:
-          CC:   gcc-11
-          CXX:  g++-11
+          CC: gcc-9
+          CXX: g++-9
         run: |
-            cmake . -D CMAKE_BUILD_TYPE=Release
-            make
+          cmake . -D CMAKE_BUILD_TYPE=Release
+          make
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:

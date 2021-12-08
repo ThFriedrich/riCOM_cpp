@@ -1,3 +1,16 @@
+/* Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu, 
+ * University of Antwerp - All Rights Reserved. 
+ * You may use, distribute and modify
+ * this code under the terms of the GPL3 license.
+ * You should have received a copy of the GPL3 license with
+ * this file. If not, please visit: 
+ * https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * Authors: 
+ *   Thomas Friedrich <thomas.friedrich@uantwerpen.be>
+ *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
+ */
+
 #ifndef MERLIN_INTERFACE_H
 #define MERLIN_INTERFACE_H
 
@@ -34,7 +47,6 @@ class MerlinInterface
 private:
     RICOM::modes mode;
     struct sockaddr_in address;
-    int addrlen = sizeof(address);
 
     std::array<char, 384> head_buffer;
     std::array<char, 15> tcp_buffer;
@@ -193,7 +205,6 @@ public:
         int bytes_payload_count = 0;
         int bytes_payload_total = 0;
 
-        // std::cout << " (reading data) ";
         while (bytes_payload_total < data_size)
         {
             bytes_payload_count = recv(rc_socket,
@@ -214,7 +225,6 @@ public:
             }
             bytes_payload_total += bytes_payload_count;
         }
-        // std::cout << " (data read) ";
     }
 
     void flush_socket()
@@ -328,7 +338,7 @@ public:
         acq_header.resize(l);
         char *buffer = reinterpret_cast<char *>(&acq_header[0]);
         read_data_from_socket(buffer, l);
-        char *p = strtok(buffer, " "); //strtok() func. with delimeter " "
+        char *p = strtok(buffer, " ");
         while (p)
         {
             acq += std::string(p) + "\n";
@@ -345,7 +355,6 @@ public:
 
         try
         {
-            //converting the string to an integer
             int ds = stoi(n);
             return ds;
         }
@@ -359,20 +368,16 @@ public:
     inline void decode_head()
     {
         rcv.assign(head_buffer.cbegin(), head_buffer.cend());
-        // splitting the header string into a vector of strings
         size_t i = 0;
         head.fill("");
         std::stringstream ss(rcv);
         while (ss.good() && i <= 6)
         {
             std::getline(ss, head[i], ',');
-            // std::cout << head[i] << " ";
             i++;
         }
-        // std::cout << std::endl;
         if (i >= 6)
         {
-            //converting the string to an integer
             try
             {
                 nx_merlin = stoi(head[4]);
@@ -411,7 +416,6 @@ public:
         }
     }
 
-    // Reading data stream from Socket
     void connect_socket()
     {
 #ifdef WIN32
@@ -429,29 +433,6 @@ public:
             handle_socket_errors("intitializing Socket");
         }
 
-        //  #ifdef WIN32
-        //         DWORD timeout = 0.5;
-        //         if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
-        //         {
-        //             handle_socket_errors("setting socket options");
-        //         }
-        //         else
-        //         {
-        //             setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
-        //         }
-        //  #else
-        //         struct timeval tv;
-        //         tv.tv_sec = 0.5;
-        //         if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
-        //         {
-        //             handle_socket_errors("setting socket options");
-        //         }
-        //         else
-        //         {
-        //             setsockopt(rc_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-        //         }
-        //  #endif
-
         if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
         {
             handle_socket_errors("setting socket options");
@@ -462,6 +443,7 @@ public:
         address.sin_port = htons(port);
 
         std::cout << "Waiting for incoming connection..." << std::endl;
+        
         // Connecting socket to the port
         int error_counter = 0;
         while (true)
