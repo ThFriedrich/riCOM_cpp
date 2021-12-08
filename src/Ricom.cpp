@@ -714,7 +714,7 @@ void Ricom::process_frames()
                 p_prog_mon->first_frame = false;
                 if (n_threads > 1)
                 {
-                    pool.push_task([=, this]
+                    pool.push_task([=]
                                    { com_icom<T>(data, ix, iy, p_dose_sum, p_com_xy_sum, p_prog_mon); });
                 }
                 else
@@ -825,7 +825,7 @@ void Ricom::process_timepix_stream()
     sumx_map.assign(nxy, 0);
     sumy_map.assign(nxy, 0);
     reinit_vectors_limits();
-    
+
     while (true)
     {
         read_com_ti(prog_mon.fr_count, dose_map, sumx_map, sumy_map, first_frame, end_frame);
