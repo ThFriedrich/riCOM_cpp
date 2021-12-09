@@ -1,7 +1,9 @@
 [![BUILD](https://github.com/ThFriedrich/riCOM_cpp/actions/workflows/build.yml/badge.svg)](https://github.com/ThFriedrich/riCOM_cpp/blob/master/.github/workflows/build.yml)
 [![License: GPL3](https://img.shields.io/badge/License-GPL3-brightgreen.svg)](https://opensource.org/licenses/GPL-3.0) 
+
+This repository contains the C++ implementation of the riCOM (Real Time Centre Of Mass) algorithm for 4D Scanning electron microscopy as described in [this preprint](https://arxiv.org/abs/2112.04442). At this point it is compatible with .mib files (Quantum Detectors Merlin) and .t3p (Timepix camera) data and can be run in live mode with the Merlin camera.
 # Installation
-- Just download the precompiled executable for your system from the artefacts of the automated compilation run from the Repositories "Actions" Tab, for example [here](https://github.com/ThFriedrich/riCOM_cpp/actions/runs/1365246924)!
+- Just download the precompiled executable for your system from the artefacts of the automated compilation run from the Repositories "Actions" Tab, for example [here](https://github.com/ThFriedrich/riCOM_cpp/actions/runs/1365246924)! The Windows version includes additional libraries, which need be kept in the same folder as the executable. Linux requires SDL2 and FFTW3 libraries on your system (see below).
 - Alternatively build from source as outlined below. Make sure you clone the repository including submodules: ```git clone --recurse-submodules -j2 git@github.com:ThFriedrich/riCOM_cpp.git``` 
 - The project uses features of C++ standard 17. You may need appropriate compilers and libraries.
 
@@ -54,13 +56,16 @@ msbuild .\RICOM.vcxproj /p:configuration=Release
 ```
 The executable RICOM.exe will be in the folder 'build\Release'. Make  sure **the files 'SDL2.dll' and 'libmmd.dll' are in the same location as the executable** 
 
-### Running in Live mode with Quantum Detector MerlinEM camera
+## Running in Live mode with Quantum Detector MerlinEM camera
 To send instructions to the camera a python scipt is executed internally, which relies on the [Merlin Interface package](https://gitlab.com/tfriedrich/merlin_interface). It is a submodule of this repository, but it can also be installed using pip or conda, e.g.
 ```bash
 pip3 install merlin_interface
 ```
 
-### License
+## Running example files
+A set of compatible example datasets are provided in an open data repository on [Zenodo](doi.org/10.5281/zenodo.5572123).
+
+## License
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
@@ -70,5 +75,5 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-You may contact the [University of Antwerp](jo.verbeek@uantwerpen.be) for alternative licensing options if 
-necessary.
+**You may contact the [University of Antwerp](jo.verbeek@uantwerpen.be) for alternative licensing options if 
+necessary.**
