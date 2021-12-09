@@ -63,7 +63,7 @@ pip3 install merlin_interface
 ```
 
 ## Running example files
-A set of compatible example datasets are provided in an open data repository on [Zenodo](doi.org/10.5281/zenodo.5572123).
+A set of compatible example datasets are provided in an open data repository on [Zenodo](https://zenodo.org/record/5572123#.YbHNzNso9hF).
 
 ## License
 it under the terms of the GNU General Public License as published by
