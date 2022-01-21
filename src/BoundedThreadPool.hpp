@@ -11,7 +11,8 @@
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
 
-#pragma once
+#ifndef BOUNDED_THREAD_POOL_H
+#define BOUNDED_THREAD_POOL_H
 
 #include <thread>
 #include <queue>
@@ -146,3 +147,5 @@ public:
         join_threads();
     }
 };
+
+#endif

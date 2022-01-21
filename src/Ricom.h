@@ -24,9 +24,9 @@
 #include <mutex>
 #include <future>
 
-#include "MerlinInterface.hpp"
-#include "TimpixInterface.h"
-#include "ProgressMonitor.hpp"
+#include "SocketConnector.h"
+#include "ProgressMonitor.h"
+#include "Camera.h"
 
 class Ricom_kernel
 {
@@ -41,16 +41,24 @@ public:
     std::vector<float> kernel_x;
     std::vector<float> kernel_y;
     std::vector<float> kernel_filter;
+    std::vector<float> f_approx;
     // Methods
     void compute_kernel();
     void compute_filter();
     void include_filter();
     std::vector<int> fftshift_map(int x, int y);
     // Constructor
-    Ricom_kernel() : kernel_size(5), b_filter(false), kernel_filter_frequency{20, 1}, k_width_sym(0), rotation(0.0), kernel_x(), kernel_y()
+    Ricom_kernel() : kernel_size(5),
+                     b_filter(false),
+                     kernel_filter_frequency{20, 1},
+                     k_width_sym(0),
+                     rotation(0.0),
+                     kernel_x(),
+                     kernel_y()
     {
         compute_kernel();
     };
+    void approximate_frequencies(size_t n_im);
     // Destructor
     ~Ricom_kernel(){};
 };
@@ -77,24 +85,31 @@ class Ricom_detector
 public:
     // Properties
     std::array<float, 2> radius;
-    std::array<float, 2> offset;
-    size_t nx_cam;
-    size_t ny_cam;
     std::vector<int> id_list;
 
     // Methods
-    void compute_detector();
-    void compute_detector(std::array<float, 2> &offset);
+    void compute_detector(int nx_cam, int ny_cam);
+    void compute_detector(std::array<float, 2> &offset, int nx_cam, int ny_cam);
     // Constructor
-    Ricom_detector() : radius{0.0, 0.0}, offset{127.5, 127.5}, nx_cam(256), ny_cam(256), id_list()
+    Ricom_detector(int nx_cam, int ny_cam) : radius{0.0, 0.0},
+                                             id_list()
     {
-        compute_detector();
+        compute_detector(nx_cam, ny_cam);
     };
     // Destructor
     ~Ricom_detector(){};
 };
 
-class Ricom : public MerlinInterface, public TimpixInterface
+namespace RICOM
+{
+    enum modes
+    {
+        FILE,
+        TCP
+    };
+}
+
+class Ricom
 {
 private:
     // vSTEM Variables
@@ -119,19 +134,17 @@ private:
     int last_y;
 
     // Private Methods - General
-    void init_uv();
-    template <typename T>
-    void process_frames();
-    void process_timepix_stream();
     void init_surface();
     void draw_pixel(SDL_Surface *surface, int x, int y, float val, int color_map);
     void reinit_vectors_limits();
     void reset_limits();
     void reset_file();
-    std::vector<id_x_y> calculate_update_list();
+    void calculate_update_list();
     inline void rescales_recomputes();
+    template <typename T, class CameraInterface>
+    void skip_frames(int n_skip, std::vector<T> &data, CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *camera_fr);
     template <typename T>
-    inline void skip_frames(int n_skip, std::vector<T> &data);
+    void swap_endianess(T &val);
 
     // Private Methods - riCOM
     void icom(std::array<float, 2> &com, int x, int y);
@@ -151,13 +164,17 @@ private:
     void set_stem_pixel(size_t idx, size_t idy);
 
 public:
+    SocketConnector socket;
+    std::string file_path;
+    CAMERA::Camera_BASE camera;
     RICOM::modes mode;
     bool b_print2file;
     int redraw_interval;
     ProgressMonitor *p_prog_mon;
+    bool b_busy;
     float update_dose_lowbound;
     bool update_offset;
-    bool use_detector;
+    bool b_vSTEM;
     bool b_recompute_detector;
     bool b_recompute_kernel;
     Ricom_detector detector;
@@ -166,8 +183,6 @@ public:
     std::array<float, 2> com_public;
     std::vector<float> com_map_x;
     std::vector<float> com_map_y;
-
-    RICOM::Detector_type detector_type;
 
     // Scan Area Variables
     int nx;
@@ -201,12 +216,15 @@ public:
     void draw_stem_image();
     void draw_ricom_image(int y0, int ye);
     void draw_stem_image(int y0, int ye);
-    void run();
-    void run_merlin();
-    void run_timepix();
+    template <class CameraInterface>
+    void run_reconstruction(RICOM::modes mode);
     void reset();
     template <typename T>
     void plot_cbed(std::vector<T> *p_data);
+    template <typename T, class CameraInterface>
+    void process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *camera);
+    template <class CameraInterface>
+    void process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *camera);
 
     // Constructor
     Ricom();

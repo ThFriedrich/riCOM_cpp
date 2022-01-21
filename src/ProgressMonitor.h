@@ -25,8 +25,6 @@
 #include <chrono>
 namespace chc = std::chrono;
 
-#include "ricom_types.h"
-
 #define TOTAL_PERCENTAGE 100.0
 #define CHARACTER_WIDTH_PERCENTAGE 4
 #define TERMINAL_WIDTH 120
@@ -36,8 +34,8 @@ class ProgressMonitor
 public:
     const static int DEFAULT_WIDTH;
 
-    std::atomic<unsigned int> fr_count;   // frame count
-    std::atomic<unsigned int> fr_count_i; // Frame count in interval
+    std::atomic<size_t> fr_count;   // frame count
+    std::atomic<size_t> fr_count_i; // Frame count in interval
     float fr_freq;                        // frame frequency
     std::atomic<bool> report_set;         // update flag (reset internally)
     std::atomic<bool> report_set_public;  // update flag (reset externally)

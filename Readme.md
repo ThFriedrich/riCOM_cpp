@@ -57,10 +57,7 @@ msbuild .\RICOM.vcxproj /p:configuration=Release
 The executable RICOM.exe will be in the folder 'build\Release'. Make  sure **the files 'SDL2.dll' and 'libmmd.dll' are in the same location as the executable** 
 
 ## Running in Live mode with Quantum Detector MerlinEM camera
-To send instructions to the camera a python scipt is executed internally, which relies on the [Merlin Interface package](https://gitlab.com/tfriedrich/merlin_interface). It is a submodule of this repository, but it can also be installed using pip or conda, e.g.
-```bash
-pip3 install merlin_interface
-```
+To send instructions to the camera a python scipt is executed internally, which relies on the [Merlin Interface package](https://gitlab.com/tfriedrich/merlin_interface). It is a submodule of this repository, but it can also be manually downloaded.
 
 ## Running example files
 A set of compatible example datasets are provided in an open data repository on [Zenodo](https://zenodo.org/record/5572123#.YbHNzNso9hF).

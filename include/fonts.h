@@ -1,33 +1,3 @@
-
-const char *font_names[6] = {
-    "Karla-Regular",
-    "Roboto-Medium",
-    "Cousine-Regular",
-    "DroidSans",
-    "ProggyClean",
-    "ProggyTiny"};
-
-int selectedFont = 0;
-void ShowFontSelector(const char* label)
-{
-    ImGuiIO& io = ImGui::GetIO();
-    ImFont* font_current = ImGui::GetFont();
-    if (ImGui::BeginCombo(label, font_names[selectedFont]))
-    {
-        for (int n = 0; n < io.Fonts->Fonts.Size; n++)
-        {
-            ImFont* font = io.Fonts->Fonts[n];
-            ImGui::PushID((void*)font);
-            if (ImGui::Selectable(font_names[n], font == font_current)) {
-                io.FontDefault = font;
-                selectedFont = n;
-            }
-                
-            ImGui::PopID();
-        }
-        ImGui::EndCombo();
-    } 
-}
 // File: 'Roboto-Medium.ttf' (162588 bytes)
 // Exported using binary_to_compressed_c.cpp
 static const unsigned int RobotoMedium_compressed_size = 115741;

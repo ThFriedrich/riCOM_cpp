@@ -11,21 +11,22 @@
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
 
-#ifndef RICOM_TYPES_H_
-#define RICOM_TYPES_H_
-#include <chrono>
+#ifndef FILE_CONNECTOR_H
+#define FILE_CONNECTOR_H
 
-namespace RICOM
+#include <string>
+#include <fstream>
+#include <filesystem>
+
+class FileConnector
 {
-    enum modes
-    {
-        FILE,
-        LIVE
-    };
-    enum Detector_type
-    {
-        MERLIN,
-        TIMEPIX
-    };
-}
-#endif // RICOM_TYPES_H_
+public:
+    std::filesystem::path path;
+    std::ifstream stream;
+    std::uintmax_t file_size;
+    void open_file();
+    void close_file();
+    void read_data(char *buffer, size_t data_size);
+    void reset_file();
+};
+#endif // FILE_CONNECTOR_H

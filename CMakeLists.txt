@@ -75,30 +75,38 @@ if (WIN32)
     file(COPY ${FFTW3_DIR}/libfftw3-3.lib DESTINATION ${BUILD_DIR})
 endif (WIN32)
 
-
 add_executable(RICOM src/main.cpp)
 
 target_sources( RICOM PRIVATE
+    imgui/misc/cpp/imgui_stdlib.cpp
     imgui/imgui_demo.cpp
     imgui/imgui_draw.cpp
     imgui/imgui_tables.cpp
     imgui/imgui_widgets.cpp
-    imgui/imgui.cpp
     imgui/backends/imgui_impl_opengl3.cpp
     imgui/backends/imgui_impl_sdl.cpp
+    imgui/imgui.cpp
+    src/SocketConnector.cpp
+    src/FileConnector.cpp
     src/ProgressMonitor.cpp
-    src/TimpixInterface.cpp
     src/Ricom.cpp 
+    src/cameras/TimepixInterface.cpp
+    src/cameras/TimepixWrapper.cpp
+    src/cameras/MerlinInterface.cpp
+    src/cameras/MerlinWrapper.cpp
+    src/Camera.cpp
     src/main.cpp
     )
 
 target_include_directories( RICOM PUBLIC
     imgui
     imgui/backends
+    imgui/misc/cpp
     ${SDL2_INCLUDE_DIR}
     ${FFTW3_DIR}
     include
     src
+    src/cameras
     )
 
 find_package(OpenGL REQUIRED)

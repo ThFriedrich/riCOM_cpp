@@ -11,7 +11,7 @@
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
 
-#include "ProgressMonitor.hpp"
+#include "ProgressMonitor.h"
 #include <cmath>
 #include <chrono>
 
@@ -53,7 +53,7 @@ ProgressMonitor &ProgressMonitor::operator++()
     fr_count_i++;
     fr_count++;
     auto mil_secs = chc::duration_cast<float_ms>(chc::high_resolution_clock::now() - time_stamp).count();
-    if (mil_secs > report_interval || fr_count == fr_total)
+    if (mil_secs > report_interval || fr_count >= fr_total)
     {
         fr = fr_count_i / mil_secs;
         fr_avg += fr;
