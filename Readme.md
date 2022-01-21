@@ -7,7 +7,7 @@ This repository contains the C++ implementation of the riCOM (Real Time Centre O
 - Alternatively build from source as outlined below. Make sure you clone the repository including submodules: ```git clone --recurse-submodules -j2 git@github.com:ThFriedrich/riCOM_cpp.git``` 
 - The project uses features of C++ standard 17. You may need appropriate compilers and libraries.
 
-**Generally build instructions can be followed step by step from the [automated build setup](https://github.com/ThFriedrich/riCOM_cpp/.github/workflows/build.yml) from command line**
+**Generally build instructions can be followed step by step from the [automated build setup](https://github.com/ThFriedrich/riCOM_cpp/blob/master/.github/workflows/build.yml) from command line**
 ## Build instructions Linux
 ### Dependencies 
 - g++/gcc compiler version 9
@@ -63,6 +63,7 @@ To send instructions to the camera a python scipt is executed internally, which 
 A set of compatible example datasets are provided in an open data repository on [Zenodo](https://zenodo.org/record/5572123#.YbHNzNso9hF).
 
 ## License
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
