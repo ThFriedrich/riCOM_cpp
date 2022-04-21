@@ -1067,18 +1067,29 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
     std::thread run_thread;
     run_thread = std::thread(run_ricom, ricom, ricom->mode);
     run_thread.detach();
-
+    bool b_redraw = false;
     SDL_Delay(ricom->redraw_interval * 2);
     while (1)
     {
-        if (ricom->p_prog_mon != nullptr && ricom->p_prog_mon->report_set_public)
+        if (ricom->p_prog_mon != nullptr)
+        {
+            if (ricom->p_prog_mon->report_set_public)
+            {
+                b_redraw = true;
+                ricom->p_prog_mon->report_set_public = false;
+            }
+        }
+        else
+        {
+            b_redraw = true;
+        }
+        if (b_redraw)
         {
             update_image(tex, renderer, ricom->srf_ricom);
             if (ricom->b_vSTEM)
             {
                 update_image(stem, renderer_stem, ricom->srf_stem);
             }
-            ricom->p_prog_mon->report_set_public = false;
         }
 
         while (SDL_PollEvent(&event))
