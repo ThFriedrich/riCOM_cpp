@@ -827,7 +827,7 @@ namespace tinycolormap
 
     inline constexpr Color GetGrayColor(double x) noexcept
     {
-        return Color{ 1.0 - internal::Clamp01(x) };
+        return Color{ internal::Clamp01(x) };
     }
 
     inline Color GetMagmaColor(double x)
