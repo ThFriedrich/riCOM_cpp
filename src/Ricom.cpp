@@ -1,12 +1,12 @@
-/* Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu, 
- * University of Antwerp - All Rights Reserved. 
+/* Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu,
+ * University of Antwerp - All Rights Reserved.
  * You may use, distribute and modify
  * this code under the terms of the GPL3 license.
  * You should have received a copy of the GPL3 license with
- * this file. If not, please visit: 
+ * this file. If not, please visit:
  * https://www.gnu.org/licenses/gpl-3.0.en.html
- * 
- * Authors: 
+ *
+ * Authors:
  *   Thomas Friedrich <thomas.friedrich@uantwerpen.be>
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
@@ -308,25 +308,39 @@ void Ricom_detector::compute_detector(std::array<float, 2> &offset, int nx_cam, 
 ///////////////////////////////////////////////////
 //      Counter x-y position class methods       //
 ///////////////////////////////////////////////////
-id_x_y::id_x_y(int id, int x, int y, int nx_ricom, int ny_ricom, bool valid)
+id_x_y::id_x_y(int id, bool valid)
 {
     this->id = id;
-    this->x = x;
-    this->y = y;
-    this->nx_ricom = nx_ricom;
-    this->ny_ricom = ny_ricom;
     this->valid = valid;
 };
 
-id_x_y operator+(id_x_y &c1, const int &c2)
+void Update_list::init(Ricom_kernel kernel, int nx_ricom, int ny_ricom)
 {
-    id_x_y res = c1;
-    res.id = c1.id + c2;
-    res.y = res.id / c1.nx_ricom;
-    res.x = res.id % c1.nx_ricom;
-    res.valid = res.y >= 0 && res.y < c1.ny_ricom && res.x < c1.nx_ricom && res.x >= 0;
-    return res;
-};
+    this->nx = nx_ricom;
+    this->ny = ny_ricom;
+    this->kernel = kernel;
+
+    ids.resize(kernel.k_area);
+    int idul = 0;
+    for (int idy = -kernel.kernel_size; idy <= kernel.kernel_size; idy++)
+    {
+        for (int idx = -kernel.kernel_size; idx <= kernel.kernel_size; idx++)
+        {
+            ids[idul] = {(idy * nx + idx), false};
+            idul++;
+        }
+    }
+}
+
+void Update_list::shift(id_x_y &res, int id, int shift)
+{
+    
+    int id_sft = ids[id].id + shift;
+    int y = id_sft / nx;
+    int x = id_sft % nx;
+    res = {id_sft, y >= 0 && y < ny && x < nx && x >= 0};
+
+}
 
 ////////////////////////////////////////////////
 //               SDL plotting                 //
@@ -348,6 +362,8 @@ void Ricom::init_surface()
         exit(EXIT_FAILURE);
     }
     // SDL surface for CBED image
+    cbed_log.resize(camera.nx_cam*camera.ny_cam);
+    cbed_log = {0.0};
     srf_cbed = SDL_CreateRGBSurface(0, camera.nx_cam, camera.ny_cam, 32, 0, 0, 0, 0);
     if (srf_cbed == NULL)
     {
@@ -373,6 +389,7 @@ Ricom::Ricom() : stem_data(),
                  ricom_data(),
                  update_list(),
                  ricom_max(-FLT_MAX), ricom_min(FLT_MAX),
+                 cbed_log(),
                  ricom_mutex(), stem_mutex(), counter_mutex(),
                  last_y(0),
                  socket(), file_path(""),
@@ -445,7 +462,7 @@ void Ricom::com(std::vector<T> *data, std::array<float, 2> &com, std::atomic<int
         sum_x_temp = 0;
         for (int idx = 0; idx < camera.nx_cam; idx++)
         {
-            px = (*data)[y_nx + idx];
+            px = data->data()[y_nx + idx];
             swap_endianess(px);
             sum_x_temp += px;
             sum_y[idx] += px;
@@ -501,16 +518,16 @@ void Ricom::stem(std::vector<T> *data, size_t id_stem)
 }
 
 // Integrate COM around position x,y
-void Ricom::icom(std::array<float, 2> &com, int x, int y)
+void Ricom::icom(std::array<float, 2> *com, int x, int y)
 {
-    float com_x = com[0] - offset[0];
-    float com_y = com[1] - offset[1];
+    float com_x = (*com)[0] - offset[0];
+    float com_y = (*com)[1] - offset[1];
     id_x_y idr;
     int idc = x + y * nx;
 
     for (int id = 0; id < kernel.k_area; id++)
     {
-        idr = update_list[id] + idc;
+        update_list.shift(idr, id, idc);
         if (idr.valid)
         {
             ricom_data[idr.id] += com_x * kernel.kernel_x[id] + com_y * kernel.kernel_y[id];
@@ -528,17 +545,31 @@ void Ricom::icom(std::array<float, 2> &com, int x, int y)
     }
 }
 
-void Ricom::calculate_update_list()
+// Integrate COM around position x,y
+void Ricom::icom(std::array<float, 2> com, int x, int y)
 {
-    update_list.resize(kernel.k_area);
-    int idul = 0;
-    for (int idy = -kernel.kernel_size; idy <= kernel.kernel_size; idy++)
+    float com_x = com[0] - offset[0];
+    float com_y = com[1] - offset[1];
+    id_x_y idr;
+    int idc = x + y * nx;
+
+    for (int id = 0; id < kernel.k_area; id++)
     {
-        for (int idx = -kernel.kernel_size; idx <= kernel.kernel_size; idx++)
+        update_list.shift(idr, id, idc);
+        if (idr.valid)
         {
-            update_list[idul] = {(idy * nx + idx), idx, idy, nx, ny, false};
-            idul++;
+            ricom_data[idr.id] += com_x * kernel.kernel_x[id] + com_y * kernel.kernel_y[id];
         }
+    }
+    if (ricom_data[idc] > ricom_max)
+    {
+        ricom_max = ricom_data[idc];
+        rescale_ricom = true;
+    }
+    if (ricom_data[idc] < ricom_min)
+    {
+        ricom_min = ricom_data[idc];
+        rescale_ricom = true;
     }
 }
 
@@ -625,6 +656,7 @@ void Ricom::plot_cbed(std::vector<T> *cbed_data)
     float v_min = INFINITY;
     float v_max = 0.0;
     float vl_f;
+
     for (size_t id = 0; id < (*cbed_data).size(); id++)
     {
         T vl = (*cbed_data)[id];
@@ -638,18 +670,18 @@ void Ricom::plot_cbed(std::vector<T> *cbed_data)
         {
             v_min = vl_f;
         }
+        cbed_log[id] = vl_f;
     }
 
     int iy_t;
+    float v_rng = v_max - v_min;
     for (int ix = 0; ix < camera.ny_cam; ix++)
     {
         iy_t = camera.v[ix] * camera.nx_cam;
         for (int iy = 0; iy < camera.nx_cam; iy++)
         {
-            T vl = (*cbed_data)[iy_t + camera.u[iy]];
-            swap_endianess(vl);
-            vl_f = log(1 + (float)vl);
-            float val = (vl_f - v_min) / (v_max - v_min);
+            vl_f = cbed_log[iy_t + camera.u[iy]];
+            float val = (vl_f - v_min) / v_rng;
             draw_pixel(srf_cbed, ix, iy, val, cbed_cmap);
         }
     }
@@ -667,7 +699,7 @@ inline void Ricom::rescales_recomputes()
     if (b_recompute_kernel)
     {
         kernel.compute_kernel();
-        calculate_update_list();
+        update_list.init(kernel, nx, ny);
         b_recompute_kernel = false;
     }
 
@@ -860,7 +892,14 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
     std::vector<uint16_t> frame(camera_spec->nx_cam * camera_spec->ny_cam);
     std::vector<uint16_t> *p_frame = &frame;
 
+    BoundedThreadPool pool;
+
+    // Start Thread Pool
+    if (n_threads > 1)
+        pool.init(n_threads, queue_size);
+
     std::array<float, 2> com_xy = {0.0, 0.0};
+    std::array<float, 2> *p_com_xy = &com_xy;
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
     int dose_sum = 0;
     int idxx = 0;
@@ -918,60 +957,70 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
             ix = idxx % nx;
             iy = floor(idxx / nx);
 
+            if (n_threads > 1)
+            {
+                pool.push_task([=]
+                               { icom(com_xy, ix, iy); });
+            }
+            else
+            {
+                icom(p_com_xy, ix, iy);
+            }
+
             if (b_vSTEM)
             {
                 stem(p_frame, iy * nx + ix);
             }
-            icom(com_xy, ix, iy);
+        }
+    
+    if (prog_mon.report_set)
+    {
+        draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), (std::min)(iy + kernel.kernel_size, ny - 1));
+        if (b_vSTEM)
+        {
+            draw_stem_image(last_y, iy);
+        }
+        plot_cbed(p_frame);
+        fr_freq = prog_mon.fr_freq;
+        rescales_recomputes();
+        for (int i = 0; i < 2; i++)
+        {
+            com_public[i] = com_xy_sum[i] / prog_mon.fr_count_i;
+            com_xy_sum[i] = 0;
+        }
+        prog_mon.reset_flags();
+        last_y = iy;
+    }
+
+    if (prog_mon.fr_count >= end_frame)
+    {
+        if (prog_mon.fr_count != fr_total_u)
+        {
+            img_num++;
+            first_frame = img_num * nxy;
+            end_frame = (img_num + 1) * nxy;
+            reinit_vectors_limits();
+            dose_map.assign(nxy, 0);
+            sumx_map.assign(nxy, 0);
+            sumy_map.assign(nxy, 0);
         }
 
-        if (prog_mon.report_set)
+        if (update_offset && dose_sum > pow(10.0, update_dose_lowbound))
         {
-            draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), (std::min)(iy + kernel.kernel_size, ny - 1));
-            if (b_vSTEM)
-            {
-                draw_stem_image(last_y, iy);
-            }
-            plot_cbed(p_frame);
-            fr_freq = prog_mon.fr_freq;
-            rescales_recomputes();
-            for (int i = 0; i < 2; i++)
-            {
-                com_public[i] = com_xy_sum[i] / prog_mon.fr_count_i;
-                com_xy_sum[i] = 0;
-            }
-            prog_mon.reset_flags();
-            last_y = iy;
-        }
-
-        if (prog_mon.fr_count >= end_frame)
-        {
-            if (prog_mon.fr_count != fr_total_u)
-            {
-                img_num++;
-                first_frame = img_num * nxy;
-                end_frame = (img_num + 1) * nxy;
-                reinit_vectors_limits();
-                dose_map.assign(nxy, 0);
-                sumx_map.assign(nxy, 0);
-                sumy_map.assign(nxy, 0);
-            }
-
-            if (update_offset && dose_sum > pow(10.0, update_dose_lowbound))
-            {
-                offset[0] = com_public[0];
-                offset[1] = com_public[1];
-                dose_sum = 0;
-            }
-        }
-
-        if (prog_mon.fr_count == fr_total_u || rc_quit)
-        {
-            p_prog_mon = nullptr;
-            return;
+            offset[0] = com_public[0];
+            offset[1] = com_public[1];
+            dose_sum = 0;
         }
     }
-    p_prog_mon = nullptr;
+
+    if (prog_mon.fr_count == fr_total_u || rc_quit)
+    {
+        pool.wait_for_completion();
+        p_prog_mon = nullptr;
+        return;
+    }
+}
+p_prog_mon = nullptr;
 }
 
 // Entrance function for Ricom_reconstructinon
@@ -999,7 +1048,7 @@ void Ricom::run_reconstruction(RICOM::modes mode)
 
     // Allocate the ricom image and COM arrays
     ricom_data.resize(nxy);
-    calculate_update_list();
+    update_list.init(kernel, nx, ny);
     com_map_x.resize(nxy);
     com_map_y.resize(nxy);
     stem_data.resize(nxy);

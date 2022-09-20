@@ -17,6 +17,7 @@
 #include <vector>
 #include <atomic>
 #include <array>
+#include <stdlib.h>
 
 // Only forward declaration for Ricom class
 class Ricom;
