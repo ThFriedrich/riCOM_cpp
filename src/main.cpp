@@ -1137,6 +1137,9 @@ int main(int argc, char *argv[])
 
     if (argc == 1)
     {
+        #ifdef _WIN32
+        FreeConsole();
+        #endif
         log2file(ricom_ptr);
         return run_gui(ricom_ptr);
     }
