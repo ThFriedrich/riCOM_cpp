@@ -1068,7 +1068,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
     std::thread run_thread;
     run_thread = std::thread(run_ricom, ricom, ricom->mode);
     run_thread.detach();
-    bool b_redraw = false;
+
     SDL_Delay(ricom->redraw_interval * 2);
 
     while (1)
