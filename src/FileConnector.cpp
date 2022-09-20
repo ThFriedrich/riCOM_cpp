@@ -50,8 +50,9 @@ void FileConnector::close_file()
 void FileConnector::read_data(char *buffer, size_t data_size)
 {
     stream.read(buffer, data_size);
+    pos += data_size;
     // Reset file to the beginning for repeat reading
-    if (file_size - stream.tellg() < data_size)
+    if (file_size - pos < data_size)
     {
         reset_file();
     }
@@ -59,6 +60,7 @@ void FileConnector::read_data(char *buffer, size_t data_size)
 
 void FileConnector::reset_file()
 {
+    pos = 0;
     stream.clear();
     stream.seekg(0, std::ios::beg);
 }

@@ -22,11 +22,13 @@ class FileConnector
 {
 public:
     std::filesystem::path path;
-    std::ifstream stream;
-    std::uintmax_t file_size;
     void open_file();
     void close_file();
     void read_data(char *buffer, size_t data_size);
+private:
+    std::ifstream stream;
+    std::uintmax_t file_size;
+    std::uintmax_t pos;
     void reset_file();
 };
 #endif // FILE_CONNECTOR_H
