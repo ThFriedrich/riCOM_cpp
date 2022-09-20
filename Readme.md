@@ -2,7 +2,7 @@
 [![BUILD](https://github.com/ThFriedrich/riCOM_cpp/actions/workflows/build.yml/badge.svg)](https://github.com/ThFriedrich/riCOM_cpp/blob/master/.github/workflows/build.yml)
 [![License: GPL3](https://img.shields.io/badge/License-GPL3-brightgreen.svg)](https://opensource.org/licenses/GPL-3.0) 
 
-This repository contains the C++ implementation of the riCOM (Real Time Centre Of Mass) algorithm for 4D Scanning electron microscopy as described in [this preprint](https://arxiv.org/abs/2112.04442). At this point it is compatible with .mib files (Quantum Detectors Merlin) and .t3p (Timepix camera) data and can be run in live mode with the Merlin camera.
+This repository contains the C++ implementation of the riCOM (Real Time Centre Of Mass) algorithm for 4D Scanning electron microscopy as described in [this publication](https://www.cambridge.org/core/journals/microscopy-and-microanalysis/article/realtime-integration-center-of-mass-ricom-reconstruction-for-4d-stem/40AC3F51175C32763ADF355E58073355). At this point it is compatible with .mib files (Quantum Detectors Merlin) and .t3p (Timepix camera) data and can be run in live mode with the Merlin camera.
 
 ![image](https://user-images.githubusercontent.com/47680554/164481785-d7407e48-1fa0-4673-a03b-ba80b3a5fcae.png)
 
@@ -12,7 +12,8 @@ This repository contains the C++ implementation of the riCOM (Real Time Centre O
 - The Windows version includes additional libraries, which need to be kept in the same folder as the executable. Linux requires SDL2 and FFTW3 libraries on your system (see below).
 - Alternatively build from source as outlined below. Make sure you clone the repository including submodules: ```git clone --recurse-submodules -j2 git@github.com:ThFriedrich/riCOM_cpp.git``` 
 - The project uses features of C++ standard 17. You may need appropriate compilers and libraries.
-
+- Generally the performance/speed may not be ideal using precompiled binaries. For best results compile on the machine you want to run the software on, using the "native" option for the "ARCH" variable in the CMakeLists.txt file
+   
 **Generally build instructions can be followed step by step from the [automated build setup](https://github.com/ThFriedrich/riCOM_cpp/blob/master/.github/workflows/build.yml) from command line**
 ### Build instructions Linux
 #### Dependencies 
@@ -54,7 +55,7 @@ The executable RICOM.exe will be in the folder 'build\Release'. Make  sure **the
 
 ## Running the program
 ### Running in Live mode with Quantum Detector MerlinEM camera
-To send instructions to the camera a python scipt is executed internally, which relies on the [Merlin Interface package](https://gitlab.com/tfriedrich/merlin_interface). It is a submodule of this repository, but it can also be manually downloaded. 
+To send instructions to the camera a python scipt is executed internally, which relies on the [Merlin Interface package](https://gitlab.com/tfriedrich/merlin_interface). It is a submodule of this repository, but it can also be manually downloaded. The file [merlin_interface.py](https://gitlab.com/tfriedrich/merlin_interface/-/blob/master/merlin_interface/merlin_interface.py) should be placed in the same directory as the RICOM executable.
 
 ### Running example files
 A set of compatible example datasets are provided in an open data repository on [Zenodo](https://zenodo.org/record/5572123#.YbHNzNso9hF).
@@ -80,3 +81,17 @@ GNU General Public License for more details.
 
 **You may contact the [University of Antwerp](jo.verbeeck@uantwerpen.be) for alternative licensing options if 
 necessary.**
+
+## Cite
+If you use this software in your research please cite:
+```bibtex
+@article{
+  ricom_2022, 
+  title={Real-Time Integration Center of Mass (riCOM) Reconstruction for 4D STEM}, 
+  DOI={10.1017/S1431927622000617}, 
+  journal={Microscopy and Microanalysis}, 
+  publisher={Cambridge University Press}, 
+  author={Yu, Chu-Ping and Friedrich, Thomas and Jannis, Daen and Van Aert, Sandra and Verbeeck, Johan}, 
+  year={2022}, 
+  pages={1–12}}
+```
