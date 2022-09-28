@@ -1,12 +1,12 @@
-/* Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu, 
- * University of Antwerp - All Rights Reserved. 
+/* Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu,
+ * University of Antwerp - All Rights Reserved.
  * You may use, distribute and modify
  * this code under the terms of the GPL3 license.
  * You should have received a copy of the GPL3 license with
- * this file. If not, please visit: 
+ * this file. If not, please visit:
  * https://www.gnu.org/licenses/gpl-3.0.en.html
- * 
- * Authors: 
+ *
+ * Authors:
  *   Thomas Friedrich <thomas.friedrich@uantwerpen.be>
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
@@ -39,6 +39,7 @@
 #include <filesystem>
 #include <cfloat>
 #include <ctime>
+#include <complex>
 
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
@@ -46,10 +47,6 @@
 #include "imgui_stdlib.h"
 #include "imgui_internal.h"
 
-#include <stdio.h>
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_opengl.h>
 #include "imfilebrowser.h"
 #define MINI_CASE_SENSITIVE
 #include "ini.h"
@@ -60,6 +57,7 @@
 #include "Camera.h"
 #include "MerlinInterface.h"
 #include "TimepixInterface.h"
+#include "Gui_utils.h"
 
 namespace chc = std::chrono;
 
@@ -142,34 +140,6 @@ void select_mode_by_file(const char *filename, Ricom *ricom)
 //            GUI implementation              //
 ////////////////////////////////////////////////
 
-// Vertical Splitter Container
-void v_splitter(float thickness, float &size0, float &min_h, float &max_h, float offset = 0.0f)
-{
-
-    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrab]);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrabHovered]);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrabActive]);
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, ImGui::GetStyle().ScrollbarRounding);
-    ImGui::Button("", ImVec2(-1, thickness));
-    ImGui::PopStyleColor(3);
-    ImGui::PopStyleVar(1);
-    if (ImGui::IsItemHovered() || ImGui::IsItemActive())
-    {
-        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
-    }
-
-    if (ImGui::IsItemActive())
-    {
-        float d = ImGui::GetMousePos().y - offset;
-        if (d < min_h)
-            size0 = min_h;
-        else if (d > max_h)
-            size0 = max_h;
-        else
-            size0 = d;
-    }
-}
-
 int run_gui(Ricom *ricom)
 {
     std::thread run_thread;
@@ -239,16 +209,20 @@ int run_gui(Ricom *ricom)
     io.Fonts->AddFontFromMemoryCompressedTTF(ProggyClean_compressed_data, ProggyClean_compressed_size, 14.0f);
     io.Fonts->AddFontFromMemoryCompressedTTF(ProggyTiny_compressed_data, ProggyTiny_compressed_size, 14.0f);
 
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // Enable Docking
+    // Multi-Viewport not yet supported with SDL2
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+
     ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
     ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
     ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
     ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
-    ImVec4 clear_color = ImVec4(0.7f, 0.7f, 0.7f, 1.00f);
 
     ImVec2 menu_bar_size;
     ImVec2 control_menu_size(200, 800);
 
-    const size_t n_textures = 3;
+    const size_t n_textures = 8;
     GLuint uiTextureIDs[n_textures];
     glGenTextures(n_textures, uiTextureIDs);
 
@@ -277,7 +251,7 @@ int run_gui(Ricom *ricom)
     bool b_acq_open = false;
     bool b_started = false;
     bool b_file_selected = false;
-
+    bool b_restarted = false;
     // Merlin Settings (to send to the Camera)
     struct MerlinSettings merlin_settings;
 
@@ -285,11 +259,11 @@ int run_gui(Ricom *ricom)
     // Appearance
     int font_index = 0;
     int style_index = 0;
+    ImGui_INI::check_ini_setting(ini_cfg, "Appearance", "CBED Colormap", ricom->cbed_cmap);
     ImGui_INI::check_ini_setting(ini_cfg, "Appearance", "Font", font_index);
     ImGui_INI::set_font(font_index);
     ImGui_INI::check_ini_setting(ini_cfg, "Appearance", "Style", style_index);
     ImGui_INI::set_style(style_index);
-    ImGui_INI::check_ini_setting(ini_cfg, "Appearance", "Background", clear_color);
     // Hardware Settings
     std::string python_path;
 #ifdef _WIN32
@@ -300,7 +274,7 @@ int run_gui(Ricom *ricom)
     ImGui_INI::check_ini_setting(ini_cfg, "Hardware", "Threads", ricom->n_threads);
     ImGui_INI::check_ini_setting(ini_cfg, "Hardware", "Queue Size", ricom->queue_size);
     ImGui_INI::check_ini_setting(ini_cfg, "Hardware", "Image Refresh Interval [ms]", ricom->redraw_interval);
-    //Merlin Settings
+    // Merlin Settings
     ImGui_INI::check_ini_setting(ini_cfg, "Merlin", "Live Interface Menu", b_merlin_live_menu);
     ImGui_INI::check_ini_setting(ini_cfg, "Merlin", "nx", hardware_configurations[CAMERA::MERLIN].nx_cam);
     ImGui_INI::check_ini_setting(ini_cfg, "Merlin", "ny", hardware_configurations[CAMERA::MERLIN].ny_cam);
@@ -314,10 +288,28 @@ int run_gui(Ricom *ricom)
 
     const char *cmaps[] = {"Parula", "Heat", "Jet", "Turbo", "Hot", "Gray", "Magma", "Inferno", "Plasma", "Viridis", "Cividis", "Github"};
     bool b_redraw = false;
+    bool b_trigger_update = false;
     float menu_split_v = control_menu_size.y * 0.8f;
 
     // Initialize Frequency approximation (for plotting only)
     ricom->kernel.approximate_frequencies((size_t)ricom->nx);
+
+    GIM_Flags common_flags = GIM_Flags::SaveImButton | GIM_Flags::SaveDataButton | GIM_Flags::ColormapSelector | GIM_Flags::PowerSlider;
+    std::vector<Generic_Image_Window> generic_windows;
+    generic_windows.push_back(Generic_Image_Window("RICOM", &uiTextureIDs[0], true, 9, common_flags | GIM_Flags::FftButton));
+    generic_windows[0].pb_open = nullptr;
+    generic_windows.push_back(Generic_Image_Window("vSTEM", &uiTextureIDs[1], true, 9, common_flags | GIM_Flags::FftButton));
+    generic_windows[1].link_visibility_bool(&ricom->b_vSTEM);
+    generic_windows.push_back(Generic_Image_Window("RICOM-COMX", &uiTextureIDs[2], true, 9, common_flags));
+    generic_windows.push_back(Generic_Image_Window("RICOM-COMY", &uiTextureIDs[3], true, 9, common_flags));
+    generic_windows.push_back(Generic_Image_Window("RICOM-FFT", &uiTextureIDs[4], false, 4, common_flags));
+    generic_windows.push_back(Generic_Image_Window("vSTEM-FFT", &uiTextureIDs[5], false, 4, common_flags));
+
+    generic_windows[0].fft_window = &generic_windows[4];
+    generic_windows[1].fft_window = &generic_windows[5];
+
+    ImGuiID dock_id = 3775;
+    Main_Dock main_dock(dock_id);
 
     // Main loop
     while (!b_done)
@@ -344,10 +336,6 @@ int run_gui(Ricom *ricom)
             if (ImGui::BeginMenu("Appearance"))
             {
                 ImGui::Combo("CBED Colormap", &ricom->cbed_cmap, cmaps, IM_ARRAYSIZE(cmaps));
-                if (ImGui::ColorEdit3("Background Color", (float *)&clear_color))
-                {
-                    ini_cfg["Appearance"]["Background"] = ImGui_INI::ImVec2string(clear_color);
-                }
                 ImGui_INI::ShowFontSelector("Font", font_index, ini_cfg);
                 ImGui_INI::ShowStyleSelector("Style", style_index, ini_cfg);
                 ImGui::EndMenu();
@@ -415,6 +403,7 @@ int run_gui(Ricom *ricom)
                 }
                 ImGui::EndMenu();
             }
+
             menu_bar_size = ImGui::GetWindowSize();
             ImGui::EndMainMenuBar();
         }
@@ -481,22 +470,38 @@ int run_gui(Ricom *ricom)
             if (rot_changed || kernel_changed || filter_changed || filter_changed2)
             {
                 ricom->b_recompute_kernel = true;
+                generic_windows[0].reset_min_max();
             }
             if (kernel_changed || b_nx_changed)
             {
                 ricom->kernel.approximate_frequencies((size_t)ricom->nx);
             }
             ImGui::PlotLines("Frequencies", ricom->kernel.f_approx.data(), ricom->kernel.f_approx.size(), 0, NULL, 0.0f, 1.0f, ImVec2(0, 50));
+
+            if (ImGui::Button("Show CoM-X"))
+            {
+                generic_windows[2].set_data(ricom->nx, ricom->ny, &ricom->com_map_x);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Show CoM-Y"))
+            {
+                generic_windows[3].set_data(ricom->nx, ricom->ny, &ricom->com_map_y);
+            }
         }
 
         if (ImGui::CollapsingHeader("vSTEM Settings", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            ImGui::Checkbox("View vSTEM Image", &ricom->b_vSTEM);
+            if (ImGui::Checkbox("View vSTEM Image", &ricom->b_vSTEM) && b_started)
+            {
+                generic_windows[1].set_data(ricom->nx, ricom->ny, &ricom->stem_data);
+            }
+
             bool inner_changed = ImGui::SliderFloat("Inner Radius", &ricom->detector.radius[0], 0.0f, 182.0f, "%.1f px");
             bool outer_changed = ImGui::SliderFloat("Outer Radius", &ricom->detector.radius[1], 0.0f, 182.0f, "%.1f px");
             if (inner_changed || outer_changed)
             {
                 ricom->b_recompute_detector = true;
+                generic_windows[1].reset_min_max();
             }
         }
 
@@ -534,6 +539,7 @@ int run_gui(Ricom *ricom)
                 if (ricom->socket.b_connected)
                 {
                     b_started = true;
+                    b_restarted = true;
                     ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Connected");
                     if (ricom->socket.connection_information.size() > 0)
                     {
@@ -551,16 +557,20 @@ int run_gui(Ricom *ricom)
 
                 if (ImGui::Button("Start Acquisition", ImVec2(-1.0f, 0.0f)))
                 {
-                  
+
                     run_thread = std::thread(run_ricom, ricom, RICOM::TCP);
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));
                     py_thread = std::thread(run_connection_script, ricom, &merlin_settings, python_path);
-
                     run_thread.detach();
                     py_thread.detach();
+
+                    if (ricom->b_vSTEM)
+                        generic_windows[1].set_data(ricom->nx, ricom->ny, &ricom->stem_data);
+                    generic_windows[0].set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
                 }
             }
         }
+
         if (ImGui::CollapsingHeader("File reconstruction", ImGuiTreeNodeFlags_DefaultOpen))
         {
 
@@ -605,7 +615,11 @@ int run_gui(Ricom *ricom)
                 {
                     run_thread = std::thread(run_ricom, ricom, RICOM::FILE);
                     b_started = true;
+                    b_restarted = true;
                     run_thread.detach();
+                    if (ricom->b_vSTEM)
+                        generic_windows[1].set_data(ricom->nx, ricom->ny, &ricom->stem_data);
+                    generic_windows[0].set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
                 }
             }
         }
@@ -653,12 +667,12 @@ int run_gui(Ricom *ricom)
                 {
                     if (ricom->srf_cbed != NULL)
                     {
-                        glBindTexture(GL_TEXTURE_2D, uiTextureIDs[0]);
+                        glBindTexture(GL_TEXTURE_2D, uiTextureIDs[6]);
                         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ricom->srf_cbed->w, ricom->srf_cbed->h, 0,
                                      GL_BGRA, GL_UNSIGNED_BYTE, ricom->srf_cbed->pixels);
                     }
                 }
-                ImGui::Image((ImTextureID)uiTextureIDs[0], ImVec2(tex_wh, tex_wh), uv_min, uv_max, tint_col, border_col);
+                ImGui::Image((ImTextureID)uiTextureIDs[6], ImVec2(tex_wh, tex_wh), uv_min, uv_max, tint_col, border_col);
                 ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * 0.03, IM_COL32(255, 255, 255, 255), 256);
                 ImGui::GetWindowDrawList()->AddLine(ImVec2(com_rel_x - cross_width, com_rel_y), ImVec2(com_rel_x + cross_width, com_rel_y), IM_COL32(255, 0, 0, 255), 1.5f);
                 ImGui::GetWindowDrawList()->AddLine(ImVec2(com_rel_x, com_rel_y - cross_width), ImVec2(com_rel_x, com_rel_y + cross_width), IM_COL32(255, 0, 0, 255), 1.5f);
@@ -673,6 +687,8 @@ int run_gui(Ricom *ricom)
 
         control_menu_size = ImGui::GetWindowSize();
         ImGui::End();
+
+        main_dock.render(ImVec2(control_menu_size.x, pos.y), ImVec2(viewport->Size.x - control_menu_size.x, viewport->Size.y - menu_bar_size.y));
 
         if (b_acq_open)
         {
@@ -690,152 +706,47 @@ int run_gui(Ricom *ricom)
             ImGui::End();
         }
 
-        if (ricom->srf_ricom != NULL)
+        bool trigger = (b_trigger_update != ricom->b_busy) && (ricom->b_busy == false);
+        // Render all generic Image Windows
+        for (size_t iw = 0; iw < generic_windows.size(); iw++)
         {
-
+            if (generic_windows[iw].pb_open == NULL) // affects only Ricom Window
             {
-                ImVec2 pos = viewport->Pos;
-                pos[0] += control_menu_size[0];
-                pos[1] += menu_bar_size[1];
-                ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
-                ImVec2 size = {512, 512};
-                ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
-
-                ImGui::Begin("riCOM", NULL, ImGuiWindowFlags_NoScrollbar);
-
-                if (ImGui::Button("Save Image as..."))
+                if (b_restarted)
                 {
-                    saveFileDialog.Open();
+                    generic_windows[iw].set_nx_ny(ricom->nx, ricom->ny);
                 }
-
-                ImGui::SameLine();
-                if (ImGui::Button("Save COM..."))
+                generic_windows[iw].render_window((ricom->b_busy && b_redraw && b_started), ricom->fr_count, ricom->kernel.kernel_size, trigger);
+            }
+            else 
+            {
+                if (*generic_windows[iw].pb_open)
                 {
-                    saveDataDialog.Open();
-                }
-
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(-1);
-                if (ImGui::Combo("Colormap", &ricom->ricom_cmap, cmaps, IM_ARRAYSIZE(cmaps)))
-                {
-                    // if (ricom->fr_count == 0 || ricom->fr_count >= ricom->fr_total)
-                    if (!ricom->b_busy)
+                    if (b_restarted)
                     {
-                        ricom->draw_ricom_image();
-                        b_redraw = true;
+                        generic_windows[iw].set_nx_ny(ricom->nx, ricom->ny);
                     }
-                    else
-                    {
-                        ricom->rescale_ricom = true;
-                    }
+                    generic_windows[iw].render_window((ricom->b_busy && b_redraw && b_started), ricom->fr_count, trigger);
                 }
-
-                saveFileDialog.Display();
-                if (saveFileDialog.HasSelected())
-                {
-                    std::string img_file = saveFileDialog.GetSelected().string();
-                    if (img_file.substr(img_file.size() - 4, 4) != ".png" && img_file.substr(img_file.size() - 4, 4) != ".PNG")
-                    {
-                        img_file += ".png";
-                    }
-                    saveFileDialog.ClearSelected();
-                    IMG_SavePNG(ricom->srf_ricom, img_file.c_str());
-                }
-
-                saveDataDialog.Display();
-                if (saveDataDialog.HasSelected())
-                {
-                    std::string com_file = saveDataDialog.GetSelected().string();
-                    if (std::filesystem::path(com_file).extension() == "")
-                    {
-                        com_file += ".dat";
-                    }
-                    saveDataDialog.ClearSelected();
-                    save_com(ricom, com_file);
-                }
-
-                ImVec2 vAvail = ImGui::GetContentRegionAvail();
-                float scale = (std::min)(vAvail.x / ricom->srf_ricom->w, vAvail.y / ricom->srf_ricom->h);
-                float tex_h = ricom->srf_ricom->h * scale;
-                float tex_w = ricom->srf_ricom->w * scale;
-
-                if (b_redraw)
-                {
-                    glBindTexture(GL_TEXTURE_2D, uiTextureIDs[1]);
-                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ricom->srf_ricom->w, ricom->srf_ricom->h, 0,
-                                 GL_BGRA, GL_UNSIGNED_BYTE, ricom->srf_ricom->pixels);
-                }
-                ImGui::Image((ImTextureID)uiTextureIDs[1], ImVec2(tex_w, tex_h), uv_min, uv_max, tint_col, border_col);
-                ImGui::End();
             }
         }
-
-        if (ricom->srf_stem != NULL && ricom->b_vSTEM == true)
-        {
-            {
-                ImVec2 pos = viewport->Pos;
-                pos[0] += control_menu_size[0] + 256;
-                pos[1] += menu_bar_size[1] + 256;
-                ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
-                ImVec2 size = {512, 512};
-                ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
-
-                ImGui::Begin("vSTEM", &ricom->b_vSTEM, ImGuiWindowFlags_NoScrollbar);
-                if (ImGui::Button("Save Image as..."))
-                {
-                    saveFileDialog.Open();
-                }
-
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(-1);
-                if (ImGui::Combo("Colormap", &ricom->stem_cmap, cmaps, IM_ARRAYSIZE(cmaps)))
-                {
-                    if (!ricom->b_busy)
-                    {
-                        ricom->draw_stem_image();
-                        b_redraw = true;
-                    }
-                    else
-                    {
-                        ricom->rescale_stem = true;
-                    }
-                }
-
-                saveFileDialog.Display();
-                if (saveFileDialog.HasSelected())
-                {
-                    std::string img_file = saveFileDialog.GetSelected().string();
-                    if (img_file.substr(img_file.size() - 4, 4) != ".png" && img_file.substr(img_file.size() - 4, 4) != ".PNG")
-                    {
-                        img_file += ".png";
-                    }
-                    saveFileDialog.ClearSelected();
-                    IMG_SavePNG(ricom->srf_stem, img_file.c_str());
-                }
-
-                ImVec2 vAvail = ImGui::GetContentRegionAvail();
-                float scale = (std::min)(vAvail.x / ricom->srf_stem->w, vAvail.y / ricom->srf_stem->h);
-                float tex_h = ricom->srf_stem->h * scale;
-                float tex_w = ricom->srf_stem->w * scale;
-
-                if (b_redraw)
-                {
-                    glBindTexture(GL_TEXTURE_2D, uiTextureIDs[2]);
-                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ricom->srf_stem->w, ricom->srf_stem->h, 0,
-                                 GL_BGRA, GL_UNSIGNED_BYTE, ricom->srf_stem->pixels);
-                }
-
-                ImGui::Image((ImTextureID)uiTextureIDs[2], ImVec2(tex_w, tex_h), uv_min, uv_max, tint_col, border_col);
-                ImGui::End();
-            }
-        }
-
+        b_restarted = false;
+        b_trigger_update = ricom->b_busy;
         // Rendering
         ImGui::Render();
         glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            SDL_Window *backup_current_window = SDL_GL_GetCurrentWindow();
+            SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+        }
+
         SDL_GL_SwapWindow(window);
 
         b_redraw = false;

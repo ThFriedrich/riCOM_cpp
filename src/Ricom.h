@@ -113,14 +113,12 @@ class Ricom
 {
 private:
     // vSTEM Variables
-    std::vector<float> stem_data;
     float stem_max;
     float stem_min;
 
     // ricom variables
     std::vector<int> u;
     std::vector<int> v;
-    std::vector<float> ricom_data;
     std::vector<id_x_y> update_list;
 
     // Variables for potting in the SDL2 frame
@@ -131,7 +129,6 @@ private:
     std::mutex ricom_mutex;
     std::mutex stem_mutex;
     std::mutex counter_mutex;
-    int last_y;
 
     // Private Methods - General
     void init_surface();
@@ -144,7 +141,7 @@ private:
     template <typename T, class CameraInterface>
     void skip_frames(int n_skip, std::vector<T> &data, CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *camera_fr);
     template <typename T>
-    void swap_endianess(T &val);
+    inline void swap_endianess(T &val);
 
     // Private Methods - riCOM
     void icom(std::array<float, 2> &com, int x, int y);
@@ -170,6 +167,7 @@ public:
     RICOM::modes mode;
     bool b_print2file;
     int redraw_interval;
+    int last_y;
     ProgressMonitor *p_prog_mon;
     bool b_busy;
     float update_dose_lowbound;
@@ -183,6 +181,8 @@ public:
     std::array<float, 2> com_public;
     std::vector<float> com_map_x;
     std::vector<float> com_map_y;
+    std::vector<float> ricom_data;
+    std::vector<float> stem_data;
 
     // Scan Area Variables
     int nx;
