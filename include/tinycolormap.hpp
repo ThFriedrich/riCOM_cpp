@@ -174,7 +174,7 @@ namespace tinycolormap
         inline double QuantizeArgument(double x, unsigned int num_levels)
         {
             // Clamp num_classes to range [1, 255].
-            num_levels = std::max(1u, std::min(num_levels, 255u));
+            num_levels = (std::max)(1u, (std::min)(num_levels, 255u));
 
             const double interval_length = 255.0 / num_levels;
 

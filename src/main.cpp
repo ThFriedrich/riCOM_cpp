@@ -924,7 +924,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_GetCurrentDisplayMode(0, &DM);
-    float scale = std::min(((float)DM.w) / ricom->nx, ((float)DM.h) / ricom->ny) * 0.8;
+    float scale = (std::min)(((float)DM.w) / ricom->nx, ((float)DM.h) / ricom->ny) * 0.8;
     bool b_redraw = false;
     
     // Creating window
