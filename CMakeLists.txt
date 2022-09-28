@@ -75,8 +75,8 @@ if (WIN32)
 
     file(COPY ${SDL2_LIB_DIR}/SDL2.dll DESTINATION ${BUILD_DIR})
     file(COPY ${SDL2_LIB_DIR}/SDL2_image.dll DESTINATION ${BUILD_DIR})
-    file(COPY ${FFTW3_DIR}/libfftw3-3.dll DESTINATION ${BUILD_DIR})
-    file(COPY ${FFTW3_DIR}/libfftw3-3.lib DESTINATION ${BUILD_DIR})
+    file(COPY ${FFTW3_DIR}/libfftw3f-3.dll DESTINATION ${BUILD_DIR})
+    file(COPY ${FFTW3_DIR}/libfftw3f-3.lib DESTINATION ${BUILD_DIR})
 endif (WIN32)
 
 add_executable(RICOM src/main.cpp)
