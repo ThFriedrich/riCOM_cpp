@@ -44,7 +44,7 @@ private:
     bool b_raw;
     bool b_binary;
 
-    void read_head_data();
+    inline void read_head_data();
     void init_uv(std::vector<int> &u, std::vector<int> &v);
 
 protected:
@@ -57,13 +57,13 @@ protected:
     std::vector<char> acq_header;
 
     template <typename T>
-    void convert_binary_to_chars(std::vector<T> &data);
+    inline void convert_binary_to_chars(std::vector<T> &data);
     // Reading and decoding header data
-    bool read_head(bool decode = true);
-    void read_data(char *buffer, int data_size);
-    int read_aquisition_header();
-    int decode_tcp_head();
-    void decode_head();
+    inline bool read_head(bool decode = true);
+    inline void read_data(char *buffer, int data_size);
+    inline int read_aquisition_header();
+    inline int decode_tcp_head();
+    inline void decode_head();
 
 public:
     // Public Methods

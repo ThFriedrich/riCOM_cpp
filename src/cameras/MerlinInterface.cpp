@@ -104,7 +104,7 @@ void MerlinInterface::init_uv(std::vector<int> &u, std::vector<int> &v)
 }
 
 template <typename T>
-inline void MerlinInterface::convert_binary_to_chars(std::vector<T> &data)
+void MerlinInterface::convert_binary_to_chars(std::vector<T> &data)
 {
     size_t T_size = static_cast<size_t>(sizeof(T) * 8);
     size_t i_dat = static_cast<size_t>(data.size() / T_size);

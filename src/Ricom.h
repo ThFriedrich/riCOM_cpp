@@ -70,14 +70,26 @@ class id_x_y
 {
 public:
     int id;
-    int x;
-    int y;
-    int nx_ricom;
-    int ny_ricom;
     bool valid;
-    id_x_y() : id(0), x(0), y(0), nx_ricom(0), ny_ricom(0), valid(true){};
-    id_x_y(int id, int x, int y, int nx_ricom, int ny_ricom, bool valid);
-    friend id_x_y operator+(id_x_y &c1, const int &c2);
+    id_x_y() : id(0), valid(false){};
+    id_x_y(int id, bool valid);
+};
+
+class Update_list
+{
+private:
+    // Properties
+    Ricom_kernel kernel;
+    int nx;
+    int ny;
+public:
+    // Properties
+    std::vector<id_x_y> ids;
+    // Methods
+    void init(Ricom_kernel kernel, int nx_ricom, int ny_ricom);
+    inline void shift(id_x_y &id_sft, int id, int shift);
+    // Constructor
+    Update_list() : kernel(), nx(0), ny(0){};
 };
 
 class Ricom_detector
@@ -119,11 +131,14 @@ private:
     // ricom variables
     std::vector<int> u;
     std::vector<int> v;
-    std::vector<id_x_y> update_list;
+    std::vector<float> ricom_data;
+    
+    Update_list update_list;
 
     // Variables for potting in the SDL2 frame
     float ricom_max;
     float ricom_min;
+    std::vector<float> cbed_log;
 
     // Thread Synchronization Variables
     std::mutex ricom_mutex;
@@ -132,33 +147,34 @@ private:
 
     // Private Methods - General
     void init_surface();
-    void draw_pixel(SDL_Surface *surface, int x, int y, float val, int color_map);
+    inline void draw_pixel(SDL_Surface *surface, int x, int y, float val, int color_map);
     void reinit_vectors_limits();
     void reset_limits();
     void reset_file();
     void calculate_update_list();
     inline void rescales_recomputes();
     template <typename T, class CameraInterface>
-    void skip_frames(int n_skip, std::vector<T> &data, CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *camera_fr);
+    inline void skip_frames(int n_skip, std::vector<T> &data, CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *camera_fr);
     template <typename T>
     inline void swap_endianess(T &val);
 
     // Private Methods - riCOM
-    void icom(std::array<float, 2> &com, int x, int y);
+    inline void icom(std::array<float, 2> *com, int x, int y);
+    inline void icom(std::array<float, 2> com, int x, int y);
     template <typename T>
-    void com(std::vector<T> *data, std::array<float, 2> &com, std::atomic<int> *dose_sum);
+    inline void com(std::vector<T> *data, std::array<float, 2> &com, std::atomic<int> *dose_sum);
     template <typename T>
     void read_com_merlin(std::vector<T> &data, std::array<float, 2> &com, int &dose_sum);
-    void set_ricom_pixel(int idx, int idy);
+    inline void set_ricom_pixel(int idx, int idy);
     template <typename T>
-    void com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose_sum, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
+    inline void com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose_sum, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
     template <typename T>
-    void com_icom(std::vector<T> *p_data, int ix, int iy, std::atomic<int> *dose_sum, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
+    inline void com_icom(std::vector<T> *p_data, int ix, int iy, std::atomic<int> *dose_sum, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
 
     // Private Methods - vSTEM
     template <typename T>
-    void stem(std::vector<T> *data, size_t id_stem);
-    void set_stem_pixel(size_t idx, size_t idy);
+    inline void stem(std::vector<T> *data, size_t id_stem);
+    inline void set_stem_pixel(size_t idx, size_t idy);
 
 public:
     SocketConnector socket;

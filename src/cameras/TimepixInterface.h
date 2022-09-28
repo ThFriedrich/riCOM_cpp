@@ -63,7 +63,7 @@ public:
                         std::vector<T> &frame,
                         size_t first_frame, size_t end_frame);
 
-    void read_event(e_event &ev);
+    inline void read_event(e_event &ev);
     void init_interface(std::string &t3p_path);
     void close_interface();
 

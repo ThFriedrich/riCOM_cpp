@@ -1,8 +1,12 @@
 build
+intel_build
 data
 .vscode
 imgui.ini
 *.mib
+*.png
+*.out
+*.zip
 opengl32.dll
 ricom.log
 m_list.py

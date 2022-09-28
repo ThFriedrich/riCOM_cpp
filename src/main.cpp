@@ -925,7 +925,8 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_GetCurrentDisplayMode(0, &DM);
     float scale = std::min(((float)DM.w) / ricom->nx, ((float)DM.h) / ricom->ny) * 0.8;
-
+    bool b_redraw = false;
+    
     // Creating window
     window = SDL_CreateWindow("riCOM", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, scale * ricom->nx, scale * ricom->ny, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
     if (window == NULL)
@@ -978,22 +979,24 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
     std::thread run_thread;
     run_thread = std::thread(run_ricom, ricom, ricom->mode);
     run_thread.detach();
-    bool b_redraw = false;
+
     SDL_Delay(ricom->redraw_interval * 2);
+
     while (1)
     {
-        if (ricom->p_prog_mon != nullptr)
+        if (ricom->p_prog_mon != nullptr) 
         {
-            if (ricom->p_prog_mon->report_set_public)
+            if (ricom->p_prog_mon->report_set_public) 
             {
                 b_redraw = true;
                 ricom->p_prog_mon->report_set_public = false;
             }
+        else 
+            {
+                b_redraw = true;
+            }
         }
-        else
-        {
-            b_redraw = true;
-        }
+
         if (b_redraw)
         {
             update_image(tex, renderer, ricom->srf_ricom);
@@ -1010,7 +1013,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
                  event.window.event == SDL_WINDOWEVENT_CLOSE))
             {
                 ricom->rc_quit = true;
-                SDL_Delay(100);
+                SDL_Delay(ricom->redraw_interval);
                 return 0;
             }
         }
@@ -1045,6 +1048,9 @@ int main(int argc, char *argv[])
 
     if (argc == 1)
     {
+        #ifdef _WIN32
+        FreeConsole();
+        #endif
         log2file(ricom_ptr);
         return run_gui(ricom_ptr);
     }
