@@ -131,7 +131,6 @@ private:
     // ricom variables
     std::vector<int> u;
     std::vector<int> v;
-    std::vector<float> ricom_data;
     
     Update_list update_list;
 

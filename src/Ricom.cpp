@@ -384,9 +384,7 @@ void Ricom::draw_pixel(SDL_Surface *surface, int x, int y, float val, int col_ma
 ////////////////////////////////////////////////
 //     RICOM class method implementations     //
 ////////////////////////////////////////////////
-Ricom::Ricom() : stem_data(),
-                 stem_max(-FLT_MAX), stem_min(FLT_MAX),
-                 ricom_data(),
+Ricom::Ricom() : stem_max(-FLT_MAX), stem_min(FLT_MAX),
                  update_list(),
                  ricom_max(-FLT_MAX), ricom_min(FLT_MAX),
                  cbed_log(),
@@ -407,6 +405,8 @@ Ricom::Ricom() : stem_data(),
                  kernel(),
                  offset{127.5, 127.5}, com_public{0.0, 0.0},
                  com_map_x(), com_map_y(),
+                 ricom_data(),
+                 stem_data(),
                  nx(256), ny(256), nxy(0),
                  rep(1), fr_total(0),
                  skip_row(1), skip_img(0),
