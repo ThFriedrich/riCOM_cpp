@@ -124,12 +124,12 @@ void Ricom_kernel::include_filter()
 {
     int k_width_sym = kernel_size * 2 + 1;
     std::vector<int> map = fftshift_map(k_width_sym, k_width_sym);
-    std::complex<double> *k_x = new std::complex<double>[k_area];
-    std::complex<double> *k_y = new std::complex<double>[k_area];
-    std::complex<double> *k_x_f = new std::complex<double>[k_area];
-    std::complex<double> *k_y_f = new std::complex<double>[k_area];
+    std::complex<float> *k_x = new std::complex<float>[k_area];
+    std::complex<float> *k_y = new std::complex<float>[k_area];
+    std::complex<float> *k_x_f = new std::complex<float>[k_area];
+    std::complex<float> *k_y_f = new std::complex<float>[k_area];
 
-    fftw_plan px, py, ipx, ipy;
+    fftwf_plan px, py, ipx, ipy;
 
     for (int id = 0; id < k_area; id++)
     {
@@ -137,15 +137,15 @@ void Ricom_kernel::include_filter()
         k_y[id] = {kernel_y[id + map[id]], 0};
     }
 
-    px = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_x),
-                          reinterpret_cast<fftw_complex *>(k_x_f), FFTW_FORWARD, FFTW_ESTIMATE);
-    fftw_execute(px);
-    fftw_destroy_plan(px);
+    px = fftwf_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftwf_complex *>(k_x),
+                          reinterpret_cast<fftwf_complex *>(k_x_f), FFTW_FORWARD, FFTW_ESTIMATE);
+    fftwf_execute(px);
+    fftwf_destroy_plan(px);
 
-    py = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_y),
-                          reinterpret_cast<fftw_complex *>(k_y_f), FFTW_FORWARD, FFTW_ESTIMATE);
-    fftw_execute(py);
-    fftw_destroy_plan(py);
+    py = fftwf_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftwf_complex *>(k_y),
+                          reinterpret_cast<fftwf_complex *>(k_y_f), FFTW_FORWARD, FFTW_ESTIMATE);
+    fftwf_execute(py);
+    fftwf_destroy_plan(py);
 
     for (int id = 0; id < k_area; id++)
     {
@@ -156,15 +156,15 @@ void Ricom_kernel::include_filter()
         }
     }
 
-    ipx = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_x_f),
-                           reinterpret_cast<fftw_complex *>(k_x), FFTW_BACKWARD, FFTW_ESTIMATE);
-    fftw_execute(ipx);
-    fftw_destroy_plan(ipx);
+    ipx = fftwf_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftwf_complex *>(k_x_f),
+                           reinterpret_cast<fftwf_complex *>(k_x), FFTW_BACKWARD, FFTW_ESTIMATE);
+    fftwf_execute(ipx);
+    fftwf_destroy_plan(ipx);
 
-    ipy = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_y_f),
-                           reinterpret_cast<fftw_complex *>(k_y), FFTW_BACKWARD, FFTW_ESTIMATE);
-    fftw_execute(ipy);
-    fftw_destroy_plan(ipy);
+    ipy = fftwf_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftwf_complex *>(k_y_f),
+                           reinterpret_cast<fftwf_complex *>(k_y), FFTW_BACKWARD, FFTW_ESTIMATE);
+    fftwf_execute(ipy);
+    fftwf_destroy_plan(ipy);
 
     for (int id = 0; id < k_area; id++)
     {
@@ -374,12 +374,12 @@ Ricom::Ricom() : stem_data(),
                  update_list(),
                  ricom_max(-FLT_MAX), ricom_min(FLT_MAX),
                  ricom_mutex(), stem_mutex(), counter_mutex(),
-                 last_y(0),
                  socket(), file_path(""),
                  camera(),
                  mode(RICOM::FILE),
                  b_print2file(false),
-                 redraw_interval(20),
+                 redraw_interval(50),
+                 last_y(0),
                  p_prog_mon(nullptr),
                  b_busy(false),
                  update_dose_lowbound(6),
@@ -399,7 +399,7 @@ Ricom::Ricom() : stem_data(),
                  rc_quit(false),
                  srf_ricom(NULL), ricom_cmap(9),
                  srf_stem(NULL), stem_cmap(9),
-                 srf_cbed(NULL), cbed_cmap(9)
+                 srf_cbed(NULL), cbed_cmap(5)
 {
     n_threads_max = std::thread::hardware_concurrency();
 }
@@ -408,7 +408,7 @@ Ricom::~Ricom(){};
 
 // Change the endianness of the incoming data
 template <typename T>
-inline void Ricom::swap_endianess(T &val)
+void Ricom::swap_endianess(T &val)
 {
     if (val > 0 && camera.swap_endian)
     {
@@ -1057,5 +1057,5 @@ void Ricom::reset()
 {
     rc_quit = false;
     fr_freq = 0;
-    reset_limits();
+    reinit_vectors_limits();
 }

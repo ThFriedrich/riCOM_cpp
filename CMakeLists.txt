@@ -96,6 +96,7 @@ target_sources( RICOM PRIVATE
     src/cameras/MerlinWrapper.cpp
     src/Camera.cpp
     src/main.cpp
+    src/Gui_utils.cpp
     )
 
 target_include_directories( RICOM PUBLIC
@@ -113,7 +114,7 @@ find_package(OpenGL REQUIRED)
 
 target_link_libraries(RICOM PUBLIC ${OPENGL_LIBRARIES})
 if (WIN32)
-    target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image libfftw3-3 ${CMAKE_DL_LIBS})
+    target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image libfftw3f-3 ${CMAKE_DL_LIBS})
 else ()
-    target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image fftw3 ${CMAKE_DL_LIBS})
+    target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image fftw3f ${CMAKE_DL_LIBS})
 endif (WIN32)
