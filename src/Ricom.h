@@ -125,14 +125,13 @@ class Ricom
 {
 private:
     // vSTEM Variables
-    std::vector<float> stem_data;
     float stem_max;
     float stem_min;
 
     // ricom variables
     std::vector<int> u;
     std::vector<int> v;
-    std::vector<float> ricom_data;
+    
     Update_list update_list;
 
     // Variables for potting in the SDL2 frame
@@ -144,10 +143,11 @@ private:
     std::mutex ricom_mutex;
     std::mutex stem_mutex;
     std::mutex counter_mutex;
-    int last_y;
 
     // Private Methods - General
     void init_surface();
+    template <typename T>
+    inline void update_surfaces(int iy, std::vector<T> *p_frame);
     inline void draw_pixel(SDL_Surface *surface, int x, int y, float val, int color_map);
     void reinit_vectors_limits();
     void reset_limits();
@@ -184,11 +184,14 @@ public:
     RICOM::modes mode;
     bool b_print2file;
     int redraw_interval;
+    int last_y;
     ProgressMonitor *p_prog_mon;
     bool b_busy;
     float update_dose_lowbound;
     bool update_offset;
     bool b_vSTEM;
+    bool b_plot_cbed;
+    bool b_plot2SDL;
     bool b_recompute_detector;
     bool b_recompute_kernel;
     Ricom_detector detector;
@@ -197,6 +200,8 @@ public:
     std::array<float, 2> com_public;
     std::vector<float> com_map_x;
     std::vector<float> com_map_y;
+    std::vector<float> ricom_data;
+    std::vector<float> stem_data;
 
     // Scan Area Variables
     int nx;

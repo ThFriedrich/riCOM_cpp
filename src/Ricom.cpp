@@ -124,12 +124,12 @@ void Ricom_kernel::include_filter()
 {
     int k_width_sym = kernel_size * 2 + 1;
     std::vector<int> map = fftshift_map(k_width_sym, k_width_sym);
-    std::complex<double> *k_x = new std::complex<double>[k_area];
-    std::complex<double> *k_y = new std::complex<double>[k_area];
-    std::complex<double> *k_x_f = new std::complex<double>[k_area];
-    std::complex<double> *k_y_f = new std::complex<double>[k_area];
+    std::complex<float> *k_x = new std::complex<float>[k_area];
+    std::complex<float> *k_y = new std::complex<float>[k_area];
+    std::complex<float> *k_x_f = new std::complex<float>[k_area];
+    std::complex<float> *k_y_f = new std::complex<float>[k_area];
 
-    fftw_plan px, py, ipx, ipy;
+    fftwf_plan px, py, ipx, ipy;
 
     for (int id = 0; id < k_area; id++)
     {
@@ -137,15 +137,15 @@ void Ricom_kernel::include_filter()
         k_y[id] = {kernel_y[id + map[id]], 0};
     }
 
-    px = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_x),
-                          reinterpret_cast<fftw_complex *>(k_x_f), FFTW_FORWARD, FFTW_ESTIMATE);
-    fftw_execute(px);
-    fftw_destroy_plan(px);
+    px = fftwf_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftwf_complex *>(k_x),
+                          reinterpret_cast<fftwf_complex *>(k_x_f), FFTW_FORWARD, FFTW_ESTIMATE);
+    fftwf_execute(px);
+    fftwf_destroy_plan(px);
 
-    py = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_y),
-                          reinterpret_cast<fftw_complex *>(k_y_f), FFTW_FORWARD, FFTW_ESTIMATE);
-    fftw_execute(py);
-    fftw_destroy_plan(py);
+    py = fftwf_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftwf_complex *>(k_y),
+                          reinterpret_cast<fftwf_complex *>(k_y_f), FFTW_FORWARD, FFTW_ESTIMATE);
+    fftwf_execute(py);
+    fftwf_destroy_plan(py);
 
     for (int id = 0; id < k_area; id++)
     {
@@ -156,15 +156,15 @@ void Ricom_kernel::include_filter()
         }
     }
 
-    ipx = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_x_f),
-                           reinterpret_cast<fftw_complex *>(k_x), FFTW_BACKWARD, FFTW_ESTIMATE);
-    fftw_execute(ipx);
-    fftw_destroy_plan(ipx);
+    ipx = fftwf_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftwf_complex *>(k_x_f),
+                           reinterpret_cast<fftwf_complex *>(k_x), FFTW_BACKWARD, FFTW_ESTIMATE);
+    fftwf_execute(ipx);
+    fftwf_destroy_plan(ipx);
 
-    ipy = fftw_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftw_complex *>(k_y_f),
-                           reinterpret_cast<fftw_complex *>(k_y), FFTW_BACKWARD, FFTW_ESTIMATE);
-    fftw_execute(ipy);
-    fftw_destroy_plan(ipy);
+    ipy = fftwf_plan_dft_2d(k_width_sym, k_width_sym, reinterpret_cast<fftwf_complex *>(k_y_f),
+                           reinterpret_cast<fftwf_complex *>(k_y), FFTW_BACKWARD, FFTW_ESTIMATE);
+    fftwf_execute(ipy);
+    fftwf_destroy_plan(ipy);
 
     for (int id = 0; id < k_area; id++)
     {
@@ -333,13 +333,11 @@ void Update_list::init(Ricom_kernel kernel, int nx_ricom, int ny_ricom)
 }
 
 void Update_list::shift(id_x_y &res, int id, int shift)
-{
-    
+{  
     int id_sft = ids[id].id + shift;
     int y = id_sft / nx;
     int x = id_sft % nx;
     res = {id_sft, y >= 0 && y < ny && x < nx && x >= 0};
-
 }
 
 ////////////////////////////////////////////////
@@ -362,8 +360,7 @@ void Ricom::init_surface()
         exit(EXIT_FAILURE);
     }
     // SDL surface for CBED image
-    cbed_log.resize(camera.nx_cam*camera.ny_cam);
-    cbed_log = {0.0};
+    cbed_log.assign(camera.nx_cam*camera.ny_cam, 0.0);
     srf_cbed = SDL_CreateRGBSurface(0, camera.nx_cam, camera.ny_cam, 32, 0, 0, 0, 0);
     if (srf_cbed == NULL)
     {
@@ -384,29 +381,29 @@ void Ricom::draw_pixel(SDL_Surface *surface, int x, int y, float val, int col_ma
 ////////////////////////////////////////////////
 //     RICOM class method implementations     //
 ////////////////////////////////////////////////
-Ricom::Ricom() : stem_data(),
-                 stem_max(-FLT_MAX), stem_min(FLT_MAX),
-                 ricom_data(),
+Ricom::Ricom() : stem_max(-FLT_MAX), stem_min(FLT_MAX),
                  update_list(),
                  ricom_max(-FLT_MAX), ricom_min(FLT_MAX),
                  cbed_log(),
                  ricom_mutex(), stem_mutex(), counter_mutex(),
-                 last_y(0),
                  socket(), file_path(""),
                  camera(),
                  mode(RICOM::FILE),
                  b_print2file(false),
-                 redraw_interval(200),
+                 redraw_interval(50),
+                 last_y(0),
                  p_prog_mon(nullptr),
                  b_busy(false),
                  update_dose_lowbound(6),
                  update_offset(true),
-                 b_vSTEM(false),
+                 b_vSTEM(false), b_plot_cbed(true), b_plot2SDL(false),
                  b_recompute_detector(false), b_recompute_kernel(false),
                  detector(256, 256),
                  kernel(),
                  offset{127.5, 127.5}, com_public{0.0, 0.0},
                  com_map_x(), com_map_y(),
+                 ricom_data(),
+                 stem_data(),
                  nx(256), ny(256), nxy(0),
                  rep(1), fr_total(0),
                  skip_row(1), skip_img(0),
@@ -416,7 +413,7 @@ Ricom::Ricom() : stem_data(),
                  rc_quit(false),
                  srf_ricom(NULL), ricom_cmap(9),
                  srf_stem(NULL), stem_cmap(9),
-                 srf_cbed(NULL), cbed_cmap(9)
+                 srf_cbed(NULL), cbed_cmap(5)
 {
     n_threads_max = std::thread::hardware_concurrency();
 }
@@ -425,7 +422,7 @@ Ricom::~Ricom(){};
 
 // Change the endianness of the incoming data
 template <typename T>
-inline void Ricom::swap_endianess(T &val)
+void Ricom::swap_endianess(T &val)
 {
     if (val > 0 && camera.swap_endian)
     {
@@ -706,14 +703,12 @@ inline void Ricom::rescales_recomputes()
     if (rescale_ricom)
     {
         rescale_ricom = false;
-        draw_ricom_image();
     };
     if (b_vSTEM)
     {
         if (rescale_stem)
         {
             rescale_stem = false;
-            draw_stem_image();
         };
     };
 }
@@ -755,15 +750,10 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose
     fr_count = p_prog_mon->fr_count;
     if (p_prog_mon->report_set)
     {
-        draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), (std::min)(iy + kernel.kernel_size, ny - 1));
-        if (b_vSTEM)
-        {
-            draw_stem_image(last_y, iy);
-        }
+        update_surfaces(iy, data_ptr);
         last_y = iy;
         fr_freq = p_prog_mon->fr_freq;
         rescales_recomputes();
-        plot_cbed(data_ptr);
         for (int i = 0; i < 2; i++)
         {
             com_public[i] = com_xy_sum->at(i) / p_prog_mon->fr_count_i;
@@ -797,15 +787,10 @@ void Ricom::com_icom(std::vector<T> *data_ptr, int ix, int iy, std::atomic<int> 
     fr_count = p_prog_mon->fr_count;
     if (p_prog_mon->report_set)
     {
-        draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), (std::min)(iy + kernel.kernel_size, ny - 1));
-        if (b_vSTEM)
-        {
-            draw_stem_image(last_y, iy);
-        }
+        update_surfaces(iy, data_ptr);
         last_y = iy;
         fr_freq = p_prog_mon->fr_freq;
         rescales_recomputes();
-        plot_cbed(data_ptr);
         for (int i = 0; i < 2; i++)
         {
             com_public[i] = com_xy_sum->at(i) / p_prog_mon->fr_count_i;
@@ -881,6 +866,22 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *c
     p_prog_mon = nullptr;
 }
 
+template <typename T>
+void Ricom::update_surfaces(int iy, std::vector<T> *p_frame)
+{
+    if (b_plot2SDL)
+    {
+        draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), (std::min)(iy + kernel.kernel_size, ny - 1));
+        if (b_vSTEM)
+        {
+            draw_stem_image(last_y, iy);
+        }
+    }
+    if (b_plot_cbed)
+    {
+        plot_cbed(p_frame);
+    }
+}
 // Process EVENT_BASED camera data
 template <class CameraInterface>
 void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *camera_spec)
@@ -975,11 +976,7 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
     
     if (prog_mon.report_set)
     {
-        draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), (std::min)(iy + kernel.kernel_size, ny - 1));
-        if (b_vSTEM)
-        {
-            draw_stem_image(last_y, iy);
-        }
+        update_surfaces(iy, p_frame);
         plot_cbed(p_frame);
         fr_freq = prog_mon.fr_freq;
         rescales_recomputes();
@@ -1106,5 +1103,5 @@ void Ricom::reset()
 {
     rc_quit = false;
     fr_freq = 0;
-    reset_limits();
+    reinit_vectors_limits();
 }

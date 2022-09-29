@@ -75,15 +75,14 @@ if (WIN32)
 
     file(COPY ${SDL2_LIB_DIR}/SDL2.dll DESTINATION ${BUILD_DIR})
     file(COPY ${SDL2_LIB_DIR}/SDL2_image.dll DESTINATION ${BUILD_DIR})
-    file(COPY ${FFTW3_DIR}/libfftw3-3.dll DESTINATION ${BUILD_DIR})
-    file(COPY ${FFTW3_DIR}/libfftw3-3.lib DESTINATION ${BUILD_DIR})
+    file(COPY ${FFTW3_DIR}/libfftw3f-3.dll DESTINATION ${BUILD_DIR})
+    file(COPY ${FFTW3_DIR}/libfftw3f-3.lib DESTINATION ${BUILD_DIR})
 endif (WIN32)
 
 add_executable(RICOM src/main.cpp)
 
 target_sources( RICOM PRIVATE
     imgui/misc/cpp/imgui_stdlib.cpp
-    imgui/imgui_demo.cpp
     imgui/imgui_draw.cpp
     imgui/imgui_tables.cpp
     imgui/imgui_widgets.cpp
@@ -100,6 +99,7 @@ target_sources( RICOM PRIVATE
     src/cameras/MerlinWrapper.cpp
     src/Camera.cpp
     src/main.cpp
+    src/Gui_utils.cpp
     )
 
 target_include_directories( RICOM PUBLIC
@@ -117,7 +117,7 @@ find_package(OpenGL REQUIRED)
 
 target_link_libraries(RICOM PUBLIC ${OPENGL_LIBRARIES})
 if (WIN32)
-    target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image libfftw3-3 ${CMAKE_DL_LIBS})
+    target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image libfftw3f-3 ${CMAKE_DL_LIBS})
 else ()
-    target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image fftw3 ${CMAKE_DL_LIBS})
+    target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image fftw3f ${CMAKE_DL_LIBS})
 endif (WIN32)
