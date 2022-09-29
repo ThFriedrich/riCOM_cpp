@@ -152,10 +152,12 @@ Generic_Image_Window::Generic_Image_Window(std::string title, GLuint *tex_id, bo
     this->auto_render = auto_render;
     this->data_cmap = data_cmap;
     this->last_y = 0;
+    this->last_idr = 0;
     this->zoom = 1.0f;
     this->power = 1.0f;
     this->ny = 1;
     this->nx = 1;
+    this->nxy = 1;
     this->render_update_offset = 0;
     this->b_trigger_update = false;
     saveFileDialog = ImGui::FileBrowser(ImGuiFileBrowserFlags_EnterNewFilename | ImGuiFileBrowserFlags_CreateNewDir);
@@ -267,12 +269,8 @@ void Generic_Image_Window::render_window(bool b_redraw, int fr_count, bool b_tri
             if (saveFileDialog.HasSelected())
             {
                 std::string img_file = saveFileDialog.GetSelected().string();
-                if (img_file.substr(img_file.size() - 4, 4) != ".png" && img_file.substr(img_file.size() - 4, 4) != ".PNG")
-                {
-                    img_file += ".png";
-                }
                 saveFileDialog.ClearSelected();
-                IMG_SavePNG(sdl_srf, img_file.c_str());
+                save_image(&img_file, sdl_srf);
             }
         }
 
@@ -287,13 +285,8 @@ void Generic_Image_Window::render_window(bool b_redraw, int fr_count, bool b_tri
             if (saveDataDialog.HasSelected())
             {
                 std::string com_file = saveDataDialog.GetSelected().string();
-                if (std::filesystem::path(com_file).extension() == "")
-                {
-                    com_file += ".npy";
-                }
                 saveDataDialog.ClearSelected();
-                const std::vector<long unsigned> shape{static_cast<long unsigned>(ny), static_cast<long unsigned>(nx)};
-                npy::SaveArrayAsNumpy(com_file, false, shape.size(), shape.data(), *data);
+                save_numpy(&com_file, nx, ny, data);
             }
         }
 
@@ -415,6 +408,28 @@ void Generic_Image_Window::render_window(bool b_redraw, int fr_count, bool b_tri
     }
     ImGui::End();
     b_trigger_update = false;
+}
+
+// template <typename T>
+void save_numpy(std::string *path, int nx, int ny, std::vector<float> *data)
+{
+    std::string ext = std::filesystem::path(*path).extension().string();
+    if (ext != ".npy") 
+    {
+        *path += ".npy";
+    }
+    const std::vector<long unsigned> shape{static_cast<long unsigned>(ny), static_cast<long unsigned>(nx)};
+    npy::SaveArrayAsNumpy(path->c_str(), false, shape.size(), shape.data(), *data);
+}
+
+void save_image(std::string *path, SDL_Surface *sdl_srf)
+{
+    std::string ext = std::filesystem::path(*path).extension().string();
+    if ((ext != ".png") && (ext != ".PNG"))
+    {
+        *path += ".png";
+    }
+    IMG_SavePNG(sdl_srf, path->c_str());
 }
 
 // Vertical Splitter Container

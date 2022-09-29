@@ -132,5 +132,9 @@ class Main_Dock
         void render(ImVec2 pos, ImVec2 size);
 };
 
+void save_numpy(std::string *path, int nx, int ny, std::vector<float> *data);
+
+void save_image(std::string *path, SDL_Surface *sdl_srf);
+
 void v_splitter(float thickness, float &size0, float &min_h, float &max_h, float offset);
 #endif // GUI_UTILS_H
