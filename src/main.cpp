@@ -788,6 +788,9 @@ void update_image(SDL_Texture *tex, SDL_Renderer *renderer, SDL_Surface *srf)
 
 int run_cli(int argc, char *argv[], Ricom *ricom)
 {
+    ricom->b_plot_cbed = false;
+    std::string save_img = "";
+    std::string save_dat = "";
     // command line arguments
     for (int i = 1; i < argc; i++)
     {
@@ -885,7 +888,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
                 i++;
             }
             // Set Dwell Time
-            if (strcmp(argv[i], "-time") == 0)
+            if (strcmp(argv[i], "-dwell_time") == 0)
             {
                 ricom->camera.dwell_time = std::stof(argv[i + 1]);
                 ricom->camera.model = CAMERA::TIMEPIX;
@@ -907,116 +910,147 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
             if (strcmp(argv[i], "-redraw_interval") == 0)
             {
                 ricom->redraw_interval = std::stoi(argv[i + 1]);
+                ricom->b_plot2SDL = true;
+                i++;
+            }
+            // Set path to save reconstruction image
+            if (strcmp(argv[i], "-save_img_path") == 0)
+            {
+                save_img =  argv[i + 1];
+                ricom->b_plot2SDL = true;
+                i++;
+            }
+            // Set path to save reconstruction data
+            if (strcmp(argv[i], "-save_data_path") == 0)
+            {
+                save_dat =  argv[i + 1];
                 i++;
             }
         }
     }
 
-    // Initializing SDL
-    SDL_Window *window = NULL;          // Pointer for the window
-    SDL_Window *window_stem = NULL;     // Pointer for the window
-    SDL_Renderer *renderer = NULL;      // Pointer for the renderer
-    SDL_Renderer *renderer_stem = NULL; // Pointer for the renderer
-    SDL_Texture *tex = NULL;            // Texture for the window;
-    SDL_Texture *stem = NULL;           // Texture for the window;
-    SDL_DisplayMode DM;                 // To get the current display size
-    SDL_Event event;                    // Event variable
+    if (ricom->b_plot2SDL)
+    {
+        // Initializing SDL
+        SDL_Window *window = NULL;          // Pointer for the window
+        SDL_Window *window_stem = NULL;     // Pointer for the window
+        SDL_Renderer *renderer = NULL;      // Pointer for the renderer
+        SDL_Renderer *renderer_stem = NULL; // Pointer for the renderer
+        SDL_Texture *tex = NULL;            // Texture for the window;
+        SDL_Texture *stem = NULL;           // Texture for the window;
+        SDL_DisplayMode DM;                 // To get the current display size
+        SDL_Event event;                    // Event variable
 
-    SDL_Init(SDL_INIT_EVERYTHING);
-    SDL_GetCurrentDisplayMode(0, &DM);
-    float scale = (std::min)(((float)DM.w) / ricom->nx, ((float)DM.h) / ricom->ny) * 0.8;
-    bool b_redraw = false;
-    
-    // Creating window
-    window = SDL_CreateWindow("riCOM", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, scale * ricom->nx, scale * ricom->ny, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
-    if (window == NULL)
-    {
-        std::cout << "Window could not be created! SDL Error: " << SDL_GetError() << std::endl;
-    }
-    // Creating Renderer
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (renderer == NULL)
-    {
-        std::cout << "Renderer could not be created! SDL Error: " << SDL_GetError() << std::endl;
-    }
-    // Creating texture for hardware rendering
-    tex = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STATIC, ricom->nx, ricom->ny);
-    if (tex == NULL)
-    {
-        std::cout << "Texture could not be created! SDL Error: " << SDL_GetError() << std::endl;
-    }
-    // Maintain Pixel aspect ratio on resizing
-    if (SDL_RenderSetLogicalSize(renderer, scale * ricom->nx, scale * ricom->ny) < 0)
-    {
-        std::cout << "Logical size could not be set! SDL Error: " << SDL_GetError() << std::endl;
-    }
-    if (ricom->b_vSTEM)
-    {
+        SDL_Init(SDL_INIT_EVERYTHING);
+        SDL_GetCurrentDisplayMode(0, &DM);
+        float scale = (std::min)(((float)DM.w) / ricom->nx, ((float)DM.h) / ricom->ny) * 0.8;
+        bool b_redraw = false;
+
         // Creating window
-        window_stem = SDL_CreateWindow("vSTEM", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, scale * ricom->nx, scale * ricom->ny, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
-        if (window_stem == NULL)
+        window = SDL_CreateWindow("riCOM", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, scale * ricom->nx, scale * ricom->ny, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+        if (window == NULL)
         {
             std::cout << "Window could not be created! SDL Error: " << SDL_GetError() << std::endl;
         }
         // Creating Renderer
-        renderer_stem = SDL_CreateRenderer(window_stem, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-        if (renderer_stem == NULL)
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        if (renderer == NULL)
         {
             std::cout << "Renderer could not be created! SDL Error: " << SDL_GetError() << std::endl;
         }
         // Creating texture for hardware rendering
-        stem = SDL_CreateTexture(renderer_stem, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STATIC, ricom->nx, ricom->ny);
-        if (stem == NULL)
+        tex = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STATIC, ricom->nx, ricom->ny);
+        if (tex == NULL)
         {
             std::cout << "Texture could not be created! SDL Error: " << SDL_GetError() << std::endl;
         }
         // Maintain Pixel aspect ratio on resizing
-        if (SDL_RenderSetLogicalSize(renderer_stem, scale * ricom->nx, scale * ricom->ny) < 0)
+        if (SDL_RenderSetLogicalSize(renderer, scale * ricom->nx, scale * ricom->ny) < 0)
         {
             std::cout << "Logical size could not be set! SDL Error: " << SDL_GetError() << std::endl;
         }
+        if (ricom->b_vSTEM)
+        {
+            // Creating window
+            window_stem = SDL_CreateWindow("vSTEM", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, scale * ricom->nx, scale * ricom->ny, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+            if (window_stem == NULL)
+            {
+                std::cout << "Window could not be created! SDL Error: " << SDL_GetError() << std::endl;
+            }
+            // Creating Renderer
+            renderer_stem = SDL_CreateRenderer(window_stem, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+            if (renderer_stem == NULL)
+            {
+                std::cout << "Renderer could not be created! SDL Error: " << SDL_GetError() << std::endl;
+            }
+            // Creating texture for hardware rendering
+            stem = SDL_CreateTexture(renderer_stem, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_STATIC, ricom->nx, ricom->ny);
+            if (stem == NULL)
+            {
+                std::cout << "Texture could not be created! SDL Error: " << SDL_GetError() << std::endl;
+            }
+            // Maintain Pixel aspect ratio on resizing
+            if (SDL_RenderSetLogicalSize(renderer_stem, scale * ricom->nx, scale * ricom->ny) < 0)
+            {
+                std::cout << "Logical size could not be set! SDL Error: " << SDL_GetError() << std::endl;
+            }
+        }
+
+        std::thread run_thread;
+        run_thread = std::thread(run_ricom, ricom, ricom->mode);
+        run_thread.detach();
+
+        SDL_Delay(ricom->redraw_interval * 2);
+        bool b_open_window = true;
+        while (b_open_window)
+        {
+            if (ricom->p_prog_mon != nullptr) 
+            {
+                if (ricom->p_prog_mon->report_set_public) 
+                {
+                    b_redraw = true;
+                    ricom->p_prog_mon->report_set_public = false;
+                }
+            else 
+                {
+                    b_redraw = true;
+                }
+            }
+
+            if (b_redraw)
+            {
+                update_image(tex, renderer, ricom->srf_ricom);
+                if (ricom->b_vSTEM)
+                {
+                    update_image(stem, renderer_stem, ricom->srf_stem);
+                }
+            }
+
+            while (SDL_PollEvent(&event))
+            {
+                if (event.type == SDL_QUIT ||
+                    (event.type == SDL_WINDOWEVENT &&
+                    event.window.event == SDL_WINDOWEVENT_CLOSE))
+                {
+                    ricom->rc_quit = true;
+                    SDL_Delay(ricom->redraw_interval);
+                    b_open_window = false;
+                }
+            }
+        }
     }
-    std::thread run_thread;
-    run_thread = std::thread(run_ricom, ricom, ricom->mode);
-    run_thread.detach();
-
-    SDL_Delay(ricom->redraw_interval * 2);
-
-    while (1)
+    else{
+        run_ricom(ricom, ricom->mode);
+    }
+    if (save_dat != "")
     {
-        if (ricom->p_prog_mon != nullptr) 
-        {
-            if (ricom->p_prog_mon->report_set_public) 
-            {
-                b_redraw = true;
-                ricom->p_prog_mon->report_set_public = false;
-            }
-        else 
-            {
-                b_redraw = true;
-            }
-        }
-
-        if (b_redraw)
-        {
-            update_image(tex, renderer, ricom->srf_ricom);
-            if (ricom->b_vSTEM)
-            {
-                update_image(stem, renderer_stem, ricom->srf_stem);
-            }
-        }
-
-        while (SDL_PollEvent(&event))
-        {
-            if (event.type == SDL_QUIT ||
-                (event.type == SDL_WINDOWEVENT &&
-                 event.window.event == SDL_WINDOWEVENT_CLOSE))
-            {
-                ricom->rc_quit = true;
-                SDL_Delay(ricom->redraw_interval);
-                return 0;
-            }
-        }
+        save_numpy(&save_dat, ricom->nx, ricom->ny, &ricom->ricom_data);
+        std::cout << "riCOM reconstruction data saved as " + save_dat << std::endl;
+    }
+    if (save_img != "")
+    {
+        save_image(&save_img, ricom->srf_ricom);
+        std::cout << "riCOM reconstruction image saved as " + save_img << std::endl;
     }
     return 0;
 }

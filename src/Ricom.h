@@ -146,6 +146,8 @@ private:
 
     // Private Methods - General
     void init_surface();
+    template <typename T>
+    inline void update_surfaces(int iy, std::vector<T> *p_frame);
     inline void draw_pixel(SDL_Surface *surface, int x, int y, float val, int color_map);
     void reinit_vectors_limits();
     void reset_limits();
@@ -188,6 +190,8 @@ public:
     float update_dose_lowbound;
     bool update_offset;
     bool b_vSTEM;
+    bool b_plot_cbed;
+    bool b_plot2SDL;
     bool b_recompute_detector;
     bool b_recompute_kernel;
     Ricom_detector detector;

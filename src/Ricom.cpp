@@ -333,13 +333,11 @@ void Update_list::init(Ricom_kernel kernel, int nx_ricom, int ny_ricom)
 }
 
 void Update_list::shift(id_x_y &res, int id, int shift)
-{
-    
+{  
     int id_sft = ids[id].id + shift;
     int y = id_sft / nx;
     int x = id_sft % nx;
     res = {id_sft, y >= 0 && y < ny && x < nx && x >= 0};
-
 }
 
 ////////////////////////////////////////////////
@@ -362,8 +360,7 @@ void Ricom::init_surface()
         exit(EXIT_FAILURE);
     }
     // SDL surface for CBED image
-    cbed_log.resize(camera.nx_cam*camera.ny_cam);
-    cbed_log = {0.0};
+    cbed_log.assign(camera.nx_cam*camera.ny_cam, 0.0);
     srf_cbed = SDL_CreateRGBSurface(0, camera.nx_cam, camera.ny_cam, 32, 0, 0, 0, 0);
     if (srf_cbed == NULL)
     {
@@ -399,7 +396,7 @@ Ricom::Ricom() : stem_max(-FLT_MAX), stem_min(FLT_MAX),
                  b_busy(false),
                  update_dose_lowbound(6),
                  update_offset(true),
-                 b_vSTEM(false),
+                 b_vSTEM(false), b_plot_cbed(true), b_plot2SDL(false),
                  b_recompute_detector(false), b_recompute_kernel(false),
                  detector(256, 256),
                  kernel(),
@@ -706,14 +703,12 @@ inline void Ricom::rescales_recomputes()
     if (rescale_ricom)
     {
         rescale_ricom = false;
-        draw_ricom_image();
     };
     if (b_vSTEM)
     {
         if (rescale_stem)
         {
             rescale_stem = false;
-            draw_stem_image();
         };
     };
 }
@@ -755,15 +750,10 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose
     fr_count = p_prog_mon->fr_count;
     if (p_prog_mon->report_set)
     {
-        draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), (std::min)(iy + kernel.kernel_size, ny - 1));
-        if (b_vSTEM)
-        {
-            draw_stem_image(last_y, iy);
-        }
+        update_surfaces(iy, data_ptr);
         last_y = iy;
         fr_freq = p_prog_mon->fr_freq;
         rescales_recomputes();
-        plot_cbed(data_ptr);
         for (int i = 0; i < 2; i++)
         {
             com_public[i] = com_xy_sum->at(i) / p_prog_mon->fr_count_i;
@@ -797,15 +787,10 @@ void Ricom::com_icom(std::vector<T> *data_ptr, int ix, int iy, std::atomic<int> 
     fr_count = p_prog_mon->fr_count;
     if (p_prog_mon->report_set)
     {
-        draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), (std::min)(iy + kernel.kernel_size, ny - 1));
-        if (b_vSTEM)
-        {
-            draw_stem_image(last_y, iy);
-        }
+        update_surfaces(iy, data_ptr);
         last_y = iy;
         fr_freq = p_prog_mon->fr_freq;
         rescales_recomputes();
-        plot_cbed(data_ptr);
         for (int i = 0; i < 2; i++)
         {
             com_public[i] = com_xy_sum->at(i) / p_prog_mon->fr_count_i;
@@ -881,6 +866,22 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *c
     p_prog_mon = nullptr;
 }
 
+template <typename T>
+void Ricom::update_surfaces(int iy, std::vector<T> *p_frame)
+{
+    if (b_plot2SDL)
+    {
+        draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), (std::min)(iy + kernel.kernel_size, ny - 1));
+        if (b_vSTEM)
+        {
+            draw_stem_image(last_y, iy);
+        }
+    }
+    if (b_plot_cbed)
+    {
+        plot_cbed(p_frame);
+    }
+}
 // Process EVENT_BASED camera data
 template <class CameraInterface>
 void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *camera_spec)
@@ -975,11 +976,7 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
     
     if (prog_mon.report_set)
     {
-        draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), (std::min)(iy + kernel.kernel_size, ny - 1));
-        if (b_vSTEM)
-        {
-            draw_stem_image(last_y, iy);
-        }
+        update_surfaces(iy, p_frame);
         plot_cbed(p_frame);
         fr_freq = prog_mon.fr_freq;
         rescales_recomputes();
