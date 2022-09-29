@@ -44,7 +44,7 @@ jobs:
           curl.exe https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip --output fftw.zip
           tar -xf fftw.zip
           del fftw.zip
-          lib /def:libfftw3-3.def
+          lib /machine:x64 /def:libfftw3f-3.def
           cd ..
           move FFTW C:\
 
