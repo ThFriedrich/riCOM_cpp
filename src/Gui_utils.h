@@ -14,6 +14,24 @@
 #ifndef GUI_UTILS_H
 #define GUI_UTILS_H
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_WARNINGS
+#pragma warning(disable : 4067)
+#pragma warning(disable : 4333)
+#pragma warning(disable : 4312)
+#endif
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
+
+#if defined(__clang__)
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
+
 #include <string>
 #include <iostream>
 #include <vector>
@@ -31,7 +49,6 @@
 #include "imgui_internal.h"
 #include "imfilebrowser.h"
 
-#include "imfilebrowser.h"
 #include "libnpy.hpp"
 #include "tinycolormap.hpp"
 #include "fft2d.hpp"

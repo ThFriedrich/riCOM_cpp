@@ -11,24 +11,6 @@
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_DEPRECATE
-#define _CRT_SECURE_NO_WARNINGS
-#pragma warning(disable : 4067)
-#pragma warning(disable : 4333)
-#pragma warning(disable : 4312)
-#endif
-
-#if defined(__GNUC__)
-#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
-#pragma GCC diagnostic ignored "-Wformat-security"
-#endif
-
-#if defined(__clang__)
-#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
-#pragma GCC diagnostic ignored "-Wformat-security"
-#endif
-
 #include "Gui_utils.h"
 
 template <typename T>

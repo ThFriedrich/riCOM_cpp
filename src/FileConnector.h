@@ -14,6 +14,8 @@
 #ifndef FILE_CONNECTOR_H
 #define FILE_CONNECTOR_H
 
+#include <iostream>
+#include <limits>
 #include <string>
 #include <fstream>
 #include <filesystem>

@@ -14,8 +14,17 @@
 #ifndef RICOM_H
 #define RICOM_H
 
-#include <stdio.h>
+#ifdef _WIN32
+#include <io.h>
+#pragma warning(disable : 4333 34)
+#else
+#include <unistd.h>
+#endif
+
+#define _USE_MATH_DEFINES
 #include <cmath>
+
+#include <stdio.h>
 #include <complex>
 #include <cfloat>
 #include <vector>
@@ -23,10 +32,24 @@
 #include <SDL.h>
 #include <mutex>
 #include <future>
+#include <thread>
+#include <fftw3.h>
+#include <chrono>
+#include <algorithm>
 
+#include "BoundedThreadPool.hpp"
+#include "tinycolormap.hpp"
 #include "SocketConnector.h"
 #include "ProgressMonitor.h"
+#include "MerlinInterface.h"
+#include "TimepixInterface.h"
 #include "Camera.h"
+
+
+
+
+namespace chc = std::chrono;
+namespace cmap = tinycolormap;
 
 class Ricom_kernel
 {

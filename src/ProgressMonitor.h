@@ -23,7 +23,10 @@
 #include <cstring>
 #include <atomic>
 #include <chrono>
+#include <cmath>
+
 namespace chc = std::chrono;
+typedef chc::duration<float, std::milli> float_ms;
 
 #define TOTAL_PERCENTAGE 100.0
 #define CHARACTER_WIDTH_PERCENTAGE 4

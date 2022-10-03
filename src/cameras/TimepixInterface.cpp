@@ -11,9 +11,6 @@
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "TimepixInterface.h"
 
 // Read a frame and compute COM

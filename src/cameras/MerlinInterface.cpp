@@ -11,16 +11,6 @@
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_DEPRECATE
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
-#include <string>
-#include <vector>
-#include <iostream>
-#include <sstream>
-
 #include "MerlinInterface.h"
 
 void MerlinInterface::read_head_data()

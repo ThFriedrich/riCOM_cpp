@@ -14,9 +14,16 @@
 #ifndef MERLIN_INTERFACE_H
 #define MERLIN_INTERFACE_H
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <string>
 #include <vector>
 #include <array>
+#include <iostream>
+#include <sstream>
 
 #include "SocketConnector.h"
 #include "FileConnector.h"

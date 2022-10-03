@@ -11,34 +11,7 @@
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
 
-#ifdef _WIN32
-#include <io.h>
-#pragma warning(disable : 4333 34)
-#else
-#include <unistd.h>
-#endif
-
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <complex>
-#include <cfloat>
-#include <vector>
-#include <string>
-#include <chrono>
-#include <algorithm>
-#include <thread>
-#include <future>
-#include <fftw3.h>
-#include "tinycolormap.hpp"
-
 #include "Ricom.h"
-#include "BoundedThreadPool.hpp"
-#include "ProgressMonitor.h"
-#include "MerlinInterface.h"
-#include "TimepixInterface.h"
-
-namespace chc = std::chrono;
-namespace cmap = tinycolormap;
 
 ////////////////////////////////////////////////
 // RICOM Kernel class method implementations  //

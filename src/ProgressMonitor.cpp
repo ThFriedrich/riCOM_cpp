@@ -12,11 +12,6 @@
  */
 
 #include "ProgressMonitor.h"
-#include <cmath>
-#include <chrono>
-
-namespace chc = std::chrono;
-typedef chc::duration<float, std::milli> float_ms;
 
 ProgressMonitor::ProgressMonitor(unsigned long fr_total, bool b_bar, float report_interval, std::ostream &out) : fr_count(0), fr_count_i(0), fr_freq(0), report_set(false), report_set_public(false), first_frame(true), fr(0), fr_avg(0), fr_count_a(0)
 {

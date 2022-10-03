@@ -22,8 +22,11 @@
 #define PACK(__Declaration__) __pragma(pack(push, 1)) __Declaration__ __pragma(pack(pop))
 #endif
 
-#include <vector>
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <atomic>
+#include <vector>
+#include <array>
 
 #include "FileConnector.h"
 
