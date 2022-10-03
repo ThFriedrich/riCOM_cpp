@@ -87,11 +87,16 @@ namespace CAMERA
         Camera(Camera_BASE &cam);
         void run(Ricom *ricom);
         void read_frame_com(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
-                            std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, 
-                            size_t first_frame, size_t end_frame);
+                                std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
+                                std::vector<float> &stem_map, bool b_stem,
+                                std::array<float, 2> &offset, std::array<float, 2> &radius, 
+                                size_t first_frame, size_t end_frame);
         void read_frame_com_cbed(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
-                                 std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, 
-                                 std::vector<uint16_t> &frame, size_t first_frame, size_t end_frame);
+                                std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
+                                std::vector<float> &stem_map, bool b_stem,
+                                std::array<float, 2> &offset, std::array<float, 2> &radius, 
+                                std::vector<uint16_t> &frame, size_t frame_id,
+                                size_t first_frame, size_t end_frame);
     };
 
     class Default_configurations

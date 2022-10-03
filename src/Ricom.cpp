@@ -263,31 +263,34 @@ void Ricom_kernel::approximate_frequencies(size_t nx_im)
 ///////////////////////////////////////////////////
 
 // Computer detector distance map relative to the camera centre for vSTEM
-void Ricom_detector::compute_detector(int nx_cam, int ny_cam)
-{
-    float rad_in2 = pow(radius[0], 2), rad_out2 = pow(radius[1], 2);
-    float d2;
-    id_list.clear();
-    id_list.reserve(nx_cam * ny_cam);
-    std::array<float, 2> offset = {((float)nx_cam - 1) / 2, ((float)ny_cam - 1) / 2};
+// void Ricom_detector::compute_detector(int nx_cam, int ny_cam)
+// {
+//     radius2[0] = pow(radius[0], 2)
+//     radius2[1] = pow(radius[1], 2);
+//     float d2;
+//     id_list.clear();
+//     id_list.reserve(nx_cam * ny_cam);
+//     std::array<float, 2> offset = {((float)nx_cam - 1) / 2, ((float)ny_cam - 1) / 2};
 
-    for (float iy = 0; iy < ny_cam; iy++)
-    {
-        for (float ix = 0; ix < nx_cam; ix++)
-        {
-            d2 = pow(ix, 2) + pow(iy - offset[1], 2);
-            if (d2 > rad_in2 && d2 <= rad_out2)
-            {
-                id_list.push_back(iy * nx_cam + ix);
-            }
-        }
-    }
-}
+//     for (float iy = 0; iy < ny_cam; iy++)
+//     {
+//         for (float ix = 0; ix < nx_cam; ix++)
+//         {
+//             d2 = pow(ix, 2) + pow(iy - offset[1], 2);
+//             if (d2 > radius2[0] && d2 <= radius2[1])
+//             {
+//                 id_list.push_back(iy * nx_cam + ix);
+//             }
+//         }
+//     }
+// }
 
 // Computer detector distance map relative to a given centre (offset) for vSTEM
-void Ricom_detector::compute_detector(std::array<float, 2> &offset, int nx_cam, int ny_cam)
+void Ricom_detector::compute_detector(int nx_cam, int ny_cam, std::array<float, 2> &offset)
 {
-    float rad_in2 = pow(radius[0], 2), rad_out2 = pow(radius[1], 2);
+
+    radius2[0] = pow(radius[0], 2);
+    radius2[1] = pow(radius[1], 2);
     float d2;
     id_list.clear();
     id_list.reserve(nx_cam * ny_cam);
@@ -297,7 +300,7 @@ void Ricom_detector::compute_detector(std::array<float, 2> &offset, int nx_cam, 
         for (int ix = 0; ix < nx_cam; ix++)
         {
             d2 = pow((float)ix - offset[0], 2) + pow((float)iy - offset[1], 2);
-            if (d2 > rad_in2 && d2 <= rad_out2)
+            if (d2 > radius2[0] && d2 <= radius2[1])
             {
                 id_list.push_back(iy * nx_cam + ix);
             }
@@ -398,7 +401,7 @@ Ricom::Ricom() : stem_max(-FLT_MAX), stem_min(FLT_MAX),
                  update_offset(true),
                  b_vSTEM(false), b_plot_cbed(true), b_plot2SDL(false),
                  b_recompute_detector(false), b_recompute_kernel(false),
-                 detector(256, 256),
+                 detector(),
                  kernel(),
                  offset{127.5, 127.5}, com_public{0.0, 0.0},
                  com_map_x(), com_map_y(),
@@ -690,7 +693,7 @@ inline void Ricom::rescales_recomputes()
 {
     if (b_recompute_detector)
     {
-        detector.compute_detector(offset, camera.nx_cam, camera.ny_cam);
+        detector.compute_detector(camera.nx_cam, camera.ny_cam, offset);
         b_recompute_detector = false;
     }
     if (b_recompute_kernel)
@@ -906,6 +909,8 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
     int idxx = 0;
     int ix = 0;
     int iy = 0;
+    int acc_cbed = 0;
+    int acc_idx = 0;
 
     size_t img_num = 0;
     size_t first_frame = img_num * nxy;
@@ -928,13 +933,23 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
         ++prog_mon;
         fr_count = prog_mon.fr_count;
 
-        if (prog_mon.report_set || b_vSTEM)
+        if (acc_cbed < 3 && b_plot_cbed)
         {
-            camera_spec->read_frame_com_cbed(prog_mon.fr_count, dose_map, sumx_map, sumy_map, frame, first_frame, end_frame);
+            camera_spec->read_frame_com_cbed(prog_mon.fr_count, 
+            dose_map, sumx_map, sumy_map,
+            stem_data, b_vSTEM, 
+            offset, detector.radius2,  
+            frame, acc_idx, 
+            first_frame, end_frame);
+            acc_cbed +=1;
         }
         else
         {
-            camera_spec->read_frame_com(prog_mon.fr_count, dose_map, sumx_map, sumy_map, first_frame, end_frame);
+            camera_spec->read_frame_com(prog_mon.fr_count, 
+            dose_map, sumx_map, sumy_map, 
+            stem_data, b_vSTEM, 
+            offset, detector.radius2, 
+            first_frame, end_frame);
         }
 
         if (idxx >= 0)
@@ -968,16 +983,21 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
                 icom(p_com_xy, ix, iy);
             }
 
-            if (b_vSTEM)
-            {
-                stem(p_frame, iy * nx + ix);
-            }
+            // if (b_vSTEM)
+            // {
+            //     stem(p_frame, iy * nx + ix);
+            // }
         }
     
     if (prog_mon.report_set)
     {
         update_surfaces(iy, p_frame);
-        plot_cbed(p_frame);
+        if (b_plot_cbed)
+        {
+            frame.assign(camera_spec->nx_cam * camera_spec->ny_cam, 0);
+            acc_cbed = 0;
+            acc_idx = fr_count;
+        }
         fr_freq = prog_mon.fr_freq;
         rescales_recomputes();
         for (int i = 0; i < 2; i++)
@@ -1037,7 +1057,7 @@ void Ricom::run_reconstruction(RICOM::modes mode)
 
     if (b_vSTEM)
     {
-        detector.compute_detector(offset, camera.nx_cam, camera.ny_cam);
+        detector.compute_detector(camera.nx_cam, camera.ny_cam, offset);
     }
 
     // Compute the integration Kenel

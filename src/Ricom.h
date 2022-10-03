@@ -97,17 +97,14 @@ class Ricom_detector
 public:
     // Properties
     std::array<float, 2> radius;
+    std::array<float, 2> radius2;
     std::vector<int> id_list;
 
     // Methods
-    void compute_detector(int nx_cam, int ny_cam);
-    void compute_detector(std::array<float, 2> &offset, int nx_cam, int ny_cam);
+    // void compute_detector(int nx_cam, int ny_cam);
+    void compute_detector(int nx_cam, int ny_cam, std::array<float, 2> &offset);
     // Constructor
-    Ricom_detector(int nx_cam, int ny_cam) : radius{0.0, 0.0},
-                                             id_list()
-    {
-        compute_detector(nx_cam, ny_cam);
-    };
+    Ricom_detector() : radius{0, 0}, radius2{0, 0}, id_list(){};
     // Destructor
     ~Ricom_detector(){};
 };

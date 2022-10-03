@@ -19,20 +19,35 @@
 // Read a frame and compute COM
 void TimepixInterface::read_frame_com(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
                                   std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, 
+                                  std::vector<float> &stem_map, bool b_stem,
+                                  std::array<float, 2> &offset, std::array<float, 2> &radius2,
                                   size_t first_frame, size_t end_frame)
 {
     e_event ev;
-    size_t probe_position;
+    size_t probe_position, probe_position2;
+    size_t x, y;
+    float d2;
 
     while (true)
     {
         read_event(ev);
         probe_position = floor(ev.toa * 25 / dt);
-        if (probe_position >= first_frame && probe_position < end_frame) //  && ev.toa * 25 % dt < dt/10
+        if (probe_position >= first_frame && probe_position < end_frame)
         {
-            dose_map[probe_position - first_frame]++;
-            sumx_map[probe_position - first_frame] += ev.index % nx;
-            sumy_map[probe_position - first_frame] += floor(ev.index / nx);
+            x = ev.index % nx;
+            y = floor(ev.index / nx);
+            probe_position2 = probe_position - first_frame;
+            dose_map[probe_position2]++;
+            sumx_map[probe_position2] += x;
+            sumy_map[probe_position2] += y;
+            if (b_stem)
+            {
+                d2 = pow((float)x - offset[0], 2) + pow((float)y - offset[1], 2);
+                if (d2 > radius2[0] && d2 <= radius2[1])
+                {
+                    stem_map[probe_position2]++;
+                }   
+            }
         }
         if (probe_position > idx)
         {
@@ -44,14 +59,16 @@ void TimepixInterface::read_frame_com(std::atomic<size_t> &idx, std::vector<size
 // Read a frame and compute COM and create frame representation
 template<typename T>
 void TimepixInterface::read_frame_com(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
-                                  std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, 
-                                  std::vector<T> &frame, 
+                                  std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
+                                  std::vector<float> &stem_map, bool b_stem,
+                                  std::array<float, 2> &offset, std::array<float, 2> &radius2,
+                                  std::vector<T> &frame, size_t frame_id,
                                   size_t first_frame, size_t end_frame)
 {
     e_event ev;
-    size_t probe_position;
-    frame.assign(nx * ny, 0);
-    unsigned int x, y;
+    size_t probe_position, probe_position2;
+    size_t x, y;
+    float d2;
 
     while (true)
     {
@@ -61,10 +78,20 @@ void TimepixInterface::read_frame_com(std::atomic<size_t> &idx, std::vector<size
         {
             x = ev.index % nx;
             y = floor(ev.index / nx);
-            dose_map[probe_position - first_frame]++;
-            sumx_map[probe_position - first_frame] += x;
-            sumy_map[probe_position - first_frame] += y;
-            frame[x + y * nx]++;
+            probe_position2 = probe_position - first_frame;
+            dose_map[probe_position2]++;
+            sumx_map[probe_position2] += x;
+            sumy_map[probe_position2] += y;
+            if (probe_position == frame_id)
+                frame[x + y * nx]++;
+            if (b_stem)
+            {
+                d2 = pow((float)x - offset[0], 2) + pow((float)y - offset[1], 2);
+                if (d2 > radius2[0] && d2 <= radius2[1])
+                {
+                    stem_map[probe_position2]++;
+                }   
+            }
         }
         if (probe_position > idx)
         {
@@ -74,16 +101,23 @@ void TimepixInterface::read_frame_com(std::atomic<size_t> &idx, std::vector<size
 }
 template void TimepixInterface::read_frame_com<uint8_t>(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
                                                   std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, 
-                                                  std::vector<uint8_t> &frame, 
+                                                  std::vector<float> &stem_map, bool b_stem,
+                                                  std::array<float, 2> &offset, std::array<float, 2> &radius,
+                                                  std::vector<uint8_t> &frame, size_t frame_id,
                                                   size_t first_frame, size_t end_frame);
 template void TimepixInterface::read_frame_com<uint16_t>(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
                                                   std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, 
-                                                  std::vector<uint16_t> &frame, 
+                                                  std::vector<float> &stem_map, bool b_stem,
+                                                  std::array<float, 2> &offset, std::array<float, 2> &radius,
+                                                  std::vector<uint16_t> &frame, size_t frame_id,
                                                   size_t first_frame, size_t end_frame);
 template void TimepixInterface::read_frame_com<uint32_t>(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
                                                   std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, 
-                                                  std::vector<uint32_t> &frame, 
+                                                  std::vector<float> &stem_map, bool b_stem,
+                                                  std::array<float, 2> &offset, std::array<float, 2> &radius,
+                                                  std::vector<uint32_t> &frame, size_t frame_id,
                                                   size_t first_frame, size_t end_frame);
+
 void TimepixInterface::read_event(e_event &ev)
 {
     switch (mode)

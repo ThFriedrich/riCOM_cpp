@@ -51,16 +51,27 @@ Camera<TimepixInterface, FRAME_BASED>::Camera(Camera_BASE &cam) { (void)cam; };
 
 // read_frame_com method wrapper
 template <>
-void Camera<TimepixInterface, EVENT_BASED>::read_frame_com(std::atomic<size_t> &idx, std::vector<size_t> &dose_map, std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, size_t first_frame, size_t end_frame)
+void Camera<TimepixInterface, EVENT_BASED>::read_frame_com(std::atomic<size_t> &idx, 
+                        std::vector<size_t> &dose_map, 
+                        std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, 
+                        std::vector<float> &stem_map, bool b_stem,
+                        std::array<float, 2> &offset, std::array<float, 2> &radius,
+                        size_t first_frame, size_t end_frame)
 {
-    TimepixInterface::read_frame_com(idx, dose_map, sumx_map, sumy_map, first_frame, end_frame);
+    TimepixInterface::read_frame_com(idx, dose_map, sumx_map, sumy_map, stem_map, b_stem, offset, radius, first_frame, end_frame);
 }
 
 // read_frame_com method wrapper
 template <> 
-void Camera<TimepixInterface, EVENT_BASED>::read_frame_com_cbed(std::atomic<size_t> &idx, std::vector<size_t> &dose_map, std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, std::vector<uint16_t> &frame, size_t first_frame, size_t end_frame)
+void Camera<TimepixInterface, EVENT_BASED>::read_frame_com_cbed(std::atomic<size_t> &idx, 
+                        std::vector<size_t> &dose_map,
+                        std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
+                        std::vector<float> &stem_map, bool b_stem,
+                        std::array<float, 2> &offset, std::array<float, 2> &radius,
+                        std::vector<uint16_t> &frame, size_t frame_id,
+                        size_t first_frame, size_t end_frame)
 {
-    TimepixInterface::read_frame_com(idx, dose_map, sumx_map, sumy_map, frame, first_frame, end_frame);
+    TimepixInterface::read_frame_com(idx, dose_map, sumx_map, sumy_map, stem_map, b_stem, offset, radius, frame, frame_id, first_frame, end_frame);
 }
 
 // Run method wrapper

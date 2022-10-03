@@ -827,6 +827,20 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
                 ricom->ny = std::stoi(argv[i + 1]);
                 i++;
             }
+            // Set width of camera
+            if (strcmp(argv[i], "-cam_nx") == 0)
+            {
+                ricom->camera.nx_cam = std::stoi(argv[i + 1]);
+                ricom->offset[0] = ((float)ricom->camera.nx_cam-1)/2;
+                i++;
+            }
+            // Set height of camera
+            if (strcmp(argv[i], "-cam_ny") == 0)
+            {
+                ricom->camera.ny_cam = std::stoi(argv[i + 1]);
+                ricom->offset[1] = ((float)ricom->camera.ny_cam-1)/2;
+                i++;
+            }
             // Set skip per row
             if (strcmp(argv[i], "-skipr") == 0)
             {

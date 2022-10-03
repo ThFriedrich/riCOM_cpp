@@ -55,12 +55,17 @@ protected:
 public:
     void read_frame_com(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
                         std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, 
-                        size_t first_frame, size_t end_frame);
+                        std::vector<float> &stem_map, bool b_stem,
+                        std::array<float, 2> &offset, std::array<float, 2> &radius,
+                        size_t first_frame, size_t end_frame
+                        );
 
     template <typename T>                    
     void read_frame_com(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
                         std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
-                        std::vector<T> &frame,
+                        std::vector<float> &stem_map, bool b_stem,
+                        std::array<float, 2> &offset, std::array<float, 2> &radius,
+                        std::vector<T> &frame, size_t frame_id,
                         size_t first_frame, size_t end_frame);
 
     inline void read_event(e_event &ev);
