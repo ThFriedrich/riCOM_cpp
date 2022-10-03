@@ -3,6 +3,9 @@
 #ifndef __FFTW2D_CPP__HH__
 #define __FFTW2D_CPP__HH__
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include <cstring>
 #include <vector>
 #include <complex>

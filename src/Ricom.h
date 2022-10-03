@@ -16,7 +16,7 @@
 
 #ifdef _WIN32
 #include <io.h>
-#pragma warning(disable : 4333 34)
+#pragma warning(disable : 4005 4333 34)
 #else
 #include <unistd.h>
 #endif
