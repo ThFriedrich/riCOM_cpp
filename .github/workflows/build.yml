@@ -10,7 +10,7 @@
 #   Thomas Friedrich <thomas.friedrich@uantwerpen.be>
 #   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
 
-name: BUILD
+name: Compile
 
 on: [push, pull_request, workflow_dispatch]
 
@@ -62,7 +62,7 @@ jobs:
             build\Release
 
   build_Linux:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
@@ -70,11 +70,11 @@ jobs:
       - name: Get SDL2, fftw3 and gcc-9
         run: |
           sudo apt-get update
-          sudo apt-get install libsdl2-dev libsdl2-image-dev libfftw3-dev gcc-9 g++-9
+          sudo apt-get install libsdl2-dev libsdl2-image-dev libfftw3-dev gcc-11 g++-11
       - name: Build
         env:
-          CC: gcc-9
-          CXX: g++-9
+          CC: gcc-11
+          CXX: g++-11
         run: |
           cmake . -D CMAKE_BUILD_TYPE=Release
           make
