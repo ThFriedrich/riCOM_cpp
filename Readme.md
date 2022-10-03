@@ -1,6 +1,6 @@
 # riCOM
 [![Compile](https://github.com/ThFriedrich/riCOM_cpp/actions/workflows/build.yml/badge.svg)](https://github.com/ThFriedrich/riCOM_cpp/blob/master/.github/workflows/build.yml)
-[![Deployment documentation](https://github.com/ThFriedrich/riCOM_cpp/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/ThFriedrich/riCOM_cpp/actions/workflows/pages/pages-build-deployment)
+[![Build Documentation](https://github.com/ThFriedrich/riCOM_cpp/actions/workflows/doxygen-gh-pages.yml/badge.svg)](https://github.com/ThFriedrich/riCOM_cpp/actions/workflows/doxygen-gh-pages.yml)
 [![License: GPL3](https://img.shields.io/badge/License-GPL3-brightgreen.svg)](https://opensource.org/licenses/GPL-3.0) 
 
 This repository contains the C++ implementation of the riCOM (Real Time Centre Of Mass) algorithm for 4D Scanning electron microscopy as described in [this publication](https://www.cambridge.org/core/journals/microscopy-and-microanalysis/article/realtime-integration-center-of-mass-ricom-reconstruction-for-4d-stem/40AC3F51175C32763ADF355E58073355). At this point it is compatible with .mib files (Quantum Detectors Merlin) and .t3p (Timepix camera) data and can be run in live mode with the Merlin camera.
@@ -18,7 +18,7 @@ This repository contains the C++ implementation of the riCOM (Real Time Centre O
 **Generally build instructions can be followed step by step from the [automated build setup](https://github.com/ThFriedrich/riCOM_cpp/blob/master/.github/workflows/build.yml) from command line**
 ### Build instructions Linux
 #### Dependencies 
-- [g++/gcc](https://gcc.gnu.org/) compiler version 9
+- [g++/gcc](https://gcc.gnu.org/) compiler version >=9
   - ```sudo apt-get install gcc-9 g++-9```
 - [make & cmake](https://cmake.org/)
 - [SDL2](http://www.libsdl.org) 
@@ -43,7 +43,7 @@ make
   - Both zip folder share a common sub-structure. Extract contents of the zips to 'C:/SDL2_VC', merging the contents of both zips into the same folder structure.
 - [FFTW](https://fftw.org/)
   - Download and extract [FFTW3 library](https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip)
-  - run ```lib /def:libfftw3-3.def```
+  - run ```lib /machine:x64 /def:libfftw3f-3.def```
 
 #### Building from Command Line (**Use __Developer__ Powershell for VS**)
 ```bat
@@ -52,7 +52,7 @@ cd build
 cmake ..
 msbuild .\RICOM.vcxproj /p:configuration=Release
 ```
-The executable RICOM.exe will be in the folder 'build\Release'. Make  sure **the file 'SDL2.dll' is in the same location as the executable**, or copy it to your system libraries, e.g. 'C:\Windows\System32' 
+The executable RICOM.exe will be in the folder 'build\Release'. Make  sure **the files 'SDL2.dll', 'SDL2_image.dll', 'libfftw3f-3.dll' and 'libfftw3f-3.lib' are in the same location as the executable**. When using oneAPI `icx` compiler from Intel, also the libraries: **the files 'svml_dispmd.dll', 'libmmdd.dll' and 'libmmd.dll'** must be in this directory.
 
 ## Running the program
 ### Running in Live mode with Quantum Detector MerlinEM camera
