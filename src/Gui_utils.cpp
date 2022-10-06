@@ -222,7 +222,7 @@ void Generic_Image_Window::compute_fft()
     data_val.resize(nxy);
 
     FFT2D::r2c(*data, data_val);
-    FFT2D fft2d(nx, ny, nx, ny);
+    FFT2D fft2d(ny, nx, ny, nx);
     fft2d.fft(data_val, data_fft);
     FFT2D::c2r(data_fft, data_fft_f);
 }
@@ -392,8 +392,8 @@ void Generic_Image_Window::render_window(bool b_redraw, int fr_count, bool b_tri
     b_trigger_update = false;
 }
 
-// template <typename T>
-void save_numpy(std::string *path, int nx, int ny, std::vector<float> *data)
+template <typename T>
+void save_numpy(std::string *path, int nx, int ny, std::vector<T> *data)
 {
     std::string ext = std::filesystem::path(*path).extension().string();
     if (ext != ".npy") 

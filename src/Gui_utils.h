@@ -149,7 +149,8 @@ class Main_Dock
         void render(ImVec2 pos, ImVec2 size);
 };
 
-void save_numpy(std::string *path, int nx, int ny, std::vector<float> *data);
+template <typename T>
+void save_numpy(std::string *path, int nx, int ny, std::vector<T> *data);
 
 void save_image(std::string *path, SDL_Surface *sdl_srf);
 
