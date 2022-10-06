@@ -303,9 +303,8 @@ int run_gui(Ricom *ricom)
     generic_windows.push_back(Generic_Image_Window("RICOM-COMX", &uiTextureIDs[2], true, 9, common_flags));
     generic_windows.push_back(Generic_Image_Window("RICOM-COMY", &uiTextureIDs[3], true, 9, common_flags));
     generic_windows.push_back(Generic_Image_Window("RICOM-FFT", &uiTextureIDs[4], false, 4, common_flags));
-    generic_windows.push_back(Generic_Image_Window("vSTEM-FFT", &uiTextureIDs[5], false, 4, common_flags));
-
     generic_windows[0].fft_window = &generic_windows[4];
+    generic_windows.push_back(Generic_Image_Window("vSTEM-FFT", &uiTextureIDs[5], false, 4, common_flags));
     generic_windows[1].fft_window = &generic_windows[5];
 
     ImGuiID dock_id = 3775;
@@ -630,65 +629,70 @@ int run_gui(Ricom *ricom)
         v_splitter(5, menu_split_v, panel_h_min, panel_h_max, pos.y + ImGui::GetStyle().ItemSpacing.y * 3);
 
         ImGui::BeginChild("Progress", ImVec2(0, 0), true, ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar);
-        if (b_started)
+        ImGui::ProgressBar(ricom->fr_count / (ricom->fr_total), ImVec2(-1.0f, 0.0f));
+        ImGui::Text("Speed: %.2f kHz", ricom->fr_freq);
+        if (ImGui::Button("Quit", ImVec2(-1.0f, 0.0f)))
         {
+            ricom->rc_quit = true;
+            b_redraw = true;
+        }
 
-            ImGui::ProgressBar(ricom->fr_count / (ricom->fr_total), ImVec2(-1.0f, 0.0f));
-            ImGui::Text("Speed: %.2f kHz", ricom->fr_freq);
-            if (ImGui::Button("Quit", ImVec2(-1.0f, 0.0f)))
-            {
-                ricom->rc_quit = true;
-                b_redraw = true;
-            }
+        ImGui::Text("COM= %.2f, %.2f", ricom->com_public[0], ricom->com_public[1]);
 
-            ImGui::Text("COM= %.2f, %.2f", ricom->com_public[0], ricom->com_public[1]);
-
-            // CBED Plot Area
-            if (b_started)
-            {
-                ImVec2 rem_space = ImGui::GetContentRegionAvail();
-                float tex_wh = (std::min)(rem_space.x, rem_space.y);
-                ImVec2 p = ImGui::GetCursorScreenPos();
-
-                float com_rel_x = p.x + tex_wh * (ricom->com_public[0] / ricom->camera.nx_cam);
-                float com_rel_y = p.y + tex_wh * (ricom->com_public[1] / ricom->camera.ny_cam);
-
-                float centre_x = p.x + tex_wh * (ricom->offset[0] / ricom->camera.nx_cam);
-                float centre_y = p.y + tex_wh * (ricom->offset[1] / ricom->camera.ny_cam);
-
-                com_rel_x = (std::max)(p.x, com_rel_x);
-                com_rel_y = (std::max)(p.y, com_rel_y);
-                com_rel_x = (std::min)(p.x + tex_wh, com_rel_x);
-                com_rel_y = (std::min)(p.y + tex_wh, com_rel_y);
-
-                float cross_width = tex_wh / 15.0f;
-
-                if (b_redraw)
-                {
-                    if (ricom->srf_cbed != NULL)
-                    {
-                        glBindTexture(GL_TEXTURE_2D, uiTextureIDs[6]);
-                        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ricom->srf_cbed->w, ricom->srf_cbed->h, 0,
-                                     GL_BGRA, GL_UNSIGNED_BYTE, ricom->srf_cbed->pixels);
-                    }
-                }
-                ImGui::Image((ImTextureID)uiTextureIDs[6], ImVec2(tex_wh, tex_wh), uv_min, uv_max, tint_col, border_col);
-                ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * 0.03, IM_COL32(255, 255, 255, 255), 256);
-                ImGui::GetWindowDrawList()->AddLine(ImVec2(com_rel_x - cross_width, com_rel_y), ImVec2(com_rel_x + cross_width, com_rel_y), IM_COL32(255, 0, 0, 255), 1.5f);
-                ImGui::GetWindowDrawList()->AddLine(ImVec2(com_rel_x, com_rel_y - cross_width), ImVec2(com_rel_x, com_rel_y + cross_width), IM_COL32(255, 0, 0, 255), 1.5f);
-                if (ricom->b_vSTEM)
-                {
-                    ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * (ricom->detector.radius[0] / ricom->camera.nx_cam), IM_COL32(255, 50, 0, 255), 256);
-                    ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * (ricom->detector.radius[1] / ricom->camera.nx_cam), IM_COL32(255, 150, 0, 255), 256);
-                }
-            }
+        // CBED Plot Area/DockSpace
+        ImGui::DockSpace(1319);
+        static auto first_time = true;
+        if (first_time)
+        {
+            first_time = false;
+            ImGui::DockBuilderRemoveNode(1319); // clear any previous layout
+            ImGui::DockBuilderAddNode(1319, ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderDockWindow("CBED", 1319);
+            ImGui::DockBuilderFinish(1319);
         }
         ImGui::EndChild();
-
         control_menu_size = ImGui::GetWindowSize();
         ImGui::End();
 
         main_dock.render(ImVec2(control_menu_size.x, pos.y), ImVec2(viewport->Size.x - control_menu_size.x, viewport->Size.y - menu_bar_size.y));
+
+        ImGui::Begin("CBED", nullptr, ImGuiWindowFlags_NoScrollbar);
+         ImGui::Checkbox("Plot CBED", &ricom->b_plot_cbed);
+        ImVec2 rem_space = ImGui::GetContentRegionAvail();
+        float tex_wh = (std::min)(rem_space.x, rem_space.y);
+        ImVec2 p = ImGui::GetCursorScreenPos();
+
+        float com_rel_x = p.x + tex_wh * (ricom->com_public[0] / ricom->camera.nx_cam);
+        float com_rel_y = p.y + tex_wh * (ricom->com_public[1] / ricom->camera.ny_cam);
+
+        float centre_x = p.x + tex_wh * (ricom->offset[0] / ricom->camera.nx_cam);
+        float centre_y = p.y + tex_wh * (ricom->offset[1] / ricom->camera.ny_cam);
+
+        com_rel_x = (std::max)(p.x, com_rel_x);
+        com_rel_y = (std::max)(p.y, com_rel_y);
+        com_rel_x = (std::min)(p.x + tex_wh, com_rel_x);
+        com_rel_y = (std::min)(p.y + tex_wh, com_rel_y);
+
+        float cross_width = tex_wh / 15.0f;
+        if (b_redraw)
+        {
+            if (ricom->srf_cbed != NULL)
+            {
+                glBindTexture(GL_TEXTURE_2D, uiTextureIDs[6]);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ricom->srf_cbed->w, ricom->srf_cbed->h, 0,
+                             GL_BGRA, GL_UNSIGNED_BYTE, ricom->srf_cbed->pixels);
+            }
+        }
+        ImGui::Image((ImTextureID)uiTextureIDs[6], ImVec2(tex_wh, tex_wh), uv_min, uv_max, tint_col, border_col);
+        ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * 0.03, IM_COL32(255, 255, 255, 255), 256);
+        ImGui::GetWindowDrawList()->AddLine(ImVec2(com_rel_x - cross_width, com_rel_y), ImVec2(com_rel_x + cross_width, com_rel_y), IM_COL32(255, 0, 0, 255), 1.5f);
+        ImGui::GetWindowDrawList()->AddLine(ImVec2(com_rel_x, com_rel_y - cross_width), ImVec2(com_rel_x, com_rel_y + cross_width), IM_COL32(255, 0, 0, 255), 1.5f);
+        if (ricom->b_vSTEM)
+        {
+            ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * (ricom->detector.radius[0] / ricom->camera.nx_cam), IM_COL32(255, 50, 0, 255), 256);
+            ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * (ricom->detector.radius[1] / ricom->camera.nx_cam), IM_COL32(255, 150, 0, 255), 256);
+        }
+        ImGui::End();
 
         if (b_acq_open)
         {
@@ -718,7 +722,7 @@ int run_gui(Ricom *ricom)
                 }
                 generic_windows[iw].render_window((ricom->b_busy && b_redraw && b_started), ricom->fr_count, ricom->kernel.kernel_size, trigger);
             }
-            else 
+            else
             {
                 if (*generic_windows[iw].pb_open)
                 {
@@ -831,14 +835,14 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
             if (strcmp(argv[i], "-cam_nx") == 0)
             {
                 ricom->camera.nx_cam = std::stoi(argv[i + 1]);
-                ricom->offset[0] = ((float)ricom->camera.nx_cam-1)/2;
+                ricom->offset[0] = ((float)ricom->camera.nx_cam - 1) / 2;
                 i++;
             }
             // Set height of camera
             if (strcmp(argv[i], "-cam_ny") == 0)
             {
                 ricom->camera.ny_cam = std::stoi(argv[i + 1]);
-                ricom->offset[1] = ((float)ricom->camera.ny_cam-1)/2;
+                ricom->offset[1] = ((float)ricom->camera.ny_cam - 1) / 2;
                 i++;
             }
             // Set skip per row
@@ -930,14 +934,14 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
             // Set path to save reconstruction image
             if (strcmp(argv[i], "-save_img_path") == 0)
             {
-                save_img =  argv[i + 1];
+                save_img = argv[i + 1];
                 ricom->b_plot2SDL = true;
                 i++;
             }
             // Set path to save reconstruction data
             if (strcmp(argv[i], "-save_data_path") == 0)
             {
-                save_dat =  argv[i + 1];
+                save_dat = argv[i + 1];
                 i++;
             }
         }
@@ -1018,14 +1022,14 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
         bool b_open_window = true;
         while (b_open_window)
         {
-            if (ricom->p_prog_mon != nullptr) 
+            if (ricom->p_prog_mon != nullptr)
             {
-                if (ricom->p_prog_mon->report_set_public) 
+                if (ricom->p_prog_mon->report_set_public)
                 {
                     b_redraw = true;
                     ricom->p_prog_mon->report_set_public = false;
                 }
-            else 
+                else
                 {
                     b_redraw = true;
                 }
@@ -1044,7 +1048,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
             {
                 if (event.type == SDL_QUIT ||
                     (event.type == SDL_WINDOWEVENT &&
-                    event.window.event == SDL_WINDOWEVENT_CLOSE))
+                     event.window.event == SDL_WINDOWEVENT_CLOSE))
                 {
                     ricom->rc_quit = true;
                     SDL_Delay(ricom->redraw_interval);
@@ -1053,7 +1057,8 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
             }
         }
     }
-    else{
+    else
+    {
         run_ricom(ricom, ricom->mode);
     }
     if (save_dat != "")
@@ -1096,9 +1101,9 @@ int main(int argc, char *argv[])
 
     if (argc == 1)
     {
-        #ifdef _WIN32
+#ifdef _WIN32
         FreeConsole();
-        #endif
+#endif
         log2file(ricom_ptr);
         return run_gui(ricom_ptr);
     }
