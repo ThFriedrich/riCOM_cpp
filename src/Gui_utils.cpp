@@ -233,7 +233,7 @@ void Generic_Image_Window::render_window(bool b_redraw, int fr_count, bool b_tri
     if (ImGui::Begin(title.c_str(), pb_open, ImGuiWindowFlags_NoScrollbar))
     {
         // int frames_passed = ((fr_count-1)/nxy)*nxy;
-        fr_count -= (((fr_count-1)/nxy)*nxy);
+        fr_count -= (((fr_count - 1) / nxy) * nxy);
         b_trigger_update = b_trigger_update || b_trigger_ext;
         if (b_trigger_update)
         {
@@ -348,7 +348,7 @@ void Generic_Image_Window::render_window(bool b_redraw, int fr_count, bool b_tri
 
             // Adjust Scroll positions
             // Capture Start position of scroll or drag/pan
-            if (dz > 0.0f || ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+            if ((std::abs(dz) > 0.0f) || ImGui::IsMouseClicked(ImGuiMouseButton_Left))
             {
                 start_x = rel_x;
                 start_y = rel_y;
@@ -362,14 +362,21 @@ void Generic_Image_Window::render_window(bool b_redraw, int fr_count, bool b_tri
                 ImGui::SetScrollX(start_xs - (rel_x - start_x));
                 ImGui::SetScrollY(start_ys - (rel_y - start_y));
             }
-
+            
             // Zooming
-            else if (std::abs(dz) > 0.0f)
+            if (std::abs(dz) > 0.0f)
             {
-                zoom += dz * 0.1;
-                zoom = (std::max)(1.0f, zoom);
-                ImGui::SetScrollX(start_x * (zoom - 1.0f));
-                ImGui::SetScrollY(start_y * (zoom - 1.0f));
+
+                float zoom2 = zoom + dz * 0.1;
+                zoom2 = (std::max)(1.0f, zoom2);
+
+                float dx = ((xy.x - pos.x)/tex_w_z) * tex_w * (zoom2-zoom);
+                float dy = ((xy.y - pos.y)/tex_h_z) * tex_h * (zoom2-zoom);
+
+                ImGui::SetScrollX(start_xs + dx);
+                ImGui::SetScrollY(start_ys + dy);
+               
+                zoom = zoom2;
             }
 
             // Value Popup
@@ -378,12 +385,20 @@ void Generic_Image_Window::render_window(bool b_redraw, int fr_count, bool b_tri
                 float scale_fct = scale * zoom;
                 int x = (int)std::floor((xy.x - pos.x) / scale_fct);
                 int y = (int)std::floor((xy.y - pos.y) / scale_fct);
-                float val = (*data)[y * nx + x];
+                float val = 0.0f;
+                if (b_data_set)
+                    val = (*data)[y * nx + x];
                 ImGui::BeginTooltip();
                 ImGui::Text("XY: %i, %i", x, y);
                 ImGui::Text("Value: %.2f", val);
-                ImGui::Text("Zoom: %.1f", zoom);
+                ImGui::Text("Zoom: %.2f", zoom);
                 ImGui::EndTooltip();
+            }
+            if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+            {
+                zoom = 1.0f;
+                ImGui::SetScrollX(0.0f);
+                ImGui::SetScrollY(0.0f);
             }
         }
         ImGui::EndChildFrame();
@@ -396,7 +411,7 @@ template <typename T>
 void save_numpy(std::string *path, int nx, int ny, std::vector<T> *data)
 {
     std::string ext = std::filesystem::path(*path).extension().string();
-    if (ext != ".npy") 
+    if (ext != ".npy")
     {
         *path += ".npy";
     }
