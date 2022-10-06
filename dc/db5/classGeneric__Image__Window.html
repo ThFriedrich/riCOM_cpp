@@ -251,7 +251,7 @@ Public Attributes</h2></td></tr>
 <div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;    <span class="keywordflow">if</span> (ImGui::Begin(title.c_str(), <a class="code" href="../../dc/db5/classGeneric__Image__Window.html#a79bcbafc9e0de8cd7aea43cb5db34b35">pb_open</a>, ImGuiWindowFlags_NoScrollbar))</div>
 <div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;    {</div>
 <div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;        <span class="comment">// int frames_passed = ((fr_count-1)/nxy)*nxy;</span></div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;        fr_count -= (((fr_count-1)/nxy)*nxy);</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;        fr_count -= (((fr_count - 1) / nxy) * nxy);</div>
 <div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;        b_trigger_update = b_trigger_update || b_trigger_ext;</div>
 <div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;        <span class="keywordflow">if</span> (b_trigger_update)</div>
 <div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;        {</div>
@@ -286,7 +286,7 @@ Public Attributes</h2></td></tr>
 <div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;            {</div>
 <div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;                std::string com_file = saveDataDialog.GetSelected().string();</div>
 <div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;                saveDataDialog.ClearSelected();</div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;                <a class="code" href="../../dc/d69/Gui__utils_8cpp.html#accfc1aa27ce3a4fa149824a27089ee9b">save_numpy</a>(&amp;com_file, nx, ny, data);</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;                <a class="code" href="../../dc/d69/Gui__utils_8cpp.html#a7db0cf786d963c6b1e5ffd4f76a4a03d">save_numpy</a>(&amp;com_file, nx, ny, data);</div>
 <div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;            }</div>
 <div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;        }</div>
 <div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160; </div>
@@ -366,7 +366,7 @@ Public Attributes</h2></td></tr>
 <div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160; </div>
 <div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;            <span class="comment">// Adjust Scroll positions</span></div>
 <div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;            <span class="comment">// Capture Start position of scroll or drag/pan</span></div>
-<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;            <span class="keywordflow">if</span> (dz &gt; 0.0f || ImGui::IsMouseClicked(ImGuiMouseButton_Left))</div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;            <span class="keywordflow">if</span> ((std::abs(dz) &gt; 0.0f) || ImGui::IsMouseClicked(ImGuiMouseButton_Left))</div>
 <div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;            {</div>
 <div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;                start_x = rel_x;</div>
 <div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;                start_y = rel_y;</div>
@@ -380,35 +380,50 @@ Public Attributes</h2></td></tr>
 <div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;                ImGui::SetScrollX(start_xs - (rel_x - start_x));</div>
 <div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;                ImGui::SetScrollY(start_ys - (rel_y - start_y));</div>
 <div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;            }</div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160; </div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;            </div>
 <div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;            <span class="comment">// Zooming</span></div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (std::abs(dz) &gt; 0.0f)</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;            <span class="keywordflow">if</span> (std::abs(dz) &gt; 0.0f)</div>
 <div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;            {</div>
-<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;                zoom += dz * 0.1;</div>
-<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;                zoom = (std::max)(1.0f, zoom);</div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;                ImGui::SetScrollX(start_x * (zoom - 1.0f));</div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;                ImGui::SetScrollY(start_y * (zoom - 1.0f));</div>
-<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;            }</div>
-<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160; </div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;            <span class="comment">// Value Popup</span></div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;            <span class="keywordflow">if</span> (ImGui::IsMouseDown(ImGuiMouseButton_Right))</div>
-<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;            {</div>
-<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;                <span class="keywordtype">float</span> scale_fct = scale * zoom;</div>
-<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;                <span class="keywordtype">int</span> x = (int)std::floor((xy.x - pos.x) / scale_fct);</div>
-<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;                <span class="keywordtype">int</span> y = (int)std::floor((xy.y - pos.y) / scale_fct);</div>
-<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;                <span class="keywordtype">float</span> val = (*data)[y * nx + x];</div>
-<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;                ImGui::BeginTooltip();</div>
-<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;                ImGui::Text(<span class="stringliteral">&quot;XY: %i, %i&quot;</span>, x, y);</div>
-<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;                ImGui::Text(<span class="stringliteral">&quot;Value: %.2f&quot;</span>, val);</div>
-<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;                ImGui::Text(<span class="stringliteral">&quot;Zoom: %.1f&quot;</span>, zoom);</div>
-<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;                ImGui::EndTooltip();</div>
-<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;            }</div>
-<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;        }</div>
-<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;        ImGui::EndChildFrame();</div>
-<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;    }</div>
-<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;    ImGui::End();</div>
-<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;    b_trigger_update = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;}</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160; </div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;                <span class="keywordtype">float</span> zoom2 = zoom + dz * 0.1;</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;                zoom2 = (std::max)(1.0f, zoom2);</div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160; </div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;                <span class="keywordtype">float</span> dx = ((xy.x - pos.x)/tex_w_z) * tex_w * (zoom2-zoom);</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;                <span class="keywordtype">float</span> dy = ((xy.y - pos.y)/tex_h_z) * tex_h * (zoom2-zoom);</div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160; </div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;                ImGui::SetScrollX(start_xs + dx);</div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;                ImGui::SetScrollY(start_ys + dy);</div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;               </div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;                zoom = zoom2;</div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;            }</div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160; </div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;            <span class="comment">// Value Popup</span></div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;            <span class="keywordflow">if</span> (ImGui::IsMouseDown(ImGuiMouseButton_Right))</div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;            {</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;                <span class="keywordtype">float</span> scale_fct = scale * zoom;</div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;                <span class="keywordtype">int</span> x = (int)std::floor((xy.x - pos.x) / scale_fct);</div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;                <span class="keywordtype">int</span> y = (int)std::floor((xy.y - pos.y) / scale_fct);</div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;                <span class="keywordtype">float</span> val = 0.0f;</div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;                <span class="keywordflow">if</span> (b_data_set)</div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;                    val = (*data)[y * nx + x];</div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;                ImGui::BeginTooltip();</div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;                ImGui::Text(<span class="stringliteral">&quot;XY: %i, %i&quot;</span>, x, y);</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;                ImGui::Text(<span class="stringliteral">&quot;Value: %.2f&quot;</span>, val);</div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;                ImGui::Text(<span class="stringliteral">&quot;Zoom: %.2f&quot;</span>, zoom);</div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;                ImGui::EndTooltip();</div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;            }</div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;            <span class="keywordflow">if</span> (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))</div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;            {</div>
+<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;                zoom = 1.0f;</div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;                ImGui::SetScrollX(0.0f);</div>
+<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;                ImGui::SetScrollY(0.0f);</div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;            }</div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;        }</div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;        ImGui::EndChildFrame();</div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;    }</div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;    ImGui::End();</div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;    b_trigger_update = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -612,17 +627,17 @@ Public Attributes</h2></td></tr>
 <li>src/<a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html">Gui_utils.cpp</a></li>
 </ul>
 </div><!-- contents -->
+<div class="ttc" id="aGui__utils_8cpp_html_a7db0cf786d963c6b1e5ffd4f76a4a03d"><div class="ttname"><a href="../../dc/d69/Gui__utils_8cpp.html#a7db0cf786d963c6b1e5ffd4f76a4a03d">save_numpy</a></div><div class="ttdeci">void save_numpy(std::string *path, int nx, int ny, std::vector&lt; T &gt; *data)</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/d69/Gui__utils_8cpp_source.html#l00411">Gui_utils.cpp:411</a></div></div>
 <div class="ttc" id="aGui__utils_8h_html_a57bfef8abc6d323c65048f0c7a57a5eaa2c7a797e1be5d5ca2b4f11e010c2775a"><div class="ttname"><a href="../../d5/d80/Gui__utils_8h.html#a57bfef8abc6d323c65048f0c7a57a5eaa2c7a797e1be5d5ca2b4f11e010c2775a">GIM_Flags::FftButton</a></div><div class="ttdeci">@ FftButton</div></div>
 <div class="ttc" id="aclassGeneric__Image__Window_html_aa4b702cacbc51b999d272ee399128029"><div class="ttname"><a href="../../dc/db5/classGeneric__Image__Window.html#aa4b702cacbc51b999d272ee399128029">Generic_Image_Window::fft_window</a></div><div class="ttdeci">Generic_Image_Window * fft_window</div><div class="ttdef"><b>Definition:</b> <a href="../../d5/d80/Gui__utils_8h_source.html#l00080">Gui_utils.h:80</a></div></div>
 <div class="ttc" id="aGui__utils_8h_html_a57bfef8abc6d323c65048f0c7a57a5eaafccbe5934a1deb5b9d42d40b40f08577"><div class="ttname"><a href="../../d5/d80/Gui__utils_8h.html#a57bfef8abc6d323c65048f0c7a57a5eaafccbe5934a1deb5b9d42d40b40f08577">GIM_Flags::ColormapSelector</a></div><div class="ttdeci">@ ColormapSelector</div></div>
 <div class="ttc" id="aclassGeneric__Image__Window_html_a87dd6f75f7a4b50f497a3b1ef7a73783"><div class="ttname"><a href="../../dc/db5/classGeneric__Image__Window.html#a87dd6f75f7a4b50f497a3b1ef7a73783">Generic_Image_Window::set_nx_ny</a></div><div class="ttdeci">void set_nx_ny(int width, int height)</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/d69/Gui__utils_8cpp_source.html#l00191">Gui_utils.cpp:191</a></div></div>
-<div class="ttc" id="aGui__utils_8cpp_html_accfc1aa27ce3a4fa149824a27089ee9b"><div class="ttname"><a href="../../dc/d69/Gui__utils_8cpp.html#accfc1aa27ce3a4fa149824a27089ee9b">save_numpy</a></div><div class="ttdeci">void save_numpy(std::string *path, int nx, int ny, std::vector&lt; float &gt; *data)</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/d69/Gui__utils_8cpp_source.html#l00396">Gui_utils.cpp:396</a></div></div>
 <div class="ttc" id="aclassGeneric__Image__Window_html_a79bcbafc9e0de8cd7aea43cb5db34b35"><div class="ttname"><a href="../../dc/db5/classGeneric__Image__Window.html#a79bcbafc9e0de8cd7aea43cb5db34b35">Generic_Image_Window::pb_open</a></div><div class="ttdeci">bool * pb_open</div><div class="ttdef"><b>Definition:</b> <a href="../../d5/d80/Gui__utils_8h_source.html#l00079">Gui_utils.h:79</a></div></div>
 <div class="ttc" id="aGui__utils_8h_html_a57bfef8abc6d323c65048f0c7a57a5eaa19384afe28b41f9812a7159b6a6120db"><div class="ttname"><a href="../../d5/d80/Gui__utils_8h.html#a57bfef8abc6d323c65048f0c7a57a5eaa19384afe28b41f9812a7159b6a6120db">GIM_Flags::SaveImButton</a></div><div class="ttdeci">@ SaveImButton</div></div>
 <div class="ttc" id="aGui__utils_8h_html_a57bfef8abc6d323c65048f0c7a57a5eaafc21f76b7d81b00da25a04837a915549"><div class="ttname"><a href="../../d5/d80/Gui__utils_8h.html#a57bfef8abc6d323c65048f0c7a57a5eaafc21f76b7d81b00da25a04837a915549">GIM_Flags::SaveDataButton</a></div><div class="ttdeci">@ SaveDataButton</div></div>
 <div class="ttc" id="aGui__utils_8h_html_a57bfef8abc6d323c65048f0c7a57a5eaa80b8fc9ab05195a232e6a1625679a1fc"><div class="ttname"><a href="../../d5/d80/Gui__utils_8h.html#a57bfef8abc6d323c65048f0c7a57a5eaa80b8fc9ab05195a232e6a1625679a1fc">GIM_Flags::PowerSlider</a></div><div class="ttdeci">@ PowerSlider</div></div>
 <div class="ttc" id="aclassGeneric__Image__Window_html_a7a2bf452856e6ce8feb2a213e6b24dcf"><div class="ttname"><a href="../../dc/db5/classGeneric__Image__Window.html#a7a2bf452856e6ce8feb2a213e6b24dcf">Generic_Image_Window::set_data</a></div><div class="ttdeci">void set_data(int width, int height, std::vector&lt; float &gt; *data)</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/d69/Gui__utils_8cpp_source.html#l00167">Gui_utils.cpp:167</a></div></div>
-<div class="ttc" id="aGui__utils_8cpp_html_a8517f3410f5a9480fa17be5c432f1810"><div class="ttname"><a href="../../dc/d69/Gui__utils_8cpp.html#a8517f3410f5a9480fa17be5c432f1810">save_image</a></div><div class="ttdeci">void save_image(std::string *path, SDL_Surface *sdl_srf)</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/d69/Gui__utils_8cpp_source.html#l00407">Gui_utils.cpp:407</a></div></div>
+<div class="ttc" id="aGui__utils_8cpp_html_a8517f3410f5a9480fa17be5c432f1810"><div class="ttname"><a href="../../dc/d69/Gui__utils_8cpp.html#a8517f3410f5a9480fa17be5c432f1810">save_image</a></div><div class="ttdeci">void save_image(std::string *path, SDL_Surface *sdl_srf)</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/d69/Gui__utils_8cpp_source.html#l00422">Gui_utils.cpp:422</a></div></div>
 <div class="ttc" id="aclassGeneric__Image__Window_html_aeec34c9ee879f9c6b826e935ec4c8083"><div class="ttname"><a href="../../dc/db5/classGeneric__Image__Window.html#aeec34c9ee879f9c6b826e935ec4c8083">Generic_Image_Window::render_window</a></div><div class="ttdeci">void render_window(bool b_redraw, int last_y, int render_update_offset, bool b_trigger_update)</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/d69/Gui__utils_8cpp_source.html#l00205">Gui_utils.cpp:205</a></div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

@@ -91,8 +91,9 @@ Functions</h2></td></tr>
 <tr class="separator:a657d4193b35af1f77d4ada8d8ccd9377"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee76ba176fc20edfbaba794b816b6f8e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d5/d80/Gui__utils_8h.html#a57bfef8abc6d323c65048f0c7a57a5ea">GIM_Flags</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d69/Gui__utils_8cpp.html#aee76ba176fc20edfbaba794b816b6f8e">operator&amp;</a> (<a class="el" href="../../d5/d80/Gui__utils_8h.html#a57bfef8abc6d323c65048f0c7a57a5ea">GIM_Flags</a> lhs, <a class="el" href="../../d5/d80/Gui__utils_8h.html#a57bfef8abc6d323c65048f0c7a57a5ea">GIM_Flags</a> rhs)</td></tr>
 <tr class="separator:aee76ba176fc20edfbaba794b816b6f8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:accfc1aa27ce3a4fa149824a27089ee9b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d69/Gui__utils_8cpp.html#accfc1aa27ce3a4fa149824a27089ee9b">save_numpy</a> (std::string *path, int nx, int ny, std::vector&lt; float &gt; *data)</td></tr>
-<tr class="separator:accfc1aa27ce3a4fa149824a27089ee9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7db0cf786d963c6b1e5ffd4f76a4a03d"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a7db0cf786d963c6b1e5ffd4f76a4a03d"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../dc/d69/Gui__utils_8cpp.html#a7db0cf786d963c6b1e5ffd4f76a4a03d">save_numpy</a> (std::string *path, int nx, int ny, std::vector&lt; T &gt; *data)</td></tr>
+<tr class="separator:a7db0cf786d963c6b1e5ffd4f76a4a03d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8517f3410f5a9480fa17be5c432f1810"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d69/Gui__utils_8cpp.html#a8517f3410f5a9480fa17be5c432f1810">save_image</a> (std::string *path, SDL_Surface *sdl_srf)</td></tr>
 <tr class="separator:a8517f3410f5a9480fa17be5c432f1810"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa0e46dd03446be8b08071d8fcfbbb098"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d69/Gui__utils_8cpp.html#aa0e46dd03446be8b08071d8fcfbbb098">v_splitter</a> (float thickness, float &amp;size0, float &amp;min_h, float &amp;max_h, float offset)</td></tr>
@@ -238,23 +239,25 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html#l00407">407</a> of file <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html">Gui_utils.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;{</div>
-<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;    std::string ext = std::filesystem::path(*path).extension().string();</div>
-<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;    <span class="keywordflow">if</span> ((ext != <span class="stringliteral">&quot;.png&quot;</span>) &amp;&amp; (ext != <span class="stringliteral">&quot;.PNG&quot;</span>))</div>
-<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;    {</div>
-<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;        *path += <span class="stringliteral">&quot;.png&quot;</span>;</div>
-<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;    }</div>
-<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;    IMG_SavePNG(sdl_srf, path-&gt;c_str());</div>
-<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html#l00422">422</a> of file <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html">Gui_utils.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;{</div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;    std::string ext = std::filesystem::path(*path).extension().string();</div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;    <span class="keywordflow">if</span> ((ext != <span class="stringliteral">&quot;.png&quot;</span>) &amp;&amp; (ext != <span class="stringliteral">&quot;.PNG&quot;</span>))</div>
+<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;    {</div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;        *path += <span class="stringliteral">&quot;.png&quot;</span>;</div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;    }</div>
+<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;    IMG_SavePNG(sdl_srf, path-&gt;c_str());</div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
-<a id="accfc1aa27ce3a4fa149824a27089ee9b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#accfc1aa27ce3a4fa149824a27089ee9b">&#9670;&nbsp;</a></span>save_numpy()</h2>
+<a id="a7db0cf786d963c6b1e5ffd4f76a4a03d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7db0cf786d963c6b1e5ffd4f76a4a03d">&#9670;&nbsp;</a></span>save_numpy()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">void save_numpy </td>
@@ -277,7 +280,7 @@ template&lt;typename T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::vector&lt; float &gt; *&#160;</td>
+          <td class="paramtype">std::vector&lt; T &gt; *&#160;</td>
           <td class="paramname"><em>data</em>&#160;</td>
         </tr>
         <tr>
@@ -288,16 +291,16 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html#l00396">396</a> of file <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html">Gui_utils.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;{</div>
-<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;    std::string ext = std::filesystem::path(*path).extension().string();</div>
-<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;    <span class="keywordflow">if</span> (ext != <span class="stringliteral">&quot;.npy&quot;</span>) </div>
-<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;    {</div>
-<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;        *path += <span class="stringliteral">&quot;.npy&quot;</span>;</div>
-<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;    }</div>
-<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;    <span class="keyword">const</span> std::vector&lt;long unsigned&gt; shape{<span class="keyword">static_cast&lt;</span><span class="keywordtype">long</span> <span class="keywordtype">unsigned</span><span class="keyword">&gt;</span>(ny), <span class="keyword">static_cast&lt;</span><span class="keywordtype">long</span> <span class="keywordtype">unsigned</span><span class="keyword">&gt;</span>(nx)};</div>
-<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;    npy::SaveArrayAsNumpy(path-&gt;c_str(), <span class="keyword">false</span>, shape.size(), shape.data(), *data);</div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html#l00411">411</a> of file <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html">Gui_utils.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;{</div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;    std::string ext = std::filesystem::path(*path).extension().string();</div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;    <span class="keywordflow">if</span> (ext != <span class="stringliteral">&quot;.npy&quot;</span>)</div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;    {</div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;        *path += <span class="stringliteral">&quot;.npy&quot;</span>;</div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;    }</div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;    <span class="keyword">const</span> std::vector&lt;long unsigned&gt; shape{<span class="keyword">static_cast&lt;</span><span class="keywordtype">long</span> <span class="keywordtype">unsigned</span><span class="keyword">&gt;</span>(ny), <span class="keyword">static_cast&lt;</span><span class="keywordtype">long</span> <span class="keywordtype">unsigned</span><span class="keyword">&gt;</span>(nx)};</div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;    npy::SaveArrayAsNumpy(path-&gt;c_str(), <span class="keyword">false</span>, shape.size(), shape.data(), *data);</div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -345,32 +348,32 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html#l00418">418</a> of file <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html">Gui_utils.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;{</div>
-<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160; </div>
-<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrab]);</div>
-<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrabHovered]);</div>
-<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrabActive]);</div>
-<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, ImGui::GetStyle().ScrollbarRounding);</div>
-<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;    ImGui::Button(<span class="stringliteral">&quot;v&quot;</span>, ImVec2(-1, thickness));</div>
-<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;    ImGui::PopStyleColor(3);</div>
-<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;    ImGui::PopStyleVar(1);</div>
-<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;    <span class="keywordflow">if</span> (ImGui::IsItemHovered() || ImGui::IsItemActive())</div>
-<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;    {</div>
-<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);</div>
-<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;    }</div>
-<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160; </div>
-<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;    <span class="keywordflow">if</span> (ImGui::IsItemActive())</div>
-<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;    {</div>
-<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;        <span class="keywordtype">float</span> d = ImGui::GetMousePos().y - offset;</div>
-<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;        <span class="keywordflow">if</span> (d &lt; min_h)</div>
-<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;            size0 = min_h;</div>
-<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (d &gt; max_h)</div>
-<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;            size0 = max_h;</div>
-<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;        <span class="keywordflow">else</span></div>
-<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;            size0 = d;</div>
-<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;    }</div>
-<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;};</div>
+<p class="definition">Definition at line <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html#l00433">433</a> of file <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html">Gui_utils.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;{</div>
+<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160; </div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrab]);</div>
+<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrabHovered]);</div>
+<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrabActive]);</div>
+<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, ImGui::GetStyle().ScrollbarRounding);</div>
+<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;    ImGui::Button(<span class="stringliteral">&quot;v&quot;</span>, ImVec2(-1, thickness));</div>
+<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;    ImGui::PopStyleColor(3);</div>
+<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;    ImGui::PopStyleVar(1);</div>
+<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;    <span class="keywordflow">if</span> (ImGui::IsItemHovered() || ImGui::IsItemActive())</div>
+<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;    {</div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);</div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;    }</div>
+<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160; </div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;    <span class="keywordflow">if</span> (ImGui::IsItemActive())</div>
+<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;    {</div>
+<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;        <span class="keywordtype">float</span> d = ImGui::GetMousePos().y - offset;</div>
+<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;        <span class="keywordflow">if</span> (d &lt; min_h)</div>
+<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;            size0 = min_h;</div>
+<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (d &gt; max_h)</div>
+<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;            size0 = max_h;</div>
+<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;        <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;            size0 = d;</div>
+<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;    }</div>
+<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;};</div>
 </div><!-- fragment -->
 </div>
 </div>
