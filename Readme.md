@@ -5,7 +5,7 @@
 
 This repository contains the C++ implementation of the riCOM (Real Time Centre Of Mass) algorithm for 4D Scanning electron microscopy as described in [this publication](https://www.cambridge.org/core/journals/microscopy-and-microanalysis/article/realtime-integration-center-of-mass-ricom-reconstruction-for-4d-stem/40AC3F51175C32763ADF355E58073355). At this point it is compatible with .mib files (Quantum Detectors Merlin) and .t3p (Timepix camera) data and can be run in live mode with the Merlin camera.
 
-![image](https://user-images.githubusercontent.com/47680554/164481785-d7407e48-1fa0-4673-a03b-ba80b3a5fcae.png)
+![gui](https://user-images.githubusercontent.com/47680554/211806138-87dd32db-e15d-406f-a55e-187495668741.png)
 
 ## Installation
 ### Binaries
