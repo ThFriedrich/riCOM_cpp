@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['ricom_440',['riCOM',['../index.html',1,'']]]
+  ['ricom_446',['riCOM',['../index.html',1,'']]]
 ];
