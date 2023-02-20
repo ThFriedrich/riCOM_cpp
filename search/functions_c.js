@@ -7,12 +7,12 @@ var searchData=
   ['sdlimagewindow_337',['SdlImageWindow',['../d0/d05/classSdlImageWindow.html#a24bb9400eae6401659fc14f1cd08fe3b',1,'SdlImageWindow::SdlImageWindow(const char *title, SDL_Surface *srf, int nx, int ny, int scale)'],['../d0/d05/classSdlImageWindow.html#ae757bcaad2e7c277183da20164133e85',1,'SdlImageWindow::SdlImageWindow(const char *title)']]],
   ['select_5fmode_5fby_5ffile_338',['select_mode_by_file',['../d8/d91/classRicom.html#aa789f6820d7a43891e7176d6822b9e17',1,'Ricom']]],
   ['set_5fdata_339',['set_data',['../d5/d5d/classImGuiImageWindow.html#a9271615b782cf542206ebff18faca3ba',1,'ImGuiImageWindow']]],
-  ['set_5ffont_340',['set_font',['../df/d5c/namespaceImGui__INI.html#ad6102dc225f5454da1c3bd4a51efac14',1,'ImGui_INI']]],
+  ['set_5ffont_340',['set_font',['../d9/db1/namespaceImGuiINI.html#a6385b7c8f157ca6cda8a65849e472a2f',1,'ImGuiINI']]],
   ['set_5fnx_5fny_341',['set_nx_ny',['../d5/d5d/classImGuiImageWindow.html#a679544d9b70760910ee365fbb94a5708',1,'ImGuiImageWindow']]],
-  ['set_5fstyle_342',['set_style',['../df/d5c/namespaceImGui__INI.html#a0b18e12f736e7c4545c9da9da4c0e7a3',1,'ImGui_INI']]],
+  ['set_5fstyle_342',['set_style',['../d9/db1/namespaceImGuiINI.html#aeb75007bdaf5dab98cf29ff873b24794',1,'ImGuiINI']]],
   ['shift_343',['shift',['../da/df1/classUpdate__list.html#a91e56327b931ea4bdb530e0f9f26f10d',1,'Update_list']]],
-  ['showfontselector_344',['ShowFontSelector',['../df/d5c/namespaceImGui__INI.html#a3ce38cf5ed1e42232513ef40cd45a721',1,'ImGui_INI']]],
-  ['showstyleselector_345',['ShowStyleSelector',['../df/d5c/namespaceImGui__INI.html#ab41c46077bb7b1e5f6722af596d521e9',1,'ImGui_INI']]],
+  ['showfontselector_344',['ShowFontSelector',['../d9/db1/namespaceImGuiINI.html#a312b9b8c24e1d74717067b588942a1e9',1,'ImGuiINI']]],
+  ['showstyleselector_345',['ShowStyleSelector',['../d9/db1/namespaceImGuiINI.html#a51d89bd81fa90596c3a81f86a9e47e7f',1,'ImGuiINI']]],
   ['socketconnector_346',['SocketConnector',['../d7/d76/classSocketConnector.html#ae32d1990a668e12e58b0d9fecdde91d0',1,'SocketConnector']]],
-  ['split2t_347',['split2T',['../df/d5c/namespaceImGui__INI.html#a1b716783ba5e8c548ffd0c4407567f1d',1,'ImGui_INI']]]
+  ['split2t_347',['split2T',['../d9/db1/namespaceImGuiINI.html#a93f6a4a236616eecf03f69e420709e1a',1,'ImGuiINI']]]
 ];

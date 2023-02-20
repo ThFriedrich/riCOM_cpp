@@ -12,7 +12,7 @@ var searchData=
   ['first_5fframe_63',['first_frame',['../d1/dcc/classProgressMonitor.html#a8d6d3dc60f1053f996f6924aa9f937eb',1,'ProgressMonitor']]],
   ['float_5fms_64',['float_ms',['../da/dce/ProgressMonitor_8h.html#a4afb1a691a5c7d7a66796e74b6f6587b',1,'ProgressMonitor.h']]],
   ['flush_5fsocket_65',['flush_socket',['../d7/d76/classSocketConnector.html#a804778a1de983fc701f4543681a0d3db',1,'SocketConnector']]],
-  ['font_5fnames_66',['font_names',['../df/d5c/namespaceImGui__INI.html#a182ee554ff554e2c2b2b14e3a42961bc',1,'ImGui_INI']]],
+  ['font_5fnames_66',['font_names',['../d9/db1/namespaceImGuiINI.html#aff14cb5cee5cea3591d9579e0befcc02',1,'ImGuiINI']]],
   ['fr_5fcount_67',['fr_count',['../d8/d91/classRicom.html#a6bb302b8d5c3d14dc908bab0e49093eb',1,'Ricom::fr_count()'],['../d1/dcc/classProgressMonitor.html#ad8b7272c1eb191d1f36248ae8118152c',1,'ProgressMonitor::fr_count()']]],
   ['fr_5fcount_5fi_68',['fr_count_i',['../d1/dcc/classProgressMonitor.html#a6b8720e81ffecdb33ad09ac681f7891b',1,'ProgressMonitor']]],
   ['fr_5fcount_5ftotal_69',['fr_count_total',['../d8/d91/classRicom.html#a584c90e059a2bef6b8488a62170345f4',1,'Ricom']]],
