@@ -11,23 +11,23 @@
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
 
-// #ifdef _MSC_VER
-// #define _CRT_SECURE_NO_DEPRECATE
-// #define _CRT_SECURE_NO_WARNINGS
-// #pragma warning(disable : 4067)
-// #pragma warning(disable : 4333)
-// #pragma warning(disable : 4312)
-// #endif
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_WARNINGS
+#pragma warning(disable : 4067)
+#pragma warning(disable : 4333)
+#pragma warning(disable : 4312)
+#endif
 
-// #if defined(__GNUC__)
-// #pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
-// #pragma GCC diagnostic ignored "-Wformat-security"
-// #endif
+#if defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
 
-// #if defined(__clang__)
-// #pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
-// #pragma GCC diagnostic ignored "-Wformat-security"
-// #endif
+#if defined(__clang__)
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
 
 #include <string>
 #include <thread>
@@ -44,7 +44,7 @@
 #include "imfilebrowser.h"
 #define MINI_CASE_SENSITIVE
 #include "ini.h"
-#include "imgui_ini.h"
+#include "ImGuiINI.hpp"
 
 #include "Ricom.h"
 #include "fonts.h"
@@ -184,11 +184,11 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
     // Appearance
     int font_index = 0;
     int style_index = 0;
-    ImGui_INI::check_ini_setting(ini_cfg, "Appearance", "CBED Colormap", ricom->cbed_cmap);
-    ImGui_INI::check_ini_setting(ini_cfg, "Appearance", "Font", font_index);
-    ImGui_INI::set_font(font_index);
-    ImGui_INI::check_ini_setting(ini_cfg, "Appearance", "Style", style_index);
-    ImGui_INI::set_style(style_index);
+    ImGuiINI::check_ini_setting(ini_cfg, "Appearance", "CBED Colormap", ricom->cbed_cmap);
+    ImGuiINI::check_ini_setting(ini_cfg, "Appearance", "Font", font_index);
+    ImGuiINI::set_font(font_index);
+    ImGuiINI::check_ini_setting(ini_cfg, "Appearance", "Style", style_index);
+    ImGuiINI::set_style(style_index);
     // Hardware Settings
     std::string python_path;
 #ifdef _WIN32
@@ -196,20 +196,20 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
 #else
     python_path = "python3";
 #endif
-    ImGui_INI::check_ini_setting(ini_cfg, "Hardware", "Threads", ricom->n_threads);
-    ImGui_INI::check_ini_setting(ini_cfg, "Hardware", "Queue Size", ricom->queue_size);
-    ImGui_INI::check_ini_setting(ini_cfg, "Hardware", "Image Refresh Interval [ms]", ricom->redraw_interval);
+    ImGuiINI::check_ini_setting(ini_cfg, "Hardware", "Threads", ricom->n_threads);
+    ImGuiINI::check_ini_setting(ini_cfg, "Hardware", "Queue Size", ricom->queue_size);
+    ImGuiINI::check_ini_setting(ini_cfg, "Hardware", "Image Refresh Interval [ms]", ricom->redraw_interval);
     // Merlin Settings
-    ImGui_INI::check_ini_setting(ini_cfg, "Merlin", "Live Interface Menu", b_merlin_live_menu);
-    ImGui_INI::check_ini_setting(ini_cfg, "Merlin", "nx", hardware_configurations[CAMERA::MERLIN].nx_cam);
-    ImGui_INI::check_ini_setting(ini_cfg, "Merlin", "ny", hardware_configurations[CAMERA::MERLIN].ny_cam);
-    ImGui_INI::check_ini_setting(ini_cfg, "Merlin", "com_port", merlin_settings.com_port);
-    ImGui_INI::check_ini_setting(ini_cfg, "Merlin", "data_port", ricom->socket.port);
-    ImGui_INI::check_ini_setting(ini_cfg, "Merlin", "ip", ricom->socket.ip);
-    ImGui_INI::check_ini_setting(ini_cfg, "Merlin", "python_path", python_path);
+    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "Live Interface Menu", b_merlin_live_menu);
+    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "nx", hardware_configurations[CAMERA::MERLIN].nx_cam);
+    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "ny", hardware_configurations[CAMERA::MERLIN].ny_cam);
+    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "com_port", merlin_settings.com_port);
+    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "data_port", ricom->socket.port);
+    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "ip", ricom->socket.ip);
+    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "python_path", python_path);
     // Timepix Settings
-    ImGui_INI::check_ini_setting(ini_cfg, "Timepix", "nx", hardware_configurations[CAMERA::MERLIN].nx_cam);
-    ImGui_INI::check_ini_setting(ini_cfg, "Timepix", "ny", hardware_configurations[CAMERA::MERLIN].ny_cam);
+    ImGuiINI::check_ini_setting(ini_cfg, "Timepix", "nx", hardware_configurations[CAMERA::MERLIN].nx_cam);
+    ImGuiINI::check_ini_setting(ini_cfg, "Timepix", "ny", hardware_configurations[CAMERA::MERLIN].ny_cam);
 
     const char *cmaps[] = {"Parula", "Heat", "Jet", "Turbo", "Hot", "Gray", "Magma", "Inferno", "Plasma", "Viridis", "Cividis", "Github","HSV"};
     bool b_redraw = false;
@@ -271,8 +271,8 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
             if (ImGui::BeginMenu("Appearance"))
             {
                 ImGui::Combo("CBED Colormap", &ricom->cbed_cmap, cmaps, IM_ARRAYSIZE(cmaps));
-                ImGui_INI::ShowFontSelector("Font", font_index, ini_cfg);
-                ImGui_INI::ShowStyleSelector("Style", style_index, ini_cfg);
+                ImGuiINI::ShowFontSelector("Font", font_index, ini_cfg);
+                ImGuiINI::ShowStyleSelector("Style", style_index, ini_cfg);
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Hardware Settings"))

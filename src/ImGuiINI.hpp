@@ -15,7 +15,7 @@
 #include "ini.h"
 #include <string>
 
-namespace ImGui_INI
+namespace ImGuiINI
 {
     // Styles
     void set_style(int style_idx)
