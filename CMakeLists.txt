@@ -99,7 +99,11 @@ target_sources( RICOM PRIVATE
     src/cameras/MerlinWrapper.cpp
     src/Camera.cpp
     src/main.cpp
-    src/Gui_utils.cpp
+    src/GuiUtils.cpp
+    src/SdlImageWindow.cpp
+    src/ImGuiImageWindow.cpp
+    src/RunCLI.cpp
+    src/RunGUI.cpp
     )
 
 target_include_directories( RICOM PUBLIC

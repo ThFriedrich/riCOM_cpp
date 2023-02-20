@@ -62,7 +62,7 @@ To send instructions to the camera a python scipt is executed internally, which 
 A set of compatible example datasets are provided in an open data repository on [Zenodo](https://zenodo.org/record/5572123#.YbHNzNso9hF).
 
 ### Command Line Interface
-The program can be run from command line without opening a GUI. The input file path and other parameters are being specified by additional parameters as listed [here](https://github.com/ThFriedrich/riCOM_cpp/blob/303d8a9fb5b056810d83f51e5f858dc5cd608d56/src/main.cpp#L880).  
+The program can be run from command line without opening a GUI. The input file path and other parameters are being specified by additional parameters as listed [automated build setup](https://github.com/ThFriedrich/riCOM_cpp/blob/master/src/RunCLI.cpp).  
 Example usage:
 ```bash
 ./RICOM -filename default1.mib -nx 64 -ny 64

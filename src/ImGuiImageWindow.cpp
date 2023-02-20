@@ -1,17 +1,4 @@
-/* Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu,
- * University of Antwerp - All Rights Reserved.
- * You may use, distribute and modify
- * this code under the terms of the GPL3 license.
- * You should have received a copy of the GPL3 license with
- * this file. If not, please visit:
- * https://www.gnu.org/licenses/gpl-3.0.en.html
- *
- * Authors:
- *   Thomas Friedrich <thomas.friedrich@uantwerpen.be>
- *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
- */
-
-#include "Gui_utils.h"
+#include "ImGuiImageWindow.h"
 
 template <typename T>
 inline T pw(T val, T power)
@@ -35,13 +22,15 @@ GIM_Flags operator&(GIM_Flags lhs, GIM_Flags rhs)
         static_cast<std::underlying_type_t<GIM_Flags>>(rhs));
 }
 
-bool Generic_Image_Window::has(GIM_Flags flag)
+template<typename T>
+bool ImGuiImageWindow<T>::has(GIM_Flags flag)
 {
     return static_cast<bool>(flags & flag);
 }
 
 // Redraws the entire image
-void Generic_Image_Window::render_image()
+template<typename T>
+void ImGuiImageWindow<T>::render_image()
 {
     if (b_data_set)
     {
@@ -60,7 +49,8 @@ void Generic_Image_Window::render_image()
 }
 
 // Redraws the entire ricom image from line y0 to line ye
-void Generic_Image_Window::render_image(int last_idr)
+template<typename T>
+void ImGuiImageWindow<T>::render_image(int last_idr)
 {
     int last_y = (last_idr / nx);
     if (b_data_set)
@@ -78,7 +68,8 @@ void Generic_Image_Window::render_image(int last_idr)
     this->last_idr = last_idr;
 }
 
-void Generic_Image_Window::set_pixel(int idx, int idy)
+template<>
+void ImGuiImageWindow<float>::set_pixel(int idx, int idy)
 {
     // determine location index of value in memory
     int idr = idy * nx + idx;
@@ -88,53 +79,111 @@ void Generic_Image_Window::set_pixel(int idx, int idy)
     draw_pixel(idx, idy, val);
 }
 
-void Generic_Image_Window::set_min_max(int last_idr)
+template<>
+void ImGuiImageWindow<std::complex<float>>::set_pixel(int idx, int idy)
+{
+    // determine location index of value in memory
+    int idr = idy * nx + idx;
+
+    // Get magnitude and angle from complex
+    float mag = (abs(data->at(idr)) - data_min) / data_range;
+    float ang = arg(data->at(idr));
+    ang = (ang/M_PI+1)/2;
+    mag = pw(mag,power);
+
+    // Update pixel at location
+    draw_pixel(idx, idy, ang, mag);
+}
+
+template<>
+float ImGuiImageWindow<float>::get_val(int idr)
+{
+    return (*data)[idr];
+}
+
+template<>
+float ImGuiImageWindow<std::complex<float>>::get_val(int idr)
+{
+    return abs((*data)[idr]);
+}
+
+template<typename T>
+void ImGuiImageWindow<T>::set_min_max(int last_idr)
 {
     float val;
     for (int idr = this->last_idr; idr < last_idr; idr++)
     {
-        val = (*data)[idr];
+        val = get_val(idr);
         if (val < data_min)
         {
             data_min = val;
             data_range = data_max - data_min;
+            b_trigger_update = true;
         }
         if (val > data_max)
         {
             data_max = val;
             data_range = data_max - data_min;
+            b_trigger_update = true;
         }
     }
 }
 
-void Generic_Image_Window::set_min_max()
+template<typename T>
+void ImGuiImageWindow<T>::set_min_max()
 {
-    data_min = *std::min_element(data->begin(), data->end());
-    data_max = *std::max_element(data->begin(), data->end());
-    data_range = data_max - data_min;
+    float val;
+    for (int idr = 0; idr < nxy; idr++)
+    {
+        val = get_val(idr);
+        if (val < data_min)
+        {
+            data_min = val;
+            data_range = data_max - data_min;
+            b_trigger_update = true;
+        }
+        if (val > data_max)
+        {
+            data_max = val;
+            data_range = data_max - data_min;
+            b_trigger_update = true;
+        }
+    }
 }
 
 // Draw a pixel on the surface at (x, y) for a given colormap
-void Generic_Image_Window::draw_pixel(int x, int y, float val)
+template<typename T>
+void ImGuiImageWindow<T>::draw_pixel(int x, int y, float val)
 {
     cmap::Color c = cmap::GetColor(val, cmap::ColormapType(data_cmap));
-    Uint32 px = SDL_MapRGB(sdl_srf->format, (Uint8)(c.r() * 255), (Uint8)(c.g() * 255), (Uint8)(c.b() * 255));
+    Uint32 px = SDL_MapRGB(sdl_srf->format, (Uint8)(c.ri()), (Uint8)(c.gi()), (Uint8)(c.bi()));
     Uint32 *const target_pixel = (Uint32 *)((Uint8 *)sdl_srf->pixels + y * sdl_srf->pitch + x * sdl_srf->format->BytesPerPixel);
     *target_pixel = px;
 }
 
-Generic_Image_Window::Generic_Image_Window(std::string title, GLuint *tex_id, bool auto_render, int data_cmap, GIM_Flags flags)
+template<typename T>
+void ImGuiImageWindow<T>::draw_pixel(int x, int y, float ang, float mag)
+{
+    
+    cmap::Color c = mag*cmap::GetColor(ang, cmap::ColormapType(data_cmap));
+    Uint32 px = SDL_MapRGB(sdl_srf->format, (Uint8)(c.ri()), (Uint8)(c.gi()), (Uint8)(c.bi()));
+    Uint32 *const target_pixel = (Uint32 *)((Uint8 *)sdl_srf->pixels + y * sdl_srf->pitch + x * sdl_srf->format->BytesPerPixel);
+    *target_pixel = px;
+}
+
+template<typename T>
+ImGuiImageWindow<T>::ImGuiImageWindow(std::string title, GLuint *tex_id, bool auto_render, int data_cmap,  GIM_Flags flags, bool *visible)
 {
 
     this->title = title;
     this->flags = flags;
     this->tex_id = tex_id;
-    this->b_open = false;
-    this->pb_open = &this->b_open;
+    this->pb_open = visible;
     this->auto_render = auto_render;
     this->data_cmap = data_cmap;
     this->last_y = 0;
     this->last_idr = 0;
+    this->last_img = 0;
     this->zoom = 1.0f;
     this->power = 1.0f;
     this->ny = 1;
@@ -159,19 +208,11 @@ Generic_Image_Window::Generic_Image_Window(std::string title, GLuint *tex_id, bo
     this->b_data_set = false;
 }
 
-void Generic_Image_Window::link_visibility_bool(bool *visible)
-{
-    this->pb_open = visible;
-}
-
-void Generic_Image_Window::set_data(int width, int height, std::vector<float> *data)
+template<typename T>
+void ImGuiImageWindow<T>::set_data(int width, int height, std::vector<T> *data)
 {
     this->data = data;
     set_nx_ny(width, height);
-
-    b_open = true;
-    if (this->pb_open != NULL)
-        this->pb_open = &b_open;
     reset_limits();
     if (!auto_render)
     {
@@ -180,19 +221,28 @@ void Generic_Image_Window::set_data(int width, int height, std::vector<float> *d
     b_data_set = true;
 }
 
-void Generic_Image_Window::reset_limits()
+template<typename T>
+void ImGuiImageWindow<T>::reset_limits()
 {
     last_y = 0;
+    last_idr = 0;
+    last_img = 0;
     data_min = FLT_MAX;
     data_max = -FLT_MAX;
     data_range = FLT_MAX;
 }
 
-void Generic_Image_Window::set_nx_ny(int width, int height)
+template<typename T>
+void ImGuiImageWindow<T>::set_nx_ny(int width, int height)
 {
     this->nx = width;
     this->ny = height;
     this->nxy = height * width;
+    
+    data_fft.resize(nxy);
+    data_fft_f.resize(nxy);
+    data_val.resize(nxy);
+
     reset_limits();
 
     sdl_srf = SDL_CreateRGBSurface(0, this->nx, this->ny, 32, 0, 0, 0, 0);
@@ -202,39 +252,93 @@ void Generic_Image_Window::set_nx_ny(int width, int height)
     }
 }
 
-void Generic_Image_Window::render_window(bool b_redraw, int last_y, int render_update_offset, bool b_trigger_update)
+template<typename T>
+void ImGuiImageWindow<T>::render_window(bool b_redraw, int last_y, int render_update_offset, bool b_trigger_update)
 {
     this->render_update_offset = render_update_offset;
     render_window(b_redraw, last_y, b_trigger_update);
 }
 
-void Generic_Image_Window::reset_min_max()
+template<typename T>
+void ImGuiImageWindow<T>::reset_min_max()
 {
     data_min = FLT_MAX;
     data_max = -FLT_MAX;
     data_range = FLT_MAX;
 }
 
-void Generic_Image_Window::compute_fft()
+template<>
+void ImGuiImageWindow<float>::compute_fft()
 {
-    data_fft.resize(nxy);
-    data_fft_f.resize(nxy);
-    data_val.resize(nxy);
-
-    FFT2D::r2c(*data, data_val);
     FFT2D fft2d(ny, nx, ny, nx);
+    FFT2D::r2c(*data, data_val);
     fft2d.fft(data_val, data_fft);
     FFT2D::c2r(data_fft, data_fft_f);
 }
 
-void Generic_Image_Window::render_window(bool b_redraw, int fr_count, bool b_trigger_ext)
+template<>
+void ImGuiImageWindow<std::complex<float>>::compute_fft()
+{
+    FFT2D fft2d(ny, nx, ny, nx);
+    fft2d.fft(*data, data_fft);
+    FFT2D::c2r(data_fft, data_fft_f);
+}
+
+// Deal with situation when process is finished (redraw==false) but not fully rendered
+// Should also render at end of a full cycle but not when it's finished completely
+template<typename T>
+bool ImGuiImageWindow<T>::detect_frame_switch(int &fr_count)
+{
+    int n_im = (fr_count) / nxy;
+    if (last_img < n_im)
+    {
+        last_img = n_im;
+        fr_count = nxy;
+        this->last_y = 0;
+        return true;
+    } else {
+        fr_count -= (n_im * nxy);
+        return false;
+    }
+}
+
+template<>
+void ImGuiImageWindow<float>::value_tooltip(const int x, const int y, const float zoom)
+{
+    float val = 0.0f;
+    if (b_data_set)
+        val = data->at(y * nx + x);
+    ImGui::BeginTooltip();
+    ImGui::Text("XY: %i, %i", x, y);
+    ImGui::Text("Value: %.2f", val);
+    ImGui::Text("Zoom: %.2f", zoom);
+    ImGui::EndTooltip();
+}
+
+template<>
+void ImGuiImageWindow<std::complex<float>>::value_tooltip(const int x, const int y, const float zoom)
+{
+    std::complex<float> val = 0.0;
+    if (b_data_set)
+        val = data->at(y * nx + x);
+    ImGui::BeginTooltip();
+    ImGui::Text("XY: %i, %i", x, y);
+    ImGui::Text("Angle: %.2f", arg(val));
+    ImGui::Text("Magnitude: %.2f", abs(val));
+    ImGui::Text("Zoom: %.2f", zoom);
+    ImGui::EndTooltip();
+}
+
+// b_redraw is the standard timer based update, b_trigger_ext can trigger a full redraw of the image
+template<typename T>
+void ImGuiImageWindow<T>::render_window(bool b_redraw, int fr_count, bool b_trigger_ext)
 {
     ImGui::SetNextWindowSize(ImVec2{256, 256}, ImGuiCond_FirstUseEver);
-    if (ImGui::Begin(title.c_str(), pb_open, ImGuiWindowFlags_NoScrollbar))
+    bool t_open = ImGui::Begin(title.c_str(), pb_open, ImGuiWindowFlags_NoScrollbar);
+    if (t_open)
     {
-        // int frames_passed = ((fr_count-1)/nxy)*nxy;
-        fr_count -= (((fr_count - 1) / nxy) * nxy);
-        b_trigger_update = b_trigger_update || b_trigger_ext;
+        bool fr_switch = detect_frame_switch(fr_count);
+        b_trigger_update = b_trigger_update || b_trigger_ext || fr_switch;
         if (b_trigger_update)
         {
             render_image();
@@ -275,7 +379,12 @@ void Generic_Image_Window::render_window(bool b_redraw, int fr_count, bool b_tri
         if (this->has(GIM_Flags::FftButton))
         {
             ImGui::SameLine();
-            if (ImGui::Button("Compute FFT") || (*fft_window->pb_open && b_trigger_update))
+            bool fft_button_press = ImGui::Button("Compute FFT");
+            if (fft_button_press)
+            {
+                *fft_window->pb_open = true;
+            }
+            if (fft_button_press || (*fft_window->pb_open && b_trigger_update))
             {
                 if (b_data_set)
                 {
@@ -298,7 +407,7 @@ void Generic_Image_Window::render_window(bool b_redraw, int fr_count, bool b_tri
             {
                 this->last_idr = 0;
                 this->last_y = 0;
-                render_image(fr_count);
+                render_image((fr_count==0)?nxy:fr_count);
                 b_trigger_update = true;
             }
         }
@@ -311,7 +420,7 @@ void Generic_Image_Window::render_window(bool b_redraw, int fr_count, bool b_tri
             {
                 this->last_idr = 0;
                 this->last_y = 0;
-                render_image(fr_count);
+                render_image((fr_count==0)?nxy:fr_count);
                 b_trigger_update = true;
             }
         }
@@ -385,14 +494,7 @@ void Generic_Image_Window::render_window(bool b_redraw, int fr_count, bool b_tri
                 float scale_fct = scale * zoom;
                 int x = (int)std::floor((xy.x - pos.x) / scale_fct);
                 int y = (int)std::floor((xy.y - pos.y) / scale_fct);
-                float val = 0.0f;
-                if (b_data_set)
-                    val = (*data)[y * nx + x];
-                ImGui::BeginTooltip();
-                ImGui::Text("XY: %i, %i", x, y);
-                ImGui::Text("Value: %.2f", val);
-                ImGui::Text("Zoom: %.2f", zoom);
-                ImGui::EndTooltip();
+                value_tooltip(x,y,zoom);
             }
             if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
             {
@@ -407,78 +509,5 @@ void Generic_Image_Window::render_window(bool b_redraw, int fr_count, bool b_tri
     b_trigger_update = false;
 }
 
-template <typename T>
-void save_numpy(std::string *path, int nx, int ny, std::vector<T> *data)
-{
-    std::string ext = std::filesystem::path(*path).extension().string();
-    if (ext != ".npy")
-    {
-        *path += ".npy";
-    }
-    const std::vector<long unsigned> shape{static_cast<long unsigned>(ny), static_cast<long unsigned>(nx)};
-    npy::SaveArrayAsNumpy(path->c_str(), false, shape.size(), shape.data(), *data);
-}
-
-void save_image(std::string *path, SDL_Surface *sdl_srf)
-{
-    std::string ext = std::filesystem::path(*path).extension().string();
-    if ((ext != ".png") && (ext != ".PNG"))
-    {
-        *path += ".png";
-    }
-    IMG_SavePNG(sdl_srf, path->c_str());
-}
-
-// Vertical Splitter Container
-void v_splitter(float thickness, float &size0, float &min_h, float &max_h, float offset)
-{
-
-    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrab]);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrabHovered]);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrabActive]);
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, ImGui::GetStyle().ScrollbarRounding);
-    ImGui::Button("v", ImVec2(-1, thickness));
-    ImGui::PopStyleColor(3);
-    ImGui::PopStyleVar(1);
-    if (ImGui::IsItemHovered() || ImGui::IsItemActive())
-    {
-        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
-    }
-
-    if (ImGui::IsItemActive())
-    {
-        float d = ImGui::GetMousePos().y - offset;
-        if (d < min_h)
-            size0 = min_h;
-        else if (d > max_h)
-            size0 = max_h;
-        else
-            size0 = d;
-    }
-};
-
-Main_Dock::Main_Dock(ImGuiID dock_id)
-{
-    this->dock_id = dock_id;
-}
-
-void Main_Dock::render(ImVec2 pos, ImVec2 size)
-{
-    ImGui::SetNextWindowPos(pos);
-    ImGui::SetNextWindowSize(size);
-    ImGui::Begin("DockWindow", nullptr, window_flags);
-    ImGui::DockSpace(dock_id);
-
-    static auto first_time = true;
-    if (first_time)
-    {
-        first_time = false;
-        ImGui::DockBuilderRemoveNode(dock_id); // clear any previous layout
-        ImGui::DockBuilderAddNode(dock_id, dockspace_flags);
-        ImGui::DockBuilderSetNodePos(dock_id, pos);
-        ImGui::DockBuilderSetNodeSize(dock_id, size);
-        ImGui::DockBuilderDockWindow("RICOM", dock_id);
-        ImGui::DockBuilderFinish(dock_id);
-    }
-    ImGui::End();
-}
+template class ImGuiImageWindow<float>;
+template class ImGuiImageWindow<std::complex<float>>;
