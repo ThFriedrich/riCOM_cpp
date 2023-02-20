@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['terminal_5fwidth_444',['TERMINAL_WIDTH',['../da/dce/ProgressMonitor_8h.html#aa4d3a8d55cf4318de7da234b86f117f7',1,'ProgressMonitor.h']]],
-  ['total_5fpercentage_445',['TOTAL_PERCENTAGE',['../da/dce/ProgressMonitor_8h.html#ad230c2a0c13c552b3a64edfc9a6f1d1c',1,'ProgressMonitor.h']]]
+  ['socket_477',['SOCKET',['../d0/d3c/SocketConnector_8h.html#aff55fe551a9992a54ec54621c524d0a4',1,'SocketConnector.h']]],
+  ['socket_5ferror_478',['SOCKET_ERROR',['../d0/d3c/SocketConnector_8h.html#a633b0396ff93d336a088412a190a5072',1,'SocketConnector.h']]]
 ];

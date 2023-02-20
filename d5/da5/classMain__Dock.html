@@ -71,7 +71,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="../../d5/d80/Gui__utils_8h_source.html">Gui_utils.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="../../d7/db2/GuiUtils_8h_source.html">GuiUtils.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -91,7 +91,7 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="../../d5/d80/Gui__utils_8h_source.html#l00142">142</a> of file <a class="el" href="../../d5/d80/Gui__utils_8h_source.html">Gui_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/db2/GuiUtils_8h_source.html#l00054">54</a> of file <a class="el" href="../../d7/db2/GuiUtils_8h_source.html">GuiUtils.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="afa3bd4ee70a79267a268163e683f6564"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afa3bd4ee70a79267a268163e683f6564">&#9670;&nbsp;</a></span>Main_Dock()</h2>
@@ -109,11 +109,11 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html#l00460">460</a> of file <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html">Gui_utils.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;{</div>
-<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;    this-&gt;<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a> = <a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>;</div>
-<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;}</div>
-<div class="ttc" id="aclassMain__Dock_html_aa8be27ed15b4ef2f9ecd5a17e5b665ef"><div class="ttname"><a href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">Main_Dock::dock_id</a></div><div class="ttdeci">ImGuiID dock_id</div><div class="ttdef"><b>Definition:</b> <a href="../../d5/d80/Gui__utils_8h_source.html#l00145">Gui_utils.h:145</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html#l00069">69</a> of file <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html">GuiUtils.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;{</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    this-&gt;<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a> = <a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;}</div>
+<div class="ttc" id="aclassMain__Dock_html_aa8be27ed15b4ef2f9ecd5a17e5b665ef"><div class="ttname"><a href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">Main_Dock::dock_id</a></div><div class="ttdeci">ImGuiID dock_id</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/db2/GuiUtils_8h_source.html#l00057">GuiUtils.h:57</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -144,28 +144,28 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html#l00465">465</a> of file <a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html">Gui_utils.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;{</div>
-<div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;    ImGui::SetNextWindowPos(pos);</div>
-<div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;    ImGui::SetNextWindowSize(size);</div>
-<div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;    ImGui::Begin(<span class="stringliteral">&quot;DockWindow&quot;</span>, <span class="keyword">nullptr</span>, <a class="code" href="../../d5/da5/classMain__Dock.html#a704472dfcdad9a5935bd56b3511e18a1">window_flags</a>);</div>
-<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;    ImGui::DockSpace(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>);</div>
-<div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160; </div>
-<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;    <span class="keyword">static</span> <span class="keyword">auto</span> first_time = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160;    <span class="keywordflow">if</span> (first_time)</div>
-<div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;    {</div>
-<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;        first_time = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;        ImGui::DockBuilderRemoveNode(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>); <span class="comment">// clear any previous layout</span></div>
-<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;        ImGui::DockBuilderAddNode(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>, <a class="code" href="../../d5/da5/classMain__Dock.html#aa0220fc5e6fa4c04f8997db3e370b704">dockspace_flags</a>);</div>
-<div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160;        ImGui::DockBuilderSetNodePos(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>, pos);</div>
-<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;        ImGui::DockBuilderSetNodeSize(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>, size);</div>
-<div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160;        ImGui::DockBuilderDockWindow(<span class="stringliteral">&quot;RICOM&quot;</span>, <a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>);</div>
-<div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;        ImGui::DockBuilderFinish(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>);</div>
-<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;    }</div>
-<div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160;    ImGui::End();</div>
-<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;}</div>
-<div class="ttc" id="aclassMain__Dock_html_a704472dfcdad9a5935bd56b3511e18a1"><div class="ttname"><a href="../../d5/da5/classMain__Dock.html#a704472dfcdad9a5935bd56b3511e18a1">Main_Dock::window_flags</a></div><div class="ttdeci">const ImGuiWindowFlags window_flags</div><div class="ttdef"><b>Definition:</b> <a href="../../d5/d80/Gui__utils_8h_source.html#l00147">Gui_utils.h:147</a></div></div>
-<div class="ttc" id="aclassMain__Dock_html_aa0220fc5e6fa4c04f8997db3e370b704"><div class="ttname"><a href="../../d5/da5/classMain__Dock.html#aa0220fc5e6fa4c04f8997db3e370b704">Main_Dock::dockspace_flags</a></div><div class="ttdeci">const ImGuiDockNodeFlags dockspace_flags</div><div class="ttdef"><b>Definition:</b> <a href="../../d5/d80/Gui__utils_8h_source.html#l00146">Gui_utils.h:146</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html#l00074">74</a> of file <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html">GuiUtils.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;{</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    ImGui::SetNextWindowPos(pos);</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    ImGui::SetNextWindowSize(size);</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    ImGui::Begin(<span class="stringliteral">&quot;DockWindow&quot;</span>, <span class="keyword">nullptr</span>, <a class="code" href="../../d5/da5/classMain__Dock.html#a704472dfcdad9a5935bd56b3511e18a1">window_flags</a>);</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    ImGui::DockSpace(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>);</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="keyword">static</span> <span class="keyword">auto</span> first_time = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    <span class="keywordflow">if</span> (first_time)</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    {</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        first_time = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        ImGui::DockBuilderRemoveNode(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>); <span class="comment">// clear any previous layout</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        ImGui::DockBuilderAddNode(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>, <a class="code" href="../../d5/da5/classMain__Dock.html#aa0220fc5e6fa4c04f8997db3e370b704">dockspace_flags</a>);</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        ImGui::DockBuilderSetNodePos(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>, pos);</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        ImGui::DockBuilderSetNodeSize(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>, size);</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        ImGui::DockBuilderDockWindow(<span class="stringliteral">&quot;RICOM&quot;</span>, <a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>);</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        ImGui::DockBuilderFinish(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>);</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    }</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    ImGui::End();</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;}</div>
+<div class="ttc" id="aclassMain__Dock_html_a704472dfcdad9a5935bd56b3511e18a1"><div class="ttname"><a href="../../d5/da5/classMain__Dock.html#a704472dfcdad9a5935bd56b3511e18a1">Main_Dock::window_flags</a></div><div class="ttdeci">const ImGuiWindowFlags window_flags</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/db2/GuiUtils_8h_source.html#l00059">GuiUtils.h:59</a></div></div>
+<div class="ttc" id="aclassMain__Dock_html_aa0220fc5e6fa4c04f8997db3e370b704"><div class="ttname"><a href="../../d5/da5/classMain__Dock.html#aa0220fc5e6fa4c04f8997db3e370b704">Main_Dock::dockspace_flags</a></div><div class="ttdeci">const ImGuiDockNodeFlags dockspace_flags</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/db2/GuiUtils_8h_source.html#l00058">GuiUtils.h:58</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -182,7 +182,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d80/Gui__utils_8h_source.html#l00145">145</a> of file <a class="el" href="../../d5/d80/Gui__utils_8h_source.html">Gui_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/db2/GuiUtils_8h_source.html#l00057">57</a> of file <a class="el" href="../../d7/db2/GuiUtils_8h_source.html">GuiUtils.h</a>.</p>
 
 </div>
 </div>
@@ -198,7 +198,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d80/Gui__utils_8h_source.html#l00146">146</a> of file <a class="el" href="../../d5/d80/Gui__utils_8h_source.html">Gui_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/db2/GuiUtils_8h_source.html#l00058">58</a> of file <a class="el" href="../../d7/db2/GuiUtils_8h_source.html">GuiUtils.h</a>.</p>
 
 </div>
 </div>
@@ -214,13 +214,13 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d80/Gui__utils_8h_source.html#l00147">147</a> of file <a class="el" href="../../d5/d80/Gui__utils_8h_source.html">Gui_utils.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/db2/GuiUtils_8h_source.html#l00059">59</a> of file <a class="el" href="../../d7/db2/GuiUtils_8h_source.html">GuiUtils.h</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>src/<a class="el" href="../../d5/d80/Gui__utils_8h_source.html">Gui_utils.h</a></li>
-<li>src/<a class="el" href="../../dc/d69/Gui__utils_8cpp_source.html">Gui_utils.cpp</a></li>
+<li>src/<a class="el" href="../../d7/db2/GuiUtils_8h_source.html">GuiUtils.h</a></li>
+<li>src/<a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html">GuiUtils.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
