@@ -231,33 +231,6 @@ void Ricom_kernel::approximate_frequencies(size_t nx_im)
     }
 }
 
-///////////////////////////////////////////////////
-//  RICOM detector class method implementations  //
-///////////////////////////////////////////////////
-
-// Computer detector distance map relative to the camera centre for vSTEM
-// void Ricom_detector::compute_detector(int nx_cam, int ny_cam)
-// {
-//     radius2[0] = pow(radius[0], 2)
-//     radius2[1] = pow(radius[1], 2);
-//     float d2;
-//     id_list.clear();
-//     id_list.reserve(nx_cam * ny_cam);
-//     std::array<float, 2> offset = {((float)nx_cam - 1) / 2, ((float)ny_cam - 1) / 2};
-
-//     for (float iy = 0; iy < ny_cam; iy++)
-//     {
-//         for (float ix = 0; ix < nx_cam; ix++)
-//         {
-//             d2 = pow(ix, 2) + pow(iy - offset[1], 2);
-//             if (d2 > radius2[0] && d2 <= radius2[1])
-//             {
-//                 id_list.push_back(iy * nx_cam + ix);
-//             }
-//         }
-//     }
-// }
-
 // Computer detector distance map relative to a given centre (offset) for vSTEM
 void Ricom_detector::compute_detector(int nx_cam, int ny_cam, std::array<float, 2> &offset)
 {
@@ -335,6 +308,13 @@ void Ricom::init_surface()
         std::cout << "Surface could not be created! SDL Error: " << SDL_GetError() << std::endl;
         exit(EXIT_FAILURE);
     }
+    // SDL surface for STEM image
+    srf_e_mag = SDL_CreateRGBSurface(0, nx, ny, 32, 0, 0, 0, 0);
+    if (srf_e_mag == NULL)
+    {
+        std::cout << "Surface could not be created! SDL Error: " << SDL_GetError() << std::endl;
+        exit(EXIT_FAILURE);
+    }
     // SDL surface for CBED image
     cbed_log.assign(camera.nx_cam*camera.ny_cam, 0.0);
     srf_cbed = SDL_CreateRGBSurface(0, camera.nx_cam, camera.ny_cam, 32, 0, 0, 0, 0);
@@ -349,7 +329,16 @@ void Ricom::init_surface()
 void Ricom::draw_pixel(SDL_Surface *surface, int x, int y, float val, int col_map)
 {
     cmap::Color c = cmap::GetColor(val, cmap::ColormapType(col_map));
-    Uint32 px = SDL_MapRGB(surface->format, (Uint8)(c.r() * 255), (Uint8)(c.g() * 255), (Uint8)(c.b() * 255));
+    Uint32 px = SDL_MapRGB(surface->format, (Uint8)(c.ri()), (Uint8)(c.gi()), (Uint8)(c.bi()));
+    Uint32 *const target_pixel = (Uint32 *)((Uint8 *)surface->pixels + y * surface->pitch + x * surface->format->BytesPerPixel);
+    *target_pixel = px;
+}
+
+void Ricom::draw_pixel(SDL_Surface *surface, int x, int y, float ang, float mag, int col_map)
+{
+    
+    cmap::Color c = mag*cmap::GetColor(ang, cmap::ColormapType(col_map));
+    Uint32 px = SDL_MapRGB(surface->format, (Uint8)(c.ri()), (Uint8)(c.gi()), (Uint8)(c.bi()));
     Uint32 *const target_pixel = (Uint32 *)((Uint8 *)surface->pixels + y * surface->pitch + x * surface->format->BytesPerPixel);
     *target_pixel = px;
 }
@@ -359,9 +348,10 @@ void Ricom::draw_pixel(SDL_Surface *surface, int x, int y, float val, int col_ma
 ////////////////////////////////////////////////
 Ricom::Ricom() : stem_max(-FLT_MAX), stem_min(FLT_MAX),
                  update_list(),
+                 e_mag_max(-FLT_MAX), e_mag_min(FLT_MAX),
                  ricom_max(-FLT_MAX), ricom_min(FLT_MAX),
                  cbed_log(),
-                 ricom_mutex(), stem_mutex(), counter_mutex(),
+                 ricom_mutex(), stem_mutex(), counter_mutex(), e_field_mutex(),
                  socket(), file_path(""),
                  camera(),
                  mode(RICOM::FILE),
@@ -370,9 +360,8 @@ Ricom::Ricom() : stem_max(-FLT_MAX), stem_min(FLT_MAX),
                  last_y(0),
                  p_prog_mon(nullptr),
                  b_busy(false),
-                 update_dose_lowbound(6),
                  update_offset(true),
-                 b_vSTEM(false), b_plot_cbed(true), b_plot2SDL(false),
+                 b_vSTEM(false), b_e_mag(false), b_plot_cbed(true), b_plot2SDL(false),
                  b_recompute_detector(false), b_recompute_kernel(false),
                  detector(),
                  kernel(),
@@ -380,6 +369,7 @@ Ricom::Ricom() : stem_max(-FLT_MAX), stem_min(FLT_MAX),
                  com_map_x(), com_map_y(),
                  ricom_data(),
                  stem_data(),
+                 e_field_data(),
                  nx(256), ny(256), nxy(0),
                  rep(1), fr_total(0),
                  skip_row(1), skip_img(0),
@@ -389,7 +379,8 @@ Ricom::Ricom() : stem_max(-FLT_MAX), stem_min(FLT_MAX),
                  rc_quit(false),
                  srf_ricom(NULL), ricom_cmap(9),
                  srf_stem(NULL), stem_cmap(9),
-                 srf_cbed(NULL), cbed_cmap(5)
+                 srf_cbed(NULL), cbed_cmap(5),
+                 srf_e_mag(NULL), e_mag_cmap(12)
 {
     n_threads_max = std::thread::hardware_concurrency();
 }
@@ -417,7 +408,7 @@ void Ricom::swap_endianess(T &val)
 
 // Compute the centre of mass
 template <typename T>
-void Ricom::com(std::vector<T> *data, std::array<float, 2> &com, std::atomic<int> *dose_sum)
+void Ricom::com(std::vector<T> *data, std::array<float, 2> &com)
 {
     float dose = 0;
     T px;
@@ -458,7 +449,6 @@ void Ricom::com(std::vector<T> *data, std::array<float, 2> &com, std::atomic<int
         {
             com[i] = (com[i] / dose);
         }
-        dose_sum[0] += (int)dose;
     }
 }
 
@@ -610,6 +600,30 @@ void Ricom::draw_stem_image(int y0, int ye)
     }
 }
 
+void Ricom::draw_e_field_image(int y0, int ye)
+{
+    std::lock_guard<std::mutex> lock(e_field_mutex);
+    for (int y = y0; y <= ye; y++)
+    {
+        for (int x = 0; x < nx; x++)
+        {
+            set_e_field_pixel(x, y);
+        }
+    }
+}
+
+void Ricom::draw_e_field_image()
+{
+    std::lock_guard<std::mutex> lock(e_field_mutex);
+    for (int y = 0; y < ny; y++)
+    {
+        for (int x = 0; x < nx; x++)
+        {
+            set_e_field_pixel(x, y);
+        }
+    }
+}
+
 // set pixel in stem image srf_stem at location idx, idy to value corresponding
 // value in stem_data array
 void Ricom::set_stem_pixel(size_t idx, size_t idy)
@@ -620,6 +634,19 @@ void Ricom::set_stem_pixel(size_t idx, size_t idy)
 
     // Update pixel at location
     draw_pixel(srf_stem, idx, idy, val, stem_cmap);
+}
+
+// set pixel in stem image srf_stem at location idx, idy to value corresponding
+// value in stem_data array
+void Ricom::set_e_field_pixel(size_t idx, size_t idy)
+{
+    // determine location index of value in memory
+    int idr = idy * nx + idx;
+    float mag = (abs(e_field_data[idr]) - e_mag_min) / (e_mag_max - e_mag_min);
+    float ang = arg(e_field_data[idr]);
+
+    // Update pixel at location
+    draw_pixel(srf_e_mag, idx, idy, ang, mag, e_mag_cmap);
 }
 
 // Draw a CBED in log-scale to the SDL surface srf_cbed
@@ -687,6 +714,14 @@ inline void Ricom::rescales_recomputes()
             rescale_stem = false;
         };
     };
+
+    if (b_e_mag)
+    {
+        if (rescale_e_mag)
+        {
+            rescale_e_mag = false;
+        };
+    };
 }
 
 // Skip n frames
@@ -701,23 +736,28 @@ void Ricom::skip_frames(int n_skip, std::vector<T> &data, CAMERA::Camera<CameraI
 
 // Compute COM and iCOM for a frame (copy data)
 template <typename T>
-void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose_sum, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon)
+void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon)
 {
     std::vector<T> *data_ptr = &data;
 
     std::array<float, 2> com_xy = {0.0, 0.0};
-    com<T>(data_ptr, com_xy, dose_sum);
+    com<T>(data_ptr, com_xy);
     icom(com_xy, ix, iy);
+
+    size_t id = iy * nx + ix;
 
     if (b_vSTEM)
     {
-        stem(data_ptr, iy * nx + ix);
+        stem(data_ptr, id);
+    }
+    if (b_e_mag)
+    {
+        compute_electric_field(com_xy, id);
     }
 
     com_xy_sum->at(0) += com_xy[0];
     com_xy_sum->at(1) += com_xy[1];
 
-    int id = iy * nx + ix;
     com_map_x[id] = com_xy[0];
     com_map_y[id] = com_xy[1];
 
@@ -742,21 +782,24 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose
 
 // Compute COM and iCOM for a frame (reference data)
 template <typename T>
-void Ricom::com_icom(std::vector<T> *data_ptr, int ix, int iy, std::atomic<int> *dose_sum, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon)
+void Ricom::com_icom(std::vector<T> *data_ptr, int ix, int iy, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon)
 {
     std::array<float, 2> com_xy = {0.0, 0.0};
-    com<T>(data_ptr, com_xy, dose_sum);
+    com<T>(data_ptr, com_xy);
     icom(com_xy, ix, iy);
 
+    size_t id = iy * nx + ix;
     if (b_vSTEM)
     {
-        stem(data_ptr, iy * nx + ix);
+        stem(data_ptr, id);
     }
-
+    if (b_e_mag)
+    {
+        compute_electric_field(com_xy, id);
+    }
     com_xy_sum->at(0) += com_xy[0];
     com_xy_sum->at(1) += com_xy[1];
 
-    int id = iy * nx + ix;
     ++(*p_prog_mon);
     com_map_x[id] = com_xy[0];
     com_map_y[id] = com_xy[1];
@@ -776,12 +819,32 @@ void Ricom::com_icom(std::vector<T> *data_ptr, int ix, int iy, std::atomic<int> 
     }
 }
 
+// Compute electric field magnitude
+void Ricom::compute_electric_field(std::array<float,2> &com_xy, size_t id)
+{
+    float e_mag = std::hypot(com_xy[0]-offset[0], com_xy[1]- offset[1]);
+    float e_ang = atan2(com_xy[0]-offset[0],com_xy[1]- offset[1]);
+    if (e_mag > e_mag_max)
+    {
+        e_mag_max = e_mag;
+        rescale_e_mag = true;
+    }
+    if (e_mag < e_mag_min)
+    {
+        e_mag_min = e_mag;
+        rescale_e_mag = true;
+    }
+    e_field_data[id] = std::polar(e_mag, e_ang);
+}
+
+
 // Process FRAME_BASED camera data
 template <typename T, class CameraInterface>
 void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *camera_spec)
 {
     // Memory allocation
-    std::vector<T> data(camera_spec->nx_cam * camera_spec->ny_cam);
+    int cam_xy = camera_spec->nx_cam * camera_spec->ny_cam;
+    std::vector<T> data(cam_xy);
     std::vector<T> *p_data = &data;
     BoundedThreadPool pool;
 
@@ -789,15 +852,13 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *c
     if (n_threads > 1)
         pool.init(n_threads, queue_size);
 
-    std::atomic<int> dose_sum = 0;
-    std::atomic<int> *p_dose_sum = &dose_sum;
-
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
     std::array<float, 2> *p_com_xy_sum = &com_xy_sum;
 
     // Initialize ProgressMonitor Object
     ProgressMonitor prog_mon(fr_total, !b_print2file, redraw_interval);
     p_prog_mon = &prog_mon;
+    
 
     for (int ir = 0; ir < rep; ir++)
     {
@@ -811,11 +872,11 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *c
                 if (n_threads > 1)
                 {
                     pool.push_task([=]
-                                   { com_icom<T>(data, ix, iy, p_dose_sum, p_com_xy_sum, p_prog_mon); });
+                                    { com_icom<T>(data, ix, iy, p_com_xy_sum, p_prog_mon); });
                 }
                 else
                 {
-                    com_icom<T>(p_data, ix, iy, p_dose_sum, p_com_xy_sum, p_prog_mon);
+                    com_icom<T>(p_data, ix, iy, p_com_xy_sum, p_prog_mon);
                 }
 
                 if (rc_quit)
@@ -832,11 +893,10 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *c
         if (n_threads > 1)
             pool.wait_for_completion();
 
-        if (update_offset && dose_sum > pow(10.0, update_dose_lowbound))
+        if (update_offset)
         {
             offset[0] = com_public[0];
             offset[1] = com_public[1];
-            dose_sum = 0;
         }
     }
     p_prog_mon = nullptr;
@@ -851,6 +911,10 @@ void Ricom::update_surfaces(int iy, std::vector<T> *p_frame)
         if (b_vSTEM)
         {
             draw_stem_image(last_y, iy);
+        }
+        if (b_e_mag)
+        {
+            draw_e_field_image(last_y, iy);
         }
     }
     if (b_plot_cbed)
@@ -878,7 +942,6 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
     std::array<float, 2> com_xy = {0.0, 0.0};
     std::array<float, 2> *p_com_xy = &com_xy;
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
-    int dose_sum = 0;
     int idxx = 0;
     int ix = 0;
     int iy = 0;
@@ -941,7 +1004,6 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
             com_map_y[idxx] = com_xy[1];
             com_xy_sum[0] += com_xy[0];
             com_xy_sum[1] += com_xy[1];
-            dose_sum += dose_map[idxx];
 
             ix = idxx % nx;
             iy = floor(idxx / nx);
@@ -955,11 +1017,10 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
             {
                 icom(p_com_xy, ix, iy);
             }
-
-            // if (b_vSTEM)
-            // {
-            //     stem(p_frame, iy * nx + ix);
-            // }
+            if (b_e_mag)
+            {
+                compute_electric_field(com_xy, idxx);
+            }
         }
     
     if (prog_mon.report_set)
@@ -995,11 +1056,10 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
             sumy_map.assign(nxy, 0);
         }
 
-        if (update_offset && dose_sum > pow(10.0, update_dose_lowbound))
+        if (update_offset)
         {
             offset[0] = com_public[0];
             offset[1] = com_public[1];
-            dose_sum = 0;
         }
     }
 
@@ -1042,6 +1102,7 @@ void Ricom::run_reconstruction(RICOM::modes mode)
     com_map_x.resize(nxy);
     com_map_y.resize(nxy);
     stem_data.resize(nxy);
+    e_field_data.resize(nxy);
 
     // Run camera dependent pipeline
     // Implementations are in the Interface Wrappers (src/cameras/XXXWrapper.cpp), but essentially
@@ -1097,4 +1158,68 @@ void Ricom::reset()
     rc_quit = false;
     fr_freq = 0;
     reinit_vectors_limits();
+}
+
+enum CAMERA::Camera_model Ricom::select_mode_by_file(const char *filename)
+{
+    file_path = filename;
+    if (std::filesystem::path(filename).extension() == ".t3p")
+    {
+        mode = RICOM::FILE;
+        return CAMERA::TIMEPIX;
+    }
+    else if (std::filesystem::path(filename).extension() == ".mib")
+    {
+        mode = RICOM::FILE;
+        return CAMERA::MERLIN;
+    } else 
+    {
+        return CAMERA::TIMEPIX;
+    }
+}
+
+void RICOM::run_ricom(Ricom *r, RICOM::modes mode)
+{
+    switch (r->camera.model)
+    {
+    case CAMERA::MERLIN:
+        r->run_reconstruction<MerlinInterface>(mode);
+        break;
+    case CAMERA::TIMEPIX:
+        r->run_reconstruction<TimepixInterface>(mode);
+        break;
+    default:
+        break;
+    }
+}
+
+void RICOM::run_connection_script(Ricom *ricom, MerlinSettings *merlin, std::string python_path)
+{
+
+    int m_fr_total = ((ricom->nx + ricom->skip_row) * ricom->ny + ricom->skip_img) * ricom->rep;
+
+    std::ofstream run_script("run_script.py");
+    run_script << "from merlin_interface.merlin_interface import MerlinInterface" << std::endl;
+    run_script << "m = MerlinInterface(tcp_ip = \"" << ricom->socket.ip << "\" , tcp_port=" << merlin->com_port << ")" << std::endl;
+    run_script << "m.hvbias = " << merlin->hvbias << std::endl;
+    run_script << "m.threshold0 = " << merlin->threshold0 << std::endl;
+    run_script << "m.threshold1 = " << merlin->threshold1 << std::endl;
+    run_script << "m.continuousrw = " << (int)merlin->continuousrw << std::endl;
+    run_script << "m.counterdepth = " << ricom->camera.depth << std::endl;
+    run_script << "m.acquisitiontime = " << merlin->dwell_time << std::endl;
+    run_script << "m.acquisitionperiod = " << merlin->dwell_time << std::endl;
+    run_script << "m.numframestoacquire = " << m_fr_total + 1 << std::endl; // Ich verstehe nicht warum, aber er werkt.
+    run_script << "m.fileenable = " << (int)merlin->save << std::endl;
+    run_script << "m.runheadless = " << (int)merlin->headless << std::endl;
+    run_script << "m.fileformat = " << (int)merlin->raw * 2 << std::endl;
+    run_script << "m.triggerstart = " << merlin->trigger << std::endl;
+    run_script << "m.startacquisition()";
+    run_script.close();
+
+    std::string command = python_path + " run_script.py";
+    int r = std::system(command.c_str());
+    if (r != 0)
+    {
+        std::cout << "main::run_connection_script: Cannot execute python run_script. Shell exited with code " << r << std::endl;
+    }
 }

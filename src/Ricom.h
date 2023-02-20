@@ -45,9 +45,6 @@
 #include "TimepixInterface.h"
 #include "Camera.h"
 
-
-
-
 namespace chc = std::chrono;
 namespace cmap = tinycolormap;
 
@@ -139,6 +136,8 @@ namespace RICOM
         FILE,
         TCP
     };
+    void run_ricom(Ricom *r, RICOM::modes mode);
+    void run_connection_script(Ricom *r, MerlinSettings *merlin, std::string python_path);
 }
 
 class Ricom
@@ -154,6 +153,10 @@ private:
     
     Update_list update_list;
 
+    // Electric field magnitude
+    float e_mag_max;
+    float e_mag_min;
+
     // Variables for potting in the SDL2 frame
     float ricom_max;
     float ricom_min;
@@ -163,12 +166,14 @@ private:
     std::mutex ricom_mutex;
     std::mutex stem_mutex;
     std::mutex counter_mutex;
+    std::mutex e_field_mutex;
 
     // Private Methods - General
     void init_surface();
     template <typename T>
     inline void update_surfaces(int iy, std::vector<T> *p_frame);
     inline void draw_pixel(SDL_Surface *surface, int x, int y, float val, int color_map);
+    inline void draw_pixel(SDL_Surface *surface, int x, int y, float ang, float mag, int col_map);
     void reinit_vectors_limits();
     void reset_limits();
     void reset_file();
@@ -183,19 +188,23 @@ private:
     inline void icom(std::array<float, 2> *com, int x, int y);
     inline void icom(std::array<float, 2> com, int x, int y);
     template <typename T>
-    inline void com(std::vector<T> *data, std::array<float, 2> &com, std::atomic<int> *dose_sum);
+    inline void com(std::vector<T> *data, std::array<float, 2> &com);
     template <typename T>
-    void read_com_merlin(std::vector<T> &data, std::array<float, 2> &com, int &dose_sum);
+    void read_com_merlin(std::vector<T> &data, std::array<float, 2> &com);
     inline void set_ricom_pixel(int idx, int idy);
     template <typename T>
-    inline void com_icom(std::vector<T> data, int ix, int iy, std::atomic<int> *dose_sum, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
+    inline void com_icom(std::vector<T> data, int ix, int iy, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
     template <typename T>
-    inline void com_icom(std::vector<T> *p_data, int ix, int iy, std::atomic<int> *dose_sum, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
+    inline void com_icom(std::vector<T> *p_data, int ix, int iy, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
 
     // Private Methods - vSTEM
     template <typename T>
     inline void stem(std::vector<T> *data, size_t id_stem);
     inline void set_stem_pixel(size_t idx, size_t idy);
+
+    // Private Methods electric field
+    inline void compute_electric_field(std::array<float,2> &p_com_xy, size_t id);
+    inline void set_e_field_pixel(size_t idx, size_t idy);
 
 public:
     SocketConnector socket;
@@ -207,9 +216,9 @@ public:
     int last_y;
     ProgressMonitor *p_prog_mon;
     bool b_busy;
-    float update_dose_lowbound;
     bool update_offset;
     bool b_vSTEM;
+    bool b_e_mag;
     bool b_plot_cbed;
     bool b_plot2SDL;
     bool b_recompute_detector;
@@ -222,6 +231,7 @@ public:
     std::vector<float> com_map_y;
     std::vector<float> ricom_data;
     std::vector<float> stem_data;
+    std::vector<std::complex<float>> e_field_data;
 
     // Scan Area Variables
     int nx;
@@ -241,20 +251,25 @@ public:
     float fr_count_total; // Count all Frames in a scanning session
     std::atomic<bool> rescale_ricom;
     std::atomic<bool> rescale_stem;
+    std::atomic<bool> rescale_e_mag;
     bool rc_quit;
 
-    SDL_Surface *srf_ricom; // Surface for the window;
+    SDL_Surface *srf_ricom; // Surface for the ricom window;
     int ricom_cmap;
-    SDL_Surface *srf_stem; // Surface for the window;
+    SDL_Surface *srf_stem; // Surface for the vSTEM window;
     int stem_cmap;
-    SDL_Surface *srf_cbed; // Surface for the window;
+    SDL_Surface *srf_cbed; // Surface for the CBED window;
     int cbed_cmap;
+    SDL_Surface *srf_e_mag; // Surface for the E-Field window;
+    int e_mag_cmap;
 
     // Public Methods
     void draw_ricom_image();
-    void draw_stem_image();
     void draw_ricom_image(int y0, int ye);
+    void draw_stem_image();
     void draw_stem_image(int y0, int ye);
+    void draw_e_field_image();
+    void draw_e_field_image(int y0, int ye);
     template <class CameraInterface>
     void run_reconstruction(RICOM::modes mode);
     void reset();
@@ -264,7 +279,8 @@ public:
     void process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *camera);
     template <class CameraInterface>
     void process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *camera);
-
+    enum CAMERA::Camera_model select_mode_by_file(const char *filename);
+    
     // Constructor
     Ricom();
 
