@@ -70,19 +70,21 @@ public:
      * @param out  Fourier transformed output data
      *             If in == out, the transformation is done in-place
      */
-    void fft(dcvector &in, dcvector &out)
+    void fft(const dcvector &in, dcvector &out)
     {
         dvector f1(N1);
         dvector f2(N2);
         freq1(f1);
         freq2(f2);
-        shift_freq(f1, f2, in);
-
+        
         // Ensure in-place transformation
         if (in.data() != out.data())
         {
             memcpy(out.data(), in.data(), N * sizeof(dcomplex));
         }
+
+        shift_freq(f1, f2, out);
+
         fftwf_execute_dft(plan_fw,
                           reinterpret_cast<fftwf_complex *>(out.data()),
                           reinterpret_cast<fftwf_complex *>(out.data()));
@@ -249,7 +251,7 @@ public:
         memcpy(f2.data(), buf2.data(), N2 * sizeof(float));
     }
 
-    static void r2c(dvector &f, dcvector &c)
+    static void r2c(const dvector &f, dcvector &c)
     {
         for (size_t v = 0; v < f.size(); v++)
         {
@@ -257,7 +259,7 @@ public:
         }
     }
 
-    static void c2r(dcvector &c, dvector &f)
+    static void c2r(const dcvector &c, dvector &f)
     {
         for (size_t v = 0; v < c.size(); v++)
         {
