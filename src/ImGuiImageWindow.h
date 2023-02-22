@@ -96,9 +96,9 @@ private:
     bool b_data_set;
 
     // FFT data
-    dcvector data_fft;
+    std::vector<std::complex<float>> data_fft;
     std::vector<float> data_fft_f;
-    dcvector data_val;
+    std::vector<std::complex<float>> data_val;
 
     // Surface and Texture
     SDL_Surface *sdl_srf;

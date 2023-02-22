@@ -1,19 +1,12 @@
-// Based on: https://github.com/lschw/fftw_cpp (GPL3 license)
+// Loosely Based on: https://github.com/lschw/fftw_cpp (GPL3 license)
 
 #ifndef __FFTW2D_CPP__HH__
 #define __FFTW2D_CPP__HH__
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
-#include <cstring>
 #include <vector>
 #include <complex>
 #include <fftw3.h>
 
-typedef std::complex<float> dcomplex;
-typedef std::vector<float> dvector;
-typedef std::vector<dcomplex> dcvector;
 
 /**
  * Class representing a 2D Fourier transform
@@ -22,13 +15,7 @@ class FFT2D
 {
 public:
     const size_t N1;           // Number of data points 1
-    const float length1;      // Length of interval in real space 1
-    const float sample_rate1; // Sample rate (N/length) 1
-    const float df1;          // (Angular) frequency step (2*pi/length) 1
     const size_t N2;           // Number of data points 2
-    const float length2;      // Length of interval in real space 2
-    const float sample_rate2; // Sample rate (N/length) 2
-    const float df2;          // (Angular) frequency step (2*pi/length) 2
     const size_t N;            // Total number of data points = N1*N2
 
 private:
@@ -40,21 +27,14 @@ public:
      * Setup Fourier transform
      * @param N1       Number of datapoints in first dim.
      * @param N2       Number of datapoints in second dim.
-     * @param length1  Length of interval in real space in first dim.
-     * @param length2  Length of interval in real space in second dim.
      */
-    FFT2D(size_t N1, size_t N2, float length1, float length2) : N1(N1), length1(length1),
-                                                                  sample_rate1(N1 / length1), df1(2 * M_PI / length1),
-                                                                  N2(N2), length2(length2),
-                                                                  sample_rate2(N2 / length2), df2(2 * M_PI / length2),
-                                                                  N(N1 * N2)
+    FFT2D(int N1, int N2) : N1(N1), N2(N2), N(N1 * N2)
     {
         plan_fw = fftwf_plan_dft_2d(
             N1, N2, 0, 0, FFTW_FORWARD, FFTW_ESTIMATE);
         plan_bw = fftwf_plan_dft_2d(
             N1, N2, 0, 0, FFTW_BACKWARD, FFTW_ESTIMATE);
     }
-
     /**
      * Clean up
      */
@@ -64,39 +44,32 @@ public:
         fftwf_destroy_plan(plan_bw);
     }
 
+
     /**
      * Calculate Fourier transform
      * @param in   Input data
      * @param out  Fourier transformed output data
      *             If in == out, the transformation is done in-place
      */
-    void fft(const dcvector &in, dcvector &out)
+    inline void fft(const std::vector<std::complex<float>> &in, std::vector<std::complex<float>> &out)
     {
-        dvector f1(N1);
-        dvector f2(N2);
-        freq1(f1);
-        freq2(f2);
-        
         // Ensure in-place transformation
         if (in.data() != out.data())
         {
-            memcpy(out.data(), in.data(), N * sizeof(dcomplex));
+            memcpy(out.data(), in.data(), N * sizeof(std::complex<float>));
         }
-
-        shift_freq(f1, f2, out);
-
+        fftshift2D(out);
         fftwf_execute_dft(plan_fw,
                           reinterpret_cast<fftwf_complex *>(out.data()),
                           reinterpret_cast<fftwf_complex *>(out.data()));
 
+        ifftshift2D(out);
+        
         // Scale amplitude as FFTW calculates unscaled coefficients
         for (size_t i = 0; i < N; ++i)
         {
             out[i] /= N;
         }
-        freq1(f1);
-        freq2(f2);
-        shift_freq(f1, f2, out);
     }
 
     /**
@@ -105,153 +78,96 @@ public:
      * @param out  Fourier transformed output data
      *             If in == out, the transformation is done in-place
      */
-    void ifft(dcvector &in, dcvector &out)
+    inline void ifft(std::vector<std::complex<float>> &in, std::vector<std::complex<float>> &out)
     {
+
         // Ensure in-place transformation
         if (in.data() != out.data())
         {
-            memcpy(out.data(), in.data(), N * sizeof(dcomplex));
+            memcpy(out.data(), in.data(), N * sizeof(std::complex<float>));
         }
+        fftshift2D(out);
         fftwf_execute_dft(plan_bw,
                           reinterpret_cast<fftwf_complex *>(out.data()),
                           reinterpret_cast<fftwf_complex *>(out.data()));
+        ifftshift2D(out);
+
     }
 
     /**
-     * Calculate sample frequencies (angular frequency)
-     * @param f  This array will store the frequency data. Format:
-     *           [0, df, 2*df, ..., N/2*df,
-     *            -(N/2-1)*df, -(N/2-2)*df, ..., -df]
+     * Shift frequency for FFT
+     * @param in   Input data, the transformation is done in-place
      */
-    void _freq(dvector &f, size_t N, float sr)
+    inline void fftshift2D(std::vector<std::complex<float>> &data)
     {
-        f.resize(N);
-        for (size_t i = 0; i < N; ++i)
-        {
-            if (i <= N / 2)
-            {
-                // Positive frequencies first
-                f[i] = 2 * M_PI * i * sr / N;
+        size_t xshift = N2 / 2;
+        size_t yshift = N1 / 2;
+        if (N2 % 2 != 0) {
+            std::vector<std::complex<float>> out(N);
+            for (size_t x = 0; x < N2; x++) {
+                size_t outX = (x + xshift) % N2;
+                for (size_t y = 0; y < N1; y++) {
+                    size_t outY = (y + yshift) % N1;
+                    out[outX + N2 * outY] = data[x + N2 * y];
+                }
             }
-            else
-            {
-                f[i] = -2 * M_PI * (N - i) * sr / N;
+            copy(out.begin(), out.end(), &data[0]);
+            }
+        else {
+            for (size_t x = 0; x < N2; x++) {
+                size_t outX = (x + xshift) % N2;
+                for (size_t y = 0; y < yshift; y++) {
+                    size_t outY = (y + yshift) % N1;
+                    swap(data[outX + N2 * outY], data[x + N2 * y]);
+                }
             }
         }
-    }
-    void freq1(dvector &f)
-    {
-        return _freq(f, N1, sample_rate1);
-    }
-    void freq2(dvector &f)
-    {
-        return _freq(f, N2, sample_rate2);
     }
 
     /**
-     * Shift frequency and data array to order frequencies from negative
-     * to positive
-     * @param f1     Frequency array1
-     * @param f2     Frequency array2
-     * @param data  Data array
+     * I-Shift frequency for FFT (Invert fftshift)
+     * @param in   Input data, the transformation is done in-place
      */
-    void shift_freq(dvector &f1, dvector &f2, dcvector &data)
+    inline void ifftshift2D(std::vector<std::complex<float>> &data)
     {
-        dvector buf1(N1);
-        dvector buf2(N2);
-        dcvector bufd(N);
-
-        // Shift first dimension
-        if (N1 % 2 == 0)
-        { // Even number of data points
-            for (size_t i = 0; i < N1 / 2 + 1; ++i)
-            {
-                buf1[N1 / 2 - 1 + i] = f1[i];
-
-                for (size_t j = 0; j < N2; ++j)
-                {
-                    bufd[(N1 / 2 - 1 + i) * N2 + j] = data[i * N2 + j];
+        size_t xshift = N2 / 2;
+        if (N2 % 2 != 0) {
+            xshift++;
+        }
+        size_t yshift = N1 / 2;
+        if (N1 % 2 != 0) {
+            yshift++;
+        }
+        if (N % 2 != 0) {
+            std::vector<std::complex<float>> out(N);
+            for (size_t x = 0; x < N2; x++) {
+                size_t outX = (x + xshift) % N2;
+                for (size_t y = 0; y < N1; y++) {
+                    size_t outY = (y + yshift) % N1;
+                    out[outX + N2 * outY] = data[x + N2 * y];
                 }
-                if (i < N1 / 2 - 1)
-                {
-                    buf1[i] = f1[N1 / 2 + 1 + i];
-                    for (size_t j = 0; j < N2; ++j)
-                    {
-                        bufd[i * N2 + j] = data[(N1 / 2 + 1 + i) * N2 + j];
-                    }
+            }
+            copy(out.begin(), out.end(), &data[0]);
+            }
+        else {
+            for (size_t x = 0; x < N2; x++) {
+                size_t outX = (x + xshift) % N2;
+                for (size_t y = 0; y < yshift; y++) {
+                    size_t outY = (y + yshift) % N1;
+                    swap(data[outX + N2 * outY], data[x + N2 * y]);
                 }
             }
         }
-        else
-        { // Odd number of data points
-            buf1[N1 / 2] = f1[0];
-            bufd[N1 / 2] = data[0];
-            for (size_t i = 0; i < N1 / 2; ++i)
-            {
-                buf1[N1 / 2 + 1 + i] = f1[i + 1];
-
-                for (size_t j = 0; j < N2; ++j)
-                {
-                    bufd[(N1 / 2 + 1 + i) * N2 + j] = data[(i + 1) * N2 + j];
-                }
-                buf1[i] = f1[N1 / 2 + 1 + i];
-                for (size_t j = 0; j < N2; ++j)
-                {
-                    bufd[i * N2 + j] = data[(N1 / 2 + 1 + i) * N2 + j];
-                }
-            }
-        }
-
-        // Shift second dimension
-        if (N2 % 2 == 0)
-        { // Even number of data points
-            for (size_t i = 0; i < N2 / 2 + 1; ++i)
-            {
-                buf2[N2 / 2 - 1 + i] = f2[i];
-
-                for (size_t j = 0; j < N1; ++j)
-                {
-                    data[j * N2 + N2 / 2 - 1 + i] = bufd[j * N2 + i];
-                }
-                if (i < N2 / 2 - 1)
-                {
-                    buf2[i] = f2[N2 / 2 + 1 + i];
-                    for (size_t j = 0; j < N1; ++j)
-                    {
-                        data[j * N2 + i] = bufd[j * N2 + N2 / 2 + 1 + i];
-                    }
-                }
-            }
-        }
-        else
-        { // Odd number of data points
-            buf2[N2 / 2] = f2[0];
-
-            for (size_t j = 0; j < N1; ++j)
-            {
-                data[j * N2 + N2 / 2] = bufd[j * N2 + 0];
-            }
-            for (size_t i = 0; i < N2 / 2; ++i)
-            {
-                buf2[N2 / 2 + 1 + i] = f2[i + 1];
-
-                for (size_t j = 0; j < N1; ++j)
-                {
-                    data[j * N2 + N2 / 2 + 1 + i] = bufd[j * N2 + i + 1];
-                }
-                buf2[i] = f2[N2 / 2 + 1 + i];
-                for (size_t j = 0; j < N1; ++j)
-                {
-                    data[j * N2 + i] = bufd[j * N2 + N2 / 2 + 1 + i];
-                }
-            }
-        }
-
-        memcpy(f1.data(), buf1.data(), N1 * sizeof(float));
-        memcpy(f2.data(), buf2.data(), N2 * sizeof(float));
     }
 
-    static void r2c(const dvector &f, dcvector &c)
+    /**
+     * Cast a std::vector<float> into
+     * a std::vector<std::complex<float>> with zero
+     * imaginary parts
+     * @param in   Input std::vector<float>
+     * @param out  Output std::vector<std::complex<float>>
+     */
+    static void r2c(const std::vector<float> &f, std::vector<std::complex<float>> &c)
     {
         for (size_t v = 0; v < f.size(); v++)
         {
@@ -259,12 +175,65 @@ public:
         }
     }
 
-    static void c2r(const dcvector &c, dvector &f)
+    /**
+     * Cast a std::vector<std::complex<float>> into
+     * a std::vector<float>, using the real parts
+     * @param in   Input std::vector<std::complex<float>>
+     * @param out  Output std::vector<float> (complex.real())
+     */
+    static void c2r(const std::vector<std::complex<float>> &c, std::vector<float> &f)
+    {
+        for (size_t v = 0; v < c.size(); v++)
+        {
+            f[v] = c[v].real();
+        }
+    }
+
+    /**
+     * Cast a std::vector<std::complex<float>> into
+     * a std::vector<float>, using the absolute values
+     * @param in   Input std::vector<std::complex<float>>
+     * @param out  Output std::vector<float> (complex.real())
+     */
+    static void c2abs(const std::vector<std::complex<float>> &c, std::vector<float> &f)
     {
         for (size_t v = 0; v < c.size(); v++)
         {
             f[v] = std::abs(c[v]);
         }
+    }
+
+    /**
+     * Cast a std::vector<float>, into
+     * a std::vector<std::complex<float>> with zero
+     * imaginary parts
+     * @param in Input std::vector<float>
+     * @return c Output std::vector<std::complex<float>>
+     */
+    static std::vector<std::complex<float>> r2c(const std::vector<float> &f)
+    {
+        std::vector<std::complex<float>> c(f.size());
+        for (size_t v = 0; v < f.size(); v++)
+        {
+            c[v] = std::complex(f[v], 0.0f);
+        }
+        return c;
+    }
+
+    /**
+     * Cast a std::vector<std::complex<float>> into
+     * a std::vector<float>, using the real parts
+     * @param in   Input std::vector<std::complex<float>>
+     * @return f  Output std::vector<float> (complex.real())
+     */
+    static std::vector<float> c2r(const std::vector<std::complex<float>> &c)
+    {
+        std::vector<float> f(c.size());
+        for (size_t v = 0; v < c.size(); v++)
+        {
+            f[v] = c[v].real();
+        }
+        return f;
     }
 };
 
