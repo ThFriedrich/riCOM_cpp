@@ -39,14 +39,16 @@
 
 #include "BoundedThreadPool.hpp"
 #include "tinycolormap.hpp"
+#include "fft2d.hpp"
 #include "SocketConnector.h"
 #include "ProgressMonitor.h"
 #include "MerlinInterface.h"
 #include "TimepixInterface.h"
 #include "Camera.h"
+#include "GuiUtils.h"
 
 namespace chc = std::chrono;
-namespace cmap = tinycolormap;
+
 
 class Ricom_kernel
 {
@@ -62,6 +64,8 @@ public:
     std::vector<float> kernel_y;
     std::vector<float> kernel_filter;
     std::vector<float> f_approx;
+    SDL_Surface *srf_kx;
+    SDL_Surface *srf_ky;
     // Methods
     void compute_kernel();
     void compute_filter();
@@ -70,7 +74,7 @@ public:
     // Constructor
     Ricom_kernel() : kernel_size(5),
                      b_filter(false),
-                     kernel_filter_frequency{20, 1},
+                     kernel_filter_frequency{1, 4},
                      k_width_sym(0),
                      rotation(0.0),
                      kernel_x(),
@@ -79,6 +83,7 @@ public:
         compute_kernel();
     };
     void approximate_frequencies(size_t n_im);
+    void draw_surfaces();
     // Destructor
     ~Ricom_kernel(){};
 };
@@ -121,7 +126,6 @@ public:
     std::vector<int> id_list;
 
     // Methods
-    // void compute_detector(int nx_cam, int ny_cam);
     void compute_detector(int nx_cam, int ny_cam, std::array<float, 2> &offset);
     // Constructor
     Ricom_detector() : radius{0, 0}, radius2{0, 0}, id_list(){};
@@ -172,8 +176,6 @@ private:
     void init_surface();
     template <typename T>
     inline void update_surfaces(int iy, std::vector<T> *p_frame);
-    inline void draw_pixel(SDL_Surface *surface, int x, int y, float val, int color_map);
-    inline void draw_pixel(SDL_Surface *surface, int x, int y, float ang, float mag, int col_map);
     void reinit_vectors_limits();
     void reset_limits();
     void reset_file();

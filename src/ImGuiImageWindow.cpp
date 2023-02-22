@@ -11,7 +11,26 @@
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_WARNINGS
+#pragma warning(disable : 4067)
+#pragma warning(disable : 4333)
+#pragma warning(disable : 4312)
+#endif
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
+
+#if defined(__clang__)
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+#pragma GCC diagnostic ignored "-Wformat-security"
+#endif
+
 #include "ImGuiImageWindow.h"
+
 
 template <typename T>
 inline T pw(T val, T power)
@@ -89,7 +108,7 @@ void ImGuiImageWindow<float>::set_pixel(int idx, int idy)
     float val = pw((data->at(idr) - data_min) / data_range, power);
 
     // Update pixel at location
-    draw_pixel(idx, idy, val);
+    SDL_Utils::draw_pixel(sdl_srf, idx, idy, val, data_cmap);
 }
 
 template<>
@@ -105,7 +124,7 @@ void ImGuiImageWindow<std::complex<float>>::set_pixel(int idx, int idy)
     mag = pw(mag,power);
 
     // Update pixel at location
-    draw_pixel(idx, idy, ang, mag);
+    SDL_Utils::draw_pixel(sdl_srf, idx, idy, ang, mag, data_cmap);
 }
 
 template<>
@@ -162,26 +181,6 @@ void ImGuiImageWindow<T>::set_min_max()
             b_trigger_update = true;
         }
     }
-}
-
-// Draw a pixel on the surface at (x, y) for a given colormap
-template<typename T>
-void ImGuiImageWindow<T>::draw_pixel(int x, int y, float val)
-{
-    cmap::Color c = cmap::GetColor(val, cmap::ColormapType(data_cmap));
-    Uint32 px = SDL_MapRGB(sdl_srf->format, (Uint8)(c.ri()), (Uint8)(c.gi()), (Uint8)(c.bi()));
-    Uint32 *const target_pixel = (Uint32 *)((Uint8 *)sdl_srf->pixels + y * sdl_srf->pitch + x * sdl_srf->format->BytesPerPixel);
-    *target_pixel = px;
-}
-
-template<typename T>
-void ImGuiImageWindow<T>::draw_pixel(int x, int y, float ang, float mag)
-{
-    
-    cmap::Color c = mag*cmap::GetColor(ang, cmap::ColormapType(data_cmap));
-    Uint32 px = SDL_MapRGB(sdl_srf->format, (Uint8)(c.ri()), (Uint8)(c.gi()), (Uint8)(c.bi()));
-    Uint32 *const target_pixel = (Uint32 *)((Uint8 *)sdl_srf->pixels + y * sdl_srf->pitch + x * sdl_srf->format->BytesPerPixel);
-    *target_pixel = px;
 }
 
 template<typename T>
@@ -283,18 +282,18 @@ void ImGuiImageWindow<T>::reset_min_max()
 template<>
 void ImGuiImageWindow<float>::compute_fft()
 {
-    FFT2D fft2d(ny, nx, ny, nx);
+    FFT2D fft2d(ny, nx);
     FFT2D::r2c(*data, data_val);
     fft2d.fft(data_val, data_fft);
-    FFT2D::c2r(data_fft, data_fft_f);
+    FFT2D::c2abs(data_fft, data_fft_f);
 }
 
 template<>
 void ImGuiImageWindow<std::complex<float>>::compute_fft()
 {
-    FFT2D fft2d(ny, nx, ny, nx);
+    FFT2D fft2d(ny, nx);
     fft2d.fft(*data, data_fft);
-    FFT2D::c2r(data_fft, data_fft_f);
+    FFT2D::c2abs(data_fft, data_fft_f);
 }
 
 // Deal with situation when process is finished (redraw==false) but not fully rendered

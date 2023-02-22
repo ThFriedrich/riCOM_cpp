@@ -91,3 +91,23 @@ void Main_Dock::render(ImVec2 pos, ImVec2 size)
     }
     ImGui::End();
 }
+
+namespace SDL_Utils
+{
+    // Draw a pixel on the surface at (x, y) for a given colormap
+    void draw_pixel(SDL_Surface *surface, int x, int y, float val, int col_map)
+    {
+        tinycolormap::Color c = tinycolormap::GetColor(val, tinycolormap::ColormapType(col_map));
+        Uint32 px = SDL_MapRGB(surface->format, (Uint8)(c.ri()), (Uint8)(c.gi()), (Uint8)(c.bi()));
+        Uint32 *const target_pixel = (Uint32 *)((Uint8 *)surface->pixels + y * surface->pitch + x * surface->format->BytesPerPixel);
+        *target_pixel = px;
+    }
+
+    void draw_pixel(SDL_Surface *surface, int x, int y, float ang, float mag, int col_map)
+    {
+        tinycolormap::Color c = mag*tinycolormap::GetColor(ang, tinycolormap::ColormapType(col_map));
+        Uint32 px = SDL_MapRGB(surface->format, (Uint8)(c.ri()), (Uint8)(c.gi()), (Uint8)(c.bi()));
+        Uint32 *const target_pixel = (Uint32 *)((Uint8 *)surface->pixels + y * surface->pitch + x * surface->format->BytesPerPixel);
+        *target_pixel = px;
+    }
+}

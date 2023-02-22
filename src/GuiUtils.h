@@ -25,7 +25,7 @@
 #include "imgui_internal.h"
 
 #include "libnpy.hpp"
-
+#include "tinycolormap.hpp"
 class Main_Dock
 {
     public:
@@ -42,4 +42,10 @@ void save_numpy(std::string *path, int nx, int ny, std::vector<T> *data);
 void save_image(std::string *path, SDL_Surface *sdl_srf);
 
 void v_splitter(float thickness, float &size0, float &min_h, float &max_h, float offset);
+namespace SDL_Utils
+{
+    void draw_pixel(SDL_Surface *surface, int x, int y, float val, int color_map);
+    void draw_pixel(SDL_Surface *surface, int x, int y, float ang, float mag, int color_map);
+}
+
 #endif // GUI_UTILS_H

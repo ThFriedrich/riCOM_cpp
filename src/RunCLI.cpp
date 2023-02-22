@@ -122,6 +122,15 @@ int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations
                 ricom->detector.radius[1] = std::stof(argv[i + 1]);
                 i++;
             }
+            // Set kernel filter
+            if (strcmp(argv[i], "-f") == 0)
+            {
+                ricom->kernel.b_filter = true;
+                ricom->kernel.kernel_filter_frequency[0] = std::stoi(argv[i + 1]);
+                i++;
+                ricom->kernel.kernel_filter_frequency[1] = std::stoi(argv[i + 1]);
+                i++;
+            }
             // Set depth of pixel for raw mode
             if (strcmp(argv[i], "-depth") == 0)
             {

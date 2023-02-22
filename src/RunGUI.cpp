@@ -59,6 +59,7 @@
 // Forward Declarations
 template<typename T>
 inline void update_views(std::map<std::string, ImGuiImageWindow<T>> &generic_windows_f, Ricom *ricom, bool b_restarted, bool trigger, bool b_redraw);
+inline void bind_tex(SDL_Surface *srf, GLuint tex_id);
 
 ////////////////////////////////////////////////
 //            GUI implementation              //
@@ -243,6 +244,10 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
     generic_windows_f.emplace("E-Field-FFT",ImGuiImageWindow<float>("E-Field-FFT", &uiTextureIDs[8], false, 4, common_flags, &e_field_fft));
     GENERIC_WINDOW_C("E-FIELD").fft_window = &GENERIC_WINDOW("E-Field-FFT");
     
+    ricom->kernel.draw_surfaces();
+    bind_tex(ricom->kernel.srf_kx, uiTextureIDs[9]);
+    bind_tex(ricom->kernel.srf_ky, uiTextureIDs[10]);
+
     ImGuiID dock_id = 3775;
     Main_Dock main_dock(dock_id);
 
@@ -437,19 +442,37 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
 
         if (ImGui::CollapsingHeader("RICOM Settings", ImGuiTreeNodeFlags_DefaultOpen))
         {
+            static int filter_max = 8;
+            static bool init_kernel_img = true;
             bool kernel_changed = ImGui::DragInt("Kernel Size", &ricom->kernel.kernel_size, 1, 1, 300);
+            if (kernel_changed)
+                filter_max = ceil(sqrt(pow(ricom->kernel.kernel_size,2)*2));
             bool rot_changed = ImGui::SliderFloat("Rotation", &ricom->kernel.rotation, 0.0f, 360.0f, "%.1f deg");
             bool filter_changed = ImGui::Checkbox("Use filter?", &ricom->kernel.b_filter);
-            bool filter_changed2 = ImGui::DragInt2("high / low", &ricom->kernel.kernel_filter_frequency[0], 1, 0, SDL_MAX_SINT32);
-            if (rot_changed || kernel_changed || filter_changed || filter_changed2)
+            bool filter_changed2 = ImGui::DragInt2("low / high", &ricom->kernel.kernel_filter_frequency[0], 1, 0, filter_max);
+            if (init_kernel_img || rot_changed || kernel_changed || filter_changed || filter_changed2)
             {
-                ricom->b_recompute_kernel = true;
+                init_kernel_img = false;
+                if (ricom->b_busy)
+                {
+                    ricom->b_recompute_kernel = true;
+                } else
+                {
+                    ricom->kernel.compute_kernel();
+                }
                 GENERIC_WINDOW("RICOM").reset_min_max();
+                ricom->kernel.draw_surfaces();
+                bind_tex(ricom->kernel.srf_kx, uiTextureIDs[9]);
+                bind_tex(ricom->kernel.srf_ky, uiTextureIDs[10]);
             }
             if (kernel_changed || b_nx_changed)
             {
                 ricom->kernel.approximate_frequencies((size_t)ricom->nx);
             }
+            float sxk = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.y * 3)/2;
+            ImGui::Image((void*)(intptr_t)uiTextureIDs[9], ImVec2(sxk,sxk), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
+            ImGui::SameLine();
+            ImGui::Image((void*)(intptr_t)uiTextureIDs[10], ImVec2(sxk,sxk), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
             ImGui::PlotLines("Frequencies", ricom->kernel.f_approx.data(), ricom->kernel.f_approx.size(), 0, NULL, 0.0f, 1.0f, ImVec2(0, 50));
         }
         if (ricom->b_vSTEM)
@@ -635,9 +658,7 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
         {
             if (ricom->srf_cbed != NULL)
             {
-                glBindTexture(GL_TEXTURE_2D, uiTextureIDs[0]);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ricom->srf_cbed->w, ricom->srf_cbed->h, 0,
-                             GL_BGRA, GL_UNSIGNED_BYTE, ricom->srf_cbed->pixels);
+                bind_tex(ricom->srf_cbed,uiTextureIDs[0]);
             }
         }
         ImGui::Image((ImTextureID)uiTextureIDs[0], ImVec2(tex_wh, tex_wh), uv_min, uv_max, tint_col, border_col);
@@ -738,4 +759,10 @@ void update_views(std::map<std::string, ImGuiImageWindow<T>> &generic_windows_f,
             }
         }
     }
+}
+
+void bind_tex(SDL_Surface *srf, GLuint tex_id){
+    glBindTexture(GL_TEXTURE_2D, (tex_id));
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, srf->w, srf->h, 0,
+                GL_BGRA, GL_UNSIGNED_BYTE, srf->pixels);
 }
