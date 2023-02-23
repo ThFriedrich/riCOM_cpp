@@ -109,10 +109,10 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html#l00069">69</a> of file <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html">GuiUtils.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;{</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    this-&gt;<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a> = <a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html#l00068">68</a> of file <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html">GuiUtils.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;{</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    this-&gt;<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a> = <a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;}</div>
 <div class="ttc" id="aclassMain__Dock_html_aa8be27ed15b4ef2f9ecd5a17e5b665ef"><div class="ttname"><a href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">Main_Dock::dock_id</a></div><div class="ttdeci">ImGuiID dock_id</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/db2/GuiUtils_8h_source.html#l00032">GuiUtils.h:32</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -144,26 +144,26 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html#l00074">74</a> of file <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html">GuiUtils.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;{</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    ImGui::SetNextWindowPos(pos);</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    ImGui::SetNextWindowSize(size);</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    ImGui::Begin(<span class="stringliteral">&quot;DockWindow&quot;</span>, <span class="keyword">nullptr</span>, <a class="code" href="../../d5/da5/classMain__Dock.html#a704472dfcdad9a5935bd56b3511e18a1">window_flags</a>);</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    ImGui::DockSpace(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>);</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="keyword">static</span> <span class="keyword">auto</span> first_time = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    <span class="keywordflow">if</span> (first_time)</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    {</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        first_time = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        ImGui::DockBuilderRemoveNode(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>); <span class="comment">// clear any previous layout</span></div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        ImGui::DockBuilderAddNode(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>, <a class="code" href="../../d5/da5/classMain__Dock.html#aa0220fc5e6fa4c04f8997db3e370b704">dockspace_flags</a>);</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        ImGui::DockBuilderSetNodePos(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>, pos);</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        ImGui::DockBuilderSetNodeSize(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>, size);</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        ImGui::DockBuilderDockWindow(<span class="stringliteral">&quot;RICOM&quot;</span>, <a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>);</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        ImGui::DockBuilderFinish(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>);</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    }</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    ImGui::End();</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html#l00073">73</a> of file <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html">GuiUtils.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;{</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    ImGui::SetNextWindowPos(pos);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    ImGui::SetNextWindowSize(size);</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    ImGui::Begin(<span class="stringliteral">&quot;DockWindow&quot;</span>, <span class="keyword">nullptr</span>, <a class="code" href="../../d5/da5/classMain__Dock.html#a704472dfcdad9a5935bd56b3511e18a1">window_flags</a>);</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    ImGui::DockSpace(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>);</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160; </div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    <span class="keyword">static</span> <span class="keyword">auto</span> first_time = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="keywordflow">if</span> (first_time)</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    {</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        first_time = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        ImGui::DockBuilderRemoveNode(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>); <span class="comment">// clear any previous layout</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        ImGui::DockBuilderAddNode(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>, <a class="code" href="../../d5/da5/classMain__Dock.html#aa0220fc5e6fa4c04f8997db3e370b704">dockspace_flags</a>);</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        ImGui::DockBuilderSetNodePos(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>, pos);</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        ImGui::DockBuilderSetNodeSize(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>, size);</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        ImGui::DockBuilderDockWindow(<span class="stringliteral">&quot;RICOM&quot;</span>, <a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>);</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        ImGui::DockBuilderFinish(<a class="code" href="../../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef">dock_id</a>);</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    }</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    ImGui::End();</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;}</div>
 <div class="ttc" id="aclassMain__Dock_html_a704472dfcdad9a5935bd56b3511e18a1"><div class="ttname"><a href="../../d5/da5/classMain__Dock.html#a704472dfcdad9a5935bd56b3511e18a1">Main_Dock::window_flags</a></div><div class="ttdeci">const ImGuiWindowFlags window_flags</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/db2/GuiUtils_8h_source.html#l00034">GuiUtils.h:34</a></div></div>
 <div class="ttc" id="aclassMain__Dock_html_aa0220fc5e6fa4c04f8997db3e370b704"><div class="ttname"><a href="../../d5/da5/classMain__Dock.html#aa0220fc5e6fa4c04f8997db3e370b704">Main_Dock::dockspace_flags</a></div><div class="ttdeci">const ImGuiDockNodeFlags dockspace_flags</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/db2/GuiUtils_8h_source.html#l00033">GuiUtils.h:33</a></div></div>
 </div><!-- fragment -->

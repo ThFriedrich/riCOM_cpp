@@ -85,19 +85,19 @@ $(function() {
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160; </div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="../../dc/dd0/SdlImageWindow_8h.html">SdlImageWindow.h</a>&quot;</span></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160; </div>
-<div class="line"><a name="l00016"></a><span class="lineno"><a class="line" href="../../d0/d05/classSdlImageWindow.html#a24bb9400eae6401659fc14f1cd08fe3b">   16</a></span>&#160;<a class="code" href="../../d0/d05/classSdlImageWindow.html#ae757bcaad2e7c277183da20164133e85">SdlImageWindow::SdlImageWindow</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> * title, SDL_Surface *srf, <span class="keywordtype">int</span> nx, <span class="keywordtype">int</span> ny, <span class="keywordtype">int</span> scale)</div>
+<div class="line"><a name="l00016"></a><span class="lineno"><a class="line" href="../../d0/d05/classSdlImageWindow.html#a24bb9400eae6401659fc14f1cd08fe3b">   16</a></span>&#160;<a class="code" href="../../d0/d05/classSdlImageWindow.html#ae757bcaad2e7c277183da20164133e85">SdlImageWindow::SdlImageWindow</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *title, SDL_Surface *srf, <span class="keywordtype">int</span> nx, <span class="keywordtype">int</span> ny, <span class="keywordtype">int</span> scale)</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;{</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    this-&gt;title = <a class="code" href="../../d0/d05/classSdlImageWindow.html#a19ad3b09bf31e681001d45530ea39231">title</a>;</div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    <a class="code" href="../../d0/d05/classSdlImageWindow.html#a68cd4e67ab4486a07365289859237b0b">create_window</a>(srf, nx, ny, scale);</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;};</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160; </div>
-<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="../../d0/d05/classSdlImageWindow.html#ae757bcaad2e7c277183da20164133e85">   22</a></span>&#160;<a class="code" href="../../d0/d05/classSdlImageWindow.html#ae757bcaad2e7c277183da20164133e85">SdlImageWindow::SdlImageWindow</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> * title)</div>
+<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="../../d0/d05/classSdlImageWindow.html#ae757bcaad2e7c277183da20164133e85">   22</a></span>&#160;<a class="code" href="../../d0/d05/classSdlImageWindow.html#ae757bcaad2e7c277183da20164133e85">SdlImageWindow::SdlImageWindow</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *title)</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;{</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    this-&gt;title = <a class="code" href="../../d0/d05/classSdlImageWindow.html#a19ad3b09bf31e681001d45530ea39231">title</a>;</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    this-&gt;window = NULL;         <span class="comment">// Pointer for the window</span></div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    this-&gt;renderer = NULL;       <span class="comment">// Pointer for the renderer</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    this-&gt;tex = NULL;            <span class="comment">// Texture for the window</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    this-&gt;srf = NULL;            <span class="comment">// Surface (data source)</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    this-&gt;window = NULL;   <span class="comment">// Pointer for the window</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    this-&gt;renderer = NULL; <span class="comment">// Pointer for the renderer</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    this-&gt;tex = NULL;      <span class="comment">// Texture for the window</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    this-&gt;srf = NULL;      <span class="comment">// Surface (data source)</span></div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;};</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
 <div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="../../d0/d05/classSdlImageWindow.html#a68cd4e67ab4486a07365289859237b0b">   31</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../d0/d05/classSdlImageWindow.html#a68cd4e67ab4486a07365289859237b0b">SdlImageWindow::create_window</a>(SDL_Surface *srf, <span class="keywordtype">int</span> nx, <span class="keywordtype">int</span> ny, <span class="keywordtype">int</span> scale)</div>
@@ -121,7 +121,7 @@ $(function() {
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        std::cout &lt;&lt; <span class="stringliteral">&quot;Texture could not be created! SDL Error: &quot;</span> &lt;&lt; SDL_GetError() &lt;&lt; std::endl;</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    }</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="comment">// Maintain Pixel aspect ratio on resizing</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keywordflow">if</span> (SDL_RenderSetLogicalSize(renderer, scale *nx, scale * ny) &lt; 0)</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keywordflow">if</span> (SDL_RenderSetLogicalSize(renderer, scale * nx, scale * ny) &lt; 0)</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    {</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        std::cout &lt;&lt; <span class="stringliteral">&quot;Logical size could not be set! SDL Error: &quot;</span> &lt;&lt; SDL_GetError() &lt;&lt; std::endl;</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    }</div>

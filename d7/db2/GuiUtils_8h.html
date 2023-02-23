@@ -258,32 +258,32 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html#l00042">42</a> of file <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html">GuiUtils.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrab]);</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrabHovered]);</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrabActive]);</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, ImGui::GetStyle().ScrollbarRounding);</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    ImGui::Button(<span class="stringliteral">&quot;v&quot;</span>, ImVec2(-1, thickness));</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    ImGui::PopStyleColor(3);</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    ImGui::PopStyleVar(1);</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keywordflow">if</span> (ImGui::IsItemHovered() || ImGui::IsItemActive())</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    {</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    }</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keywordflow">if</span> (ImGui::IsItemActive())</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    {</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="keywordtype">float</span> d = ImGui::GetMousePos().y - offset;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        <span class="keywordflow">if</span> (d &lt; min_h)</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;            size0 = min_h;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (d &gt; max_h)</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;            size0 = max_h;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="keywordflow">else</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;            size0 = d;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    }</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;};</div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html#l00041">41</a> of file <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html">GuiUtils.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;{</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrab]);</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrabHovered]);</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrabActive]);</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, ImGui::GetStyle().ScrollbarRounding);</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    ImGui::Button(<span class="stringliteral">&quot;v&quot;</span>, ImVec2(-1, thickness));</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    ImGui::PopStyleColor(3);</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    ImGui::PopStyleVar(1);</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="keywordflow">if</span> (ImGui::IsItemHovered() || ImGui::IsItemActive())</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    {</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    }</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordflow">if</span> (ImGui::IsItemActive())</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    {</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <span class="keywordtype">float</span> d = ImGui::GetMousePos().y - offset;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="keywordflow">if</span> (d &lt; min_h)</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;            size0 = min_h;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (d &gt; max_h)</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;            size0 = max_h;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;            size0 = d;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    }</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;};</div>
 </div><!-- fragment -->
 </div>
 </div>

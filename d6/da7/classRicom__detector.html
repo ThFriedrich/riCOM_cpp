@@ -187,27 +187,27 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html#l00175">175</a> of file <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html">Ricom.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;{</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160; </div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;    <a class="code" href="../../d6/da7/classRicom__detector.html#a314f973eb4cf7d8ecc8e93277e1f9df7">radius2</a>[0] = pow(<a class="code" href="../../d6/da7/classRicom__detector.html#a63e4db9f0ea06fc4fdd8aa29d820d5e5">radius</a>[0], 2);</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;    <a class="code" href="../../d6/da7/classRicom__detector.html#a314f973eb4cf7d8ecc8e93277e1f9df7">radius2</a>[1] = pow(<a class="code" href="../../d6/da7/classRicom__detector.html#a63e4db9f0ea06fc4fdd8aa29d820d5e5">radius</a>[1], 2);</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    <span class="keywordtype">float</span> d2;</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;    <a class="code" href="../../d6/da7/classRicom__detector.html#aa22c1ee080e004a607b19d1fe5c9e495">id_list</a>.clear();</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;    <a class="code" href="../../d6/da7/classRicom__detector.html#aa22c1ee080e004a607b19d1fe5c9e495">id_list</a>.reserve(nx_cam * ny_cam);</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160; </div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iy = 0; iy &lt; ny_cam; iy++)</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;    {</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ix = 0; ix &lt; nx_cam; ix++)</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;        {</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;            d2 = pow((<span class="keywordtype">float</span>)ix - offset[0], 2) + pow((<span class="keywordtype">float</span>)iy - offset[1], 2);</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;            <span class="keywordflow">if</span> (d2 &gt; <a class="code" href="../../d6/da7/classRicom__detector.html#a314f973eb4cf7d8ecc8e93277e1f9df7">radius2</a>[0] &amp;&amp; d2 &lt;= <a class="code" href="../../d6/da7/classRicom__detector.html#a314f973eb4cf7d8ecc8e93277e1f9df7">radius2</a>[1])</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;            {</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;                <a class="code" href="../../d6/da7/classRicom__detector.html#aa22c1ee080e004a607b19d1fe5c9e495">id_list</a>.push_back(iy * nx_cam + ix);</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;            }</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;        }</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;    }</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html#l00173">173</a> of file <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html">Ricom.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;{</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160; </div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    <a class="code" href="../../d6/da7/classRicom__detector.html#a314f973eb4cf7d8ecc8e93277e1f9df7">radius2</a>[0] = pow(<a class="code" href="../../d6/da7/classRicom__detector.html#a63e4db9f0ea06fc4fdd8aa29d820d5e5">radius</a>[0], 2);</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;    <a class="code" href="../../d6/da7/classRicom__detector.html#a314f973eb4cf7d8ecc8e93277e1f9df7">radius2</a>[1] = pow(<a class="code" href="../../d6/da7/classRicom__detector.html#a63e4db9f0ea06fc4fdd8aa29d820d5e5">radius</a>[1], 2);</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;    <span class="keywordtype">float</span> d2;</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;    <a class="code" href="../../d6/da7/classRicom__detector.html#aa22c1ee080e004a607b19d1fe5c9e495">id_list</a>.clear();</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    <a class="code" href="../../d6/da7/classRicom__detector.html#aa22c1ee080e004a607b19d1fe5c9e495">id_list</a>.reserve(nx_cam * ny_cam);</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160; </div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> iy = 0; iy &lt; ny_cam; iy++)</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;    {</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> ix = 0; ix &lt; nx_cam; ix++)</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;        {</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;            d2 = pow((<span class="keywordtype">float</span>)ix - offset[0], 2) + pow((<span class="keywordtype">float</span>)iy - offset[1], 2);</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;            <span class="keywordflow">if</span> (d2 &gt; <a class="code" href="../../d6/da7/classRicom__detector.html#a314f973eb4cf7d8ecc8e93277e1f9df7">radius2</a>[0] &amp;&amp; d2 &lt;= <a class="code" href="../../d6/da7/classRicom__detector.html#a314f973eb4cf7d8ecc8e93277e1f9df7">radius2</a>[1])</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;            {</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;                <a class="code" href="../../d6/da7/classRicom__detector.html#aa22c1ee080e004a607b19d1fe5c9e495">id_list</a>.push_back(iy * nx_cam + ix);</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;            }</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;        }</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;    }</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>

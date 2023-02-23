@@ -127,13 +127,13 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html#l00106">106</a> of file <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html">GuiUtils.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    {</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;        tinycolormap::Color c = mag*tinycolormap::GetColor(ang, tinycolormap::ColormapType(col_map));</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;        Uint32 px = SDL_MapRGB(surface-&gt;format, (Uint8)(c.ri()), (Uint8)(c.gi()), (Uint8)(c.bi()));</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;        Uint32 *<span class="keyword">const</span> target_pixel = (Uint32 *)((Uint8 *)surface-&gt;pixels + y * surface-&gt;pitch + x * surface-&gt;format-&gt;BytesPerPixel);</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;        *target_pixel = px;</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    }</div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html#l00105">105</a> of file <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html">GuiUtils.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    {</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        tinycolormap::Color c = mag * tinycolormap::GetColor(ang, tinycolormap::ColormapType(col_map));</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;        Uint32 px = SDL_MapRGB(surface-&gt;format, (Uint8)(c.ri()), (Uint8)(c.gi()), (Uint8)(c.bi()));</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;        Uint32 *<span class="keyword">const</span> target_pixel = (Uint32 *)((Uint8 *)surface-&gt;pixels + y * surface-&gt;pitch + x * surface-&gt;format-&gt;BytesPerPixel);</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;        *target_pixel = px;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -181,13 +181,13 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html#l00098">98</a> of file <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html">GuiUtils.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    {</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;        tinycolormap::Color c = tinycolormap::GetColor(val, tinycolormap::ColormapType(col_map));</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        Uint32 px = SDL_MapRGB(surface-&gt;format, (Uint8)(c.ri()), (Uint8)(c.gi()), (Uint8)(c.bi()));</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        Uint32 *<span class="keyword">const</span> target_pixel = (Uint32 *)((Uint8 *)surface-&gt;pixels + y * surface-&gt;pitch + x * surface-&gt;format-&gt;BytesPerPixel);</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        *target_pixel = px;</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    }</div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html#l00097">97</a> of file <a class="el" href="../../d9/d46/GuiUtils_8cpp_source.html">GuiUtils.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    {</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        tinycolormap::Color c = tinycolormap::GetColor(val, tinycolormap::ColormapType(col_map));</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;        Uint32 px = SDL_MapRGB(surface-&gt;format, (Uint8)(c.ri()), (Uint8)(c.gi()), (Uint8)(c.bi()));</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        Uint32 *<span class="keyword">const</span> target_pixel = (Uint32 *)((Uint8 *)surface-&gt;pixels + y * surface-&gt;pitch + x * surface-&gt;format-&gt;BytesPerPixel);</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        *target_pixel = px;</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    }</div>
 </div><!-- fragment -->
 </div>
 </div>
