@@ -1,12 +1,12 @@
-/* Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu, 
- * University of Antwerp - All Rights Reserved. 
+/* Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu,
+ * University of Antwerp - All Rights Reserved.
  * You may use, distribute and modify
  * this code under the terms of the GPL3 license.
  * You should have received a copy of the GPL3 license with
- * this file. If not, please visit: 
+ * this file. If not, please visit:
  * https://www.gnu.org/licenses/gpl-3.0.en.html
- * 
- * Authors: 
+ *
+ * Authors:
  *   Thomas Friedrich <thomas.friedrich@uantwerpen.be>
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
@@ -48,7 +48,6 @@
 #include "GuiUtils.h"
 
 namespace chc = std::chrono;
-
 
 class Ricom_kernel
 {
@@ -107,6 +106,7 @@ private:
     Ricom_kernel kernel;
     int nx;
     int ny;
+
 public:
     // Properties
     std::vector<id_x_y> ids;
@@ -154,7 +154,7 @@ private:
     // ricom variables
     std::vector<int> u;
     std::vector<int> v;
-    
+
     Update_list update_list;
 
     // Electric field magnitude
@@ -205,7 +205,7 @@ private:
     inline void set_stem_pixel(size_t idx, size_t idy);
 
     // Private Methods electric field
-    inline void compute_electric_field(std::array<float,2> &p_com_xy, size_t id);
+    inline void compute_electric_field(std::array<float, 2> &p_com_xy, size_t id);
     inline void set_e_field_pixel(size_t idx, size_t idy);
 
 public:
@@ -282,7 +282,7 @@ public:
     template <class CameraInterface>
     void process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *camera);
     enum CAMERA::Camera_model select_mode_by_file(const char *filename);
-    
+
     // Constructor
     Ricom();
 

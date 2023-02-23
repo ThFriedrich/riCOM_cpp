@@ -37,7 +37,6 @@ void save_image(std::string *path, SDL_Surface *sdl_srf)
     IMG_SavePNG(sdl_srf, path->c_str());
 }
 
-
 // Vertical Splitter Container
 void v_splitter(float thickness, float &size0, float &min_h, float &max_h, float offset)
 {
@@ -105,7 +104,7 @@ namespace SDL_Utils
 
     void draw_pixel(SDL_Surface *surface, int x, int y, float ang, float mag, int col_map)
     {
-        tinycolormap::Color c = mag*tinycolormap::GetColor(ang, tinycolormap::ColormapType(col_map));
+        tinycolormap::Color c = mag * tinycolormap::GetColor(ang, tinycolormap::ColormapType(col_map));
         Uint32 px = SDL_MapRGB(surface->format, (Uint8)(c.ri()), (Uint8)(c.gi()), (Uint8)(c.bi()));
         Uint32 *const target_pixel = (Uint32 *)((Uint8 *)surface->pixels + y * surface->pitch + x * surface->format->BytesPerPixel);
         *target_pixel = px;

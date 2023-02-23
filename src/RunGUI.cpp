@@ -57,7 +57,7 @@
 #define GENERIC_WINDOW_C(name) (generic_windows_c.find(name)->second)
 
 // Forward Declarations
-template<typename T>
+template <typename T>
 inline void update_views(std::map<std::string, ImGuiImageWindow<T>> &generic_windows_f, Ricom *ricom, bool b_restarted, bool trigger, bool b_redraw);
 inline void bind_tex(SDL_Surface *srf, GLuint tex_id);
 
@@ -212,11 +212,11 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
     ImGuiINI::check_ini_setting(ini_cfg, "Timepix", "nx", hardware_configurations[CAMERA::MERLIN].nx_cam);
     ImGuiINI::check_ini_setting(ini_cfg, "Timepix", "ny", hardware_configurations[CAMERA::MERLIN].ny_cam);
 
-    const char *cmaps[] = {"Parula", "Heat", "Jet", "Turbo", "Hot", "Gray", "Magma", "Inferno", "Plasma", "Viridis", "Cividis", "Github","HSV"};
+    const char *cmaps[] = {"Parula", "Heat", "Jet", "Turbo", "Hot", "Gray", "Magma", "Inferno", "Plasma", "Viridis", "Cividis", "Github", "HSV"};
     bool b_redraw = false;
     bool b_trigger_update = false;
     float menu_split_v = control_menu_size.y * 0.8f;
-    
+
     // Initialize Frequency approximation (for plotting only)
     ricom->kernel.approximate_frequencies((size_t)ricom->nx);
 
@@ -229,21 +229,21 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
     GIM_Flags common_flags = GIM_Flags::SaveImButton | GIM_Flags::SaveDataButton | GIM_Flags::ColormapSelector | GIM_Flags::PowerSlider;
     std::map<std::string, ImGuiImageWindow<float>> generic_windows_f;
     std::map<std::string, ImGuiImageWindow<std::complex<float>>> generic_windows_c;
-    generic_windows_f.emplace("RICOM",ImGuiImageWindow<float>("RICOM", &uiTextureIDs[1], true, 9, common_flags | GIM_Flags::FftButton));
-    generic_windows_f.emplace("RICOM-FFT",ImGuiImageWindow<float>("RICOM-FFT", &uiTextureIDs[2], false, 4, common_flags, &ricom_fft));
+    generic_windows_f.emplace("RICOM", ImGuiImageWindow<float>("RICOM", &uiTextureIDs[1], true, 9, common_flags | GIM_Flags::FftButton));
+    generic_windows_f.emplace("RICOM-FFT", ImGuiImageWindow<float>("RICOM-FFT", &uiTextureIDs[2], false, 4, common_flags, &ricom_fft));
     GENERIC_WINDOW("RICOM").fft_window = &GENERIC_WINDOW("RICOM-FFT");
-    
-    generic_windows_f.emplace("vSTEM",ImGuiImageWindow<float>("vSTEM", &uiTextureIDs[3], true, 9, common_flags | GIM_Flags::FftButton, &ricom->b_vSTEM));
-    generic_windows_f.emplace("vSTEM-FFT",ImGuiImageWindow<float>("vSTEM-FFT", &uiTextureIDs[4], false, 4, common_flags, &vstem_fft));
+
+    generic_windows_f.emplace("vSTEM", ImGuiImageWindow<float>("vSTEM", &uiTextureIDs[3], true, 9, common_flags | GIM_Flags::FftButton, &ricom->b_vSTEM));
+    generic_windows_f.emplace("vSTEM-FFT", ImGuiImageWindow<float>("vSTEM-FFT", &uiTextureIDs[4], false, 4, common_flags, &vstem_fft));
     GENERIC_WINDOW("vSTEM").fft_window = &GENERIC_WINDOW("vSTEM-FFT");
-    
-    generic_windows_f.emplace("COM-X",ImGuiImageWindow<float>("RICOM-COMX", &uiTextureIDs[5], true, 9, common_flags, &show_com_x));
-    generic_windows_f.emplace("COM-Y",ImGuiImageWindow<float>("RICOM-COMY", &uiTextureIDs[6], true, 9, common_flags, &show_com_y));
-    
-    generic_windows_c.emplace("E-FIELD",ImGuiImageWindow<std::complex<float>>("E-Field", &uiTextureIDs[7], true, 12, common_flags | GIM_Flags::FftButton, &ricom->b_e_mag));
-    generic_windows_f.emplace("E-Field-FFT",ImGuiImageWindow<float>("E-Field-FFT", &uiTextureIDs[8], false, 4, common_flags, &e_field_fft));
+
+    generic_windows_f.emplace("COM-X", ImGuiImageWindow<float>("RICOM-COMX", &uiTextureIDs[5], true, 9, common_flags, &show_com_x));
+    generic_windows_f.emplace("COM-Y", ImGuiImageWindow<float>("RICOM-COMY", &uiTextureIDs[6], true, 9, common_flags, &show_com_y));
+
+    generic_windows_c.emplace("E-FIELD", ImGuiImageWindow<std::complex<float>>("E-Field", &uiTextureIDs[7], true, 12, common_flags | GIM_Flags::FftButton, &ricom->b_e_mag));
+    generic_windows_f.emplace("E-Field-FFT", ImGuiImageWindow<float>("E-Field-FFT", &uiTextureIDs[8], false, 4, common_flags, &e_field_fft));
     GENERIC_WINDOW_C("E-FIELD").fft_window = &GENERIC_WINDOW("E-Field-FFT");
-    
+
     ricom->kernel.draw_surfaces();
     bind_tex(ricom->kernel.srf_kx, uiTextureIDs[9]);
     bind_tex(ricom->kernel.srf_ky, uiTextureIDs[10]);
@@ -347,27 +347,33 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
             {
                 if (ImGui::Checkbox("Show CoM-X", &show_com_x))
                 {
-                    if (show_com_x){
+                    if (show_com_x)
+                    {
                         GENERIC_WINDOW("COM-X").set_data(ricom->nx, ricom->ny, &ricom->com_map_x);
-                    } else 
+                    }
+                    else
                     {
                         *GENERIC_WINDOW("COM-X").pb_open = false;
                     }
                 }
                 if (ImGui::Checkbox("Show CoM-Y", &show_com_y))
                 {
-                    if (show_com_y){
+                    if (show_com_y)
+                    {
                         GENERIC_WINDOW("COM-Y").set_data(ricom->nx, ricom->ny, &ricom->com_map_y);
-                    } else 
+                    }
+                    else
                     {
                         *GENERIC_WINDOW("COM-Y").pb_open = false;
                     }
                 }
                 if (ImGui::Checkbox("Show E-Field", &ricom->b_e_mag))
                 {
-                    if (ricom->b_e_mag){
+                    if (ricom->b_e_mag)
+                    {
                         GENERIC_WINDOW_C("E-FIELD").set_data(ricom->nx, ricom->ny, &ricom->e_field_data);
-                    } else 
+                    }
+                    else
                     {
                         *GENERIC_WINDOW_C("E-FIELD").pb_open = false;
                     }
@@ -377,7 +383,8 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
                     if (ricom->b_vSTEM)
                     {
                         GENERIC_WINDOW("vSTEM").set_data(ricom->nx, ricom->ny, &ricom->stem_data);
-                    } else 
+                    }
+                    else
                     {
                         *GENERIC_WINDOW("vSTEM").pb_open = false;
                     }
@@ -446,7 +453,7 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
             static bool init_kernel_img = true;
             bool kernel_changed = ImGui::DragInt("Kernel Size", &ricom->kernel.kernel_size, 1, 1, 300);
             if (kernel_changed)
-                filter_max = ceil(sqrt(pow(ricom->kernel.kernel_size,2)*2));
+                filter_max = ceil(sqrt(pow(ricom->kernel.kernel_size, 2) * 2));
             bool rot_changed = ImGui::SliderFloat("Rotation", &ricom->kernel.rotation, 0.0f, 360.0f, "%.1f deg");
             bool filter_changed = ImGui::Checkbox("Use filter?", &ricom->kernel.b_filter);
             bool filter_changed2 = ImGui::DragInt2("low / high", &ricom->kernel.kernel_filter_frequency[0], 1, 0, filter_max);
@@ -456,7 +463,8 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
                 if (ricom->b_busy)
                 {
                     ricom->b_recompute_kernel = true;
-                } else
+                }
+                else
                 {
                     ricom->kernel.compute_kernel();
                 }
@@ -469,10 +477,10 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
             {
                 ricom->kernel.approximate_frequencies((size_t)ricom->nx);
             }
-            float sxk = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.y * 3)/2;
-            ImGui::Image((void*)(intptr_t)uiTextureIDs[9], ImVec2(sxk,sxk), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
+            float sxk = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.y * 3) / 2;
+            ImGui::Image((void *)(intptr_t)uiTextureIDs[9], ImVec2(sxk, sxk), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
             ImGui::SameLine();
-            ImGui::Image((void*)(intptr_t)uiTextureIDs[10], ImVec2(sxk,sxk), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
+            ImGui::Image((void *)(intptr_t)uiTextureIDs[10], ImVec2(sxk, sxk), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
             ImGui::PlotLines("Frequencies", ricom->kernel.f_approx.data(), ricom->kernel.f_approx.size(), 0, NULL, 0.0f, 1.0f, ImVec2(0, 50));
         }
         if (ricom->b_vSTEM)
@@ -488,7 +496,7 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
                 }
             }
         }
-        
+
         if (b_merlin_live_menu)
         {
             if (ImGui::CollapsingHeader("Merlin Live Mode", ImGuiTreeNodeFlags_DefaultOpen))
@@ -658,7 +666,7 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
         {
             if (ricom->srf_cbed != NULL)
             {
-                bind_tex(ricom->srf_cbed,uiTextureIDs[0]);
+                bind_tex(ricom->srf_cbed, uiTextureIDs[0]);
             }
         }
         ImGui::Image((ImTextureID)uiTextureIDs[0], ImVec2(tex_wh, tex_wh), uv_min, uv_max, tint_col, border_col);
@@ -734,7 +742,7 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
     return 0;
 }
 
-template<typename T>
+template <typename T>
 void update_views(std::map<std::string, ImGuiImageWindow<T>> &generic_windows_f, Ricom *ricom, bool b_restarted, bool trigger, bool b_redraw)
 {
     for (auto &wnd : generic_windows_f)
@@ -761,8 +769,9 @@ void update_views(std::map<std::string, ImGuiImageWindow<T>> &generic_windows_f,
     }
 }
 
-void bind_tex(SDL_Surface *srf, GLuint tex_id){
+void bind_tex(SDL_Surface *srf, GLuint tex_id)
+{
     glBindTexture(GL_TEXTURE_2D, (tex_id));
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, srf->w, srf->h, 0,
-                GL_BGRA, GL_UNSIGNED_BYTE, srf->pixels);
+                 GL_BGRA, GL_UNSIGNED_BYTE, srf->pixels);
 }

@@ -32,30 +32,31 @@
 
 enum class GIM_Flags : unsigned char
 {
-    None                = 0,
-    SaveImButton        = 1<<1,
-    SaveDataButton      = 1<<2,
-    ColormapSelector    = 1<<3,
-    FftButton           = 1<<4,
-    PowerSlider         = 1<<5,
+    None = 0,
+    SaveImButton = 1 << 1,
+    SaveDataButton = 1 << 2,
+    ColormapSelector = 1 << 3,
+    FftButton = 1 << 4,
+    PowerSlider = 1 << 5,
 };
 
 GIM_Flags operator&(GIM_Flags lhs, GIM_Flags rhs);
 GIM_Flags operator|(GIM_Flags lhs, GIM_Flags rhs);
 
-template<class T>
+template <class T>
 class ImGuiImageWindow
 {
 public:
-    ImGuiImageWindow(std::string title, GLuint *tex_id, bool auto_render, int data_cmap, GIM_Flags flags = GIM_Flags::None, bool *visible=nullptr);
-    void set_data(int width, int height, std::vector<T> *data); 
+    ImGuiImageWindow(std::string title, GLuint *tex_id, bool auto_render, int data_cmap, GIM_Flags flags = GIM_Flags::None, bool *visible = nullptr);
+    void set_data(int width, int height, std::vector<T> *data);
     void render_window(bool b_redraw, int last_y, int render_update_offset, bool b_trigger_update);
     void render_window(bool b_redraw, int last_y, bool b_trigger_update);
     void reset_min_max();
-    void set_nx_ny(int width, int height); 
+    void set_nx_ny(int width, int height);
     bool *pb_open;
     ImGuiImageWindow<float> *fft_window;
     bool b_trigger_update;
+
 private:
     // Window properties
     std::string title;
@@ -73,9 +74,9 @@ private:
     ImGui::FileBrowser saveDataDialog;
 
     // Image properties
-    float start_x, start_y;         // Scrolling/Panning positions
-    float start_xs, start_ys;       // Scrolling/Panning positions
-    const char *cmaps[13] = {"Parula", "Heat", "Jet", "Turbo", "Hot", "Gray", "Magma", "Inferno", "Plasma", "Viridis", "Cividis", "Github","HSV"};
+    float start_x, start_y;   // Scrolling/Panning positions
+    float start_xs, start_ys; // Scrolling/Panning positions
+    const char *cmaps[13] = {"Parula", "Heat", "Jet", "Turbo", "Hot", "Gray", "Magma", "Inferno", "Plasma", "Viridis", "Cividis", "Github", "HSV"};
     int data_cmap;
     float zoom;
     float power;
@@ -88,7 +89,7 @@ private:
     int last_y;
     int last_idr;
     int last_img;
-    int render_update_offset;       // Accounts for ricom Kernel size
+    int render_update_offset; // Accounts for ricom Kernel size
     float data_min;
     float data_max;
     float data_range;

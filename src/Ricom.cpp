@@ -152,24 +152,22 @@ void Ricom_kernel::draw_surfaces()
         std::cout << "Surface could not be created! SDL Error: " << SDL_GetError() << std::endl;
     }
     // determine location index of value in memory
-    std::pair kx_min_max = std::minmax_element(kernel_x.begin(),kernel_x.end());
-    std::pair ky_min_max = std::minmax_element(kernel_y.begin(),kernel_y.end());
+    std::pair kx_min_max = std::minmax_element(kernel_x.begin(), kernel_x.end());
+    std::pair ky_min_max = std::minmax_element(kernel_y.begin(), kernel_y.end());
     // Update pixel at location
 
     int ic;
     for (int y = 0; y < k_width_sym; y++)
-    {   
+    {
         ic = y * k_width_sym;
         for (int x = 0; x < k_width_sym; x++)
         {
-            float valx = (kernel_x[ic+x]-kx_min_max.first[0])/(kx_min_max.second[0]-kx_min_max.first[0]);
+            float valx = (kernel_x[ic + x] - kx_min_max.first[0]) / (kx_min_max.second[0] - kx_min_max.first[0]);
             SDL_Utils::draw_pixel(srf_kx, x, y, valx, 5);
-            float valy = (kernel_y[ic+x]-ky_min_max.first[0])/(ky_min_max.second[0]-ky_min_max.first[0]);
+            float valy = (kernel_y[ic + x] - ky_min_max.first[0]) / (ky_min_max.second[0] - ky_min_max.first[0]);
             SDL_Utils::draw_pixel(srf_ky, x, y, valy, 5);
         }
     }
-    
-
 }
 // Computer detector distance map relative to a given centre (offset) for vSTEM
 void Ricom_detector::compute_detector(int nx_cam, int ny_cam, std::array<float, 2> &offset)
@@ -222,7 +220,7 @@ void Update_list::init(Ricom_kernel kernel, int nx_ricom, int ny_ricom)
 }
 
 void Update_list::shift(id_x_y &res, int id, int shift)
-{  
+{
     int id_sft = ids[id].id + shift;
     int y = id_sft / nx;
     int x = id_sft % nx;
@@ -256,7 +254,7 @@ void Ricom::init_surface()
         exit(EXIT_FAILURE);
     }
     // SDL surface for CBED image
-    cbed_log.assign(camera.nx_cam*camera.ny_cam, 0.0);
+    cbed_log.assign(camera.nx_cam * camera.ny_cam, 0.0);
     srf_cbed = SDL_CreateRGBSurface(0, camera.nx_cam, camera.ny_cam, 32, 0, 0, 0, 0);
     if (srf_cbed == NULL)
     {
@@ -742,10 +740,10 @@ void Ricom::com_icom(std::vector<T> *data_ptr, int ix, int iy, std::array<float,
 }
 
 // Compute electric field magnitude
-void Ricom::compute_electric_field(std::array<float,2> &com_xy, size_t id)
+void Ricom::compute_electric_field(std::array<float, 2> &com_xy, size_t id)
 {
-    float e_mag = std::hypot(com_xy[0]-offset[0], com_xy[1]- offset[1]);
-    float e_ang = atan2(com_xy[0]-offset[0],com_xy[1]- offset[1]);
+    float e_mag = std::hypot(com_xy[0] - offset[0], com_xy[1] - offset[1]);
+    float e_ang = atan2(com_xy[0] - offset[0], com_xy[1] - offset[1]);
     if (e_mag > e_mag_max)
     {
         e_mag_max = e_mag;
@@ -758,7 +756,6 @@ void Ricom::compute_electric_field(std::array<float,2> &com_xy, size_t id)
     }
     e_field_data[id] = std::polar(e_mag, e_ang);
 }
-
 
 // Process FRAME_BASED camera data
 template <typename T, class CameraInterface>
@@ -780,7 +777,6 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *c
     // Initialize ProgressMonitor Object
     ProgressMonitor prog_mon(fr_total, !b_print2file, redraw_interval);
     p_prog_mon = &prog_mon;
-    
 
     for (int ir = 0; ir < rep; ir++)
     {
@@ -794,7 +790,7 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *c
                 if (n_threads > 1)
                 {
                     pool.push_task([=]
-                                    { com_icom<T>(data, ix, iy, p_com_xy_sum, p_prog_mon); });
+                                   { com_icom<T>(data, ix, iy, p_com_xy_sum, p_prog_mon); });
                 }
                 else
                 {
@@ -893,21 +889,21 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
 
         if (acc_cbed < 3 && b_plot_cbed)
         {
-            camera_spec->read_frame_com_cbed(prog_mon.fr_count, 
-            dose_map, sumx_map, sumy_map,
-            stem_data, b_vSTEM, 
-            offset, detector.radius2,  
-            frame, acc_idx, 
-            first_frame, end_frame);
-            acc_cbed +=1;
+            camera_spec->read_frame_com_cbed(prog_mon.fr_count,
+                                             dose_map, sumx_map, sumy_map,
+                                             stem_data, b_vSTEM,
+                                             offset, detector.radius2,
+                                             frame, acc_idx,
+                                             first_frame, end_frame);
+            acc_cbed += 1;
         }
         else
         {
-            camera_spec->read_frame_com(prog_mon.fr_count, 
-            dose_map, sumx_map, sumy_map, 
-            stem_data, b_vSTEM, 
-            offset, detector.radius2, 
-            first_frame, end_frame);
+            camera_spec->read_frame_com(prog_mon.fr_count,
+                                        dose_map, sumx_map, sumy_map,
+                                        stem_data, b_vSTEM,
+                                        offset, detector.radius2,
+                                        first_frame, end_frame);
         }
 
         if (idxx >= 0)
@@ -944,55 +940,55 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
                 compute_electric_field(com_xy, idxx);
             }
         }
-    
-    if (prog_mon.report_set)
-    {
-        update_surfaces(iy, p_frame);
-        if (b_plot_cbed)
-        {
-            frame.assign(camera_spec->nx_cam * camera_spec->ny_cam, 0);
-            acc_cbed = 0;
-            acc_idx = fr_count;
-        }
-        fr_freq = prog_mon.fr_freq;
-        rescales_recomputes();
-        for (int i = 0; i < 2; i++)
-        {
-            com_public[i] = com_xy_sum[i] / prog_mon.fr_count_i;
-            com_xy_sum[i] = 0;
-        }
-        prog_mon.reset_flags();
-        last_y = iy;
-    }
 
-    if (prog_mon.fr_count >= end_frame)
-    {
-        if (prog_mon.fr_count != fr_total_u)
+        if (prog_mon.report_set)
         {
-            img_num++;
-            first_frame = img_num * nxy;
-            end_frame = (img_num + 1) * nxy;
-            reinit_vectors_limits();
-            dose_map.assign(nxy, 0);
-            sumx_map.assign(nxy, 0);
-            sumy_map.assign(nxy, 0);
+            update_surfaces(iy, p_frame);
+            if (b_plot_cbed)
+            {
+                frame.assign(camera_spec->nx_cam * camera_spec->ny_cam, 0);
+                acc_cbed = 0;
+                acc_idx = fr_count;
+            }
+            fr_freq = prog_mon.fr_freq;
+            rescales_recomputes();
+            for (int i = 0; i < 2; i++)
+            {
+                com_public[i] = com_xy_sum[i] / prog_mon.fr_count_i;
+                com_xy_sum[i] = 0;
+            }
+            prog_mon.reset_flags();
+            last_y = iy;
         }
 
-        if (update_offset)
+        if (prog_mon.fr_count >= end_frame)
         {
-            offset[0] = com_public[0];
-            offset[1] = com_public[1];
+            if (prog_mon.fr_count != fr_total_u)
+            {
+                img_num++;
+                first_frame = img_num * nxy;
+                end_frame = (img_num + 1) * nxy;
+                reinit_vectors_limits();
+                dose_map.assign(nxy, 0);
+                sumx_map.assign(nxy, 0);
+                sumy_map.assign(nxy, 0);
+            }
+
+            if (update_offset)
+            {
+                offset[0] = com_public[0];
+                offset[1] = com_public[1];
+            }
+        }
+
+        if (prog_mon.fr_count == fr_total_u || rc_quit)
+        {
+            pool.wait_for_completion();
+            p_prog_mon = nullptr;
+            return;
         }
     }
-
-    if (prog_mon.fr_count == fr_total_u || rc_quit)
-    {
-        pool.wait_for_completion();
-        p_prog_mon = nullptr;
-        return;
-    }
-}
-p_prog_mon = nullptr;
+    p_prog_mon = nullptr;
 }
 
 // Entrance function for Ricom_reconstructinon
@@ -1094,7 +1090,8 @@ enum CAMERA::Camera_model Ricom::select_mode_by_file(const char *filename)
     {
         mode = RICOM::FILE;
         return CAMERA::MERLIN;
-    } else 
+    }
+    else
     {
         return CAMERA::TIMEPIX;
     }

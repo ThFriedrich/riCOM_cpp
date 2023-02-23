@@ -31,7 +31,6 @@
 
 #include "ImGuiImageWindow.h"
 
-
 template <typename T>
 inline T pw(T val, T power)
 {
@@ -54,14 +53,14 @@ GIM_Flags operator&(GIM_Flags lhs, GIM_Flags rhs)
         static_cast<std::underlying_type_t<GIM_Flags>>(rhs));
 }
 
-template<typename T>
+template <typename T>
 bool ImGuiImageWindow<T>::has(GIM_Flags flag)
 {
     return static_cast<bool>(flags & flag);
 }
 
 // Redraws the entire image
-template<typename T>
+template <typename T>
 void ImGuiImageWindow<T>::render_image()
 {
     if (b_data_set)
@@ -81,7 +80,7 @@ void ImGuiImageWindow<T>::render_image()
 }
 
 // Redraws the entire ricom image from line y0 to line ye
-template<typename T>
+template <typename T>
 void ImGuiImageWindow<T>::render_image(int last_idr)
 {
     int last_y = (last_idr / nx);
@@ -100,7 +99,7 @@ void ImGuiImageWindow<T>::render_image(int last_idr)
     this->last_idr = last_idr;
 }
 
-template<>
+template <>
 void ImGuiImageWindow<float>::set_pixel(int idx, int idy)
 {
     // determine location index of value in memory
@@ -111,7 +110,7 @@ void ImGuiImageWindow<float>::set_pixel(int idx, int idy)
     SDL_Utils::draw_pixel(sdl_srf, idx, idy, val, data_cmap);
 }
 
-template<>
+template <>
 void ImGuiImageWindow<std::complex<float>>::set_pixel(int idx, int idy)
 {
     // determine location index of value in memory
@@ -120,26 +119,26 @@ void ImGuiImageWindow<std::complex<float>>::set_pixel(int idx, int idy)
     // Get magnitude and angle from complex
     float mag = (abs(data->at(idr)) - data_min) / data_range;
     float ang = arg(data->at(idr));
-    ang = (ang/M_PI+1)/2;
-    mag = pw(mag,power);
+    ang = (ang / M_PI + 1) / 2;
+    mag = pw(mag, power);
 
     // Update pixel at location
     SDL_Utils::draw_pixel(sdl_srf, idx, idy, ang, mag, data_cmap);
 }
 
-template<>
+template <>
 float ImGuiImageWindow<float>::get_val(int idr)
 {
     return (*data)[idr];
 }
 
-template<>
+template <>
 float ImGuiImageWindow<std::complex<float>>::get_val(int idr)
 {
     return abs((*data)[idr]);
 }
 
-template<typename T>
+template <typename T>
 void ImGuiImageWindow<T>::set_min_max(int last_idr)
 {
     float val;
@@ -161,7 +160,7 @@ void ImGuiImageWindow<T>::set_min_max(int last_idr)
     }
 }
 
-template<typename T>
+template <typename T>
 void ImGuiImageWindow<T>::set_min_max()
 {
     float val;
@@ -183,8 +182,8 @@ void ImGuiImageWindow<T>::set_min_max()
     }
 }
 
-template<typename T>
-ImGuiImageWindow<T>::ImGuiImageWindow(std::string title, GLuint *tex_id, bool auto_render, int data_cmap,  GIM_Flags flags, bool *visible)
+template <typename T>
+ImGuiImageWindow<T>::ImGuiImageWindow(std::string title, GLuint *tex_id, bool auto_render, int data_cmap, GIM_Flags flags, bool *visible)
 {
 
     this->title = title;
@@ -220,7 +219,7 @@ ImGuiImageWindow<T>::ImGuiImageWindow(std::string title, GLuint *tex_id, bool au
     this->b_data_set = false;
 }
 
-template<typename T>
+template <typename T>
 void ImGuiImageWindow<T>::set_data(int width, int height, std::vector<T> *data)
 {
     this->data = data;
@@ -233,7 +232,7 @@ void ImGuiImageWindow<T>::set_data(int width, int height, std::vector<T> *data)
     b_data_set = true;
 }
 
-template<typename T>
+template <typename T>
 void ImGuiImageWindow<T>::reset_limits()
 {
     last_y = 0;
@@ -244,13 +243,13 @@ void ImGuiImageWindow<T>::reset_limits()
     data_range = FLT_MAX;
 }
 
-template<typename T>
+template <typename T>
 void ImGuiImageWindow<T>::set_nx_ny(int width, int height)
 {
     this->nx = width;
     this->ny = height;
     this->nxy = height * width;
-    
+
     data_fft.resize(nxy);
     data_fft_f.resize(nxy);
     data_val.resize(nxy);
@@ -264,14 +263,14 @@ void ImGuiImageWindow<T>::set_nx_ny(int width, int height)
     }
 }
 
-template<typename T>
+template <typename T>
 void ImGuiImageWindow<T>::render_window(bool b_redraw, int last_y, int render_update_offset, bool b_trigger_update)
 {
     this->render_update_offset = render_update_offset;
     render_window(b_redraw, last_y, b_trigger_update);
 }
 
-template<typename T>
+template <typename T>
 void ImGuiImageWindow<T>::reset_min_max()
 {
     data_min = FLT_MAX;
@@ -279,7 +278,7 @@ void ImGuiImageWindow<T>::reset_min_max()
     data_range = FLT_MAX;
 }
 
-template<>
+template <>
 void ImGuiImageWindow<float>::compute_fft()
 {
     FFT2D fft2d(ny, nx);
@@ -288,7 +287,7 @@ void ImGuiImageWindow<float>::compute_fft()
     FFT2D::c2abs(data_fft, data_fft_f);
 }
 
-template<>
+template <>
 void ImGuiImageWindow<std::complex<float>>::compute_fft()
 {
     FFT2D fft2d(ny, nx);
@@ -298,7 +297,7 @@ void ImGuiImageWindow<std::complex<float>>::compute_fft()
 
 // Deal with situation when process is finished (redraw==false) but not fully rendered
 // Should also render at end of a full cycle but not when it's finished completely
-template<typename T>
+template <typename T>
 bool ImGuiImageWindow<T>::detect_frame_switch(int &fr_count)
 {
     int n_im = (fr_count) / nxy;
@@ -308,13 +307,15 @@ bool ImGuiImageWindow<T>::detect_frame_switch(int &fr_count)
         fr_count = nxy;
         this->last_y = 0;
         return true;
-    } else {
+    }
+    else
+    {
         fr_count -= (n_im * nxy);
         return false;
     }
 }
 
-template<>
+template <>
 void ImGuiImageWindow<float>::value_tooltip(const int x, const int y, const float zoom)
 {
     float val = 0.0f;
@@ -327,7 +328,7 @@ void ImGuiImageWindow<float>::value_tooltip(const int x, const int y, const floa
     ImGui::EndTooltip();
 }
 
-template<>
+template <>
 void ImGuiImageWindow<std::complex<float>>::value_tooltip(const int x, const int y, const float zoom)
 {
     std::complex<float> val = 0.0;
@@ -342,7 +343,7 @@ void ImGuiImageWindow<std::complex<float>>::value_tooltip(const int x, const int
 }
 
 // b_redraw is the standard timer based update, b_trigger_ext can trigger a full redraw of the image
-template<typename T>
+template <typename T>
 void ImGuiImageWindow<T>::render_window(bool b_redraw, int fr_count, bool b_trigger_ext)
 {
     ImGui::SetNextWindowSize(ImVec2{256, 256}, ImGuiCond_FirstUseEver);
@@ -419,7 +420,7 @@ void ImGuiImageWindow<T>::render_window(bool b_redraw, int fr_count, bool b_trig
             {
                 this->last_idr = 0;
                 this->last_y = 0;
-                render_image((fr_count==0)?nxy:fr_count);
+                render_image((fr_count == 0) ? nxy : fr_count);
                 b_trigger_update = true;
             }
         }
@@ -432,7 +433,7 @@ void ImGuiImageWindow<T>::render_window(bool b_redraw, int fr_count, bool b_trig
             {
                 this->last_idr = 0;
                 this->last_y = 0;
-                render_image((fr_count==0)?nxy:fr_count);
+                render_image((fr_count == 0) ? nxy : fr_count);
                 b_trigger_update = true;
             }
         }
@@ -483,7 +484,7 @@ void ImGuiImageWindow<T>::render_window(bool b_redraw, int fr_count, bool b_trig
                 ImGui::SetScrollX(start_xs - (rel_x - start_x));
                 ImGui::SetScrollY(start_ys - (rel_y - start_y));
             }
-            
+
             // Zooming
             if (std::abs(dz) > 0.0f)
             {
@@ -491,12 +492,12 @@ void ImGuiImageWindow<T>::render_window(bool b_redraw, int fr_count, bool b_trig
                 float zoom2 = zoom + dz * 0.1;
                 zoom2 = (std::max)(1.0f, zoom2);
 
-                float dx = ((xy.x - pos.x)/tex_w_z) * tex_w * (zoom2-zoom);
-                float dy = ((xy.y - pos.y)/tex_h_z) * tex_h * (zoom2-zoom);
+                float dx = ((xy.x - pos.x) / tex_w_z) * tex_w * (zoom2 - zoom);
+                float dy = ((xy.y - pos.y) / tex_h_z) * tex_h * (zoom2 - zoom);
 
                 ImGui::SetScrollX(start_xs + dx);
                 ImGui::SetScrollY(start_ys + dy);
-               
+
                 zoom = zoom2;
             }
 
@@ -506,7 +507,7 @@ void ImGuiImageWindow<T>::render_window(bool b_redraw, int fr_count, bool b_trig
                 float scale_fct = scale * zoom;
                 int x = (int)std::floor((xy.x - pos.x) / scale_fct);
                 int y = (int)std::floor((xy.y - pos.y) / scale_fct);
-                value_tooltip(x,y,zoom);
+                value_tooltip(x, y, zoom);
             }
             if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
             {

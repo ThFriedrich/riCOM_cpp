@@ -195,30 +195,30 @@ int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations
     if (ricom->b_plot2SDL)
     {
         std::thread run_thread;
-        run_thread = std::thread(RICOM::run_ricom, ricom,ricom->mode);
-        while (ricom->srf_ricom==NULL)
+        run_thread = std::thread(RICOM::run_ricom, ricom, ricom->mode);
+        while (ricom->srf_ricom == NULL)
         {
             SDL_Delay(ricom->redraw_interval);
         }
-        
+
         run_thread.detach();
 
         // // Initializing SDL
-        SDL_DisplayMode DM;                 // To get the current display size
-        SDL_Event event;                    // Event variable
+        SDL_DisplayMode DM; // To get the current display size
+        SDL_Event event;    // Event variable
 
         SDL_Init(SDL_INIT_EVERYTHING);
         SDL_GetCurrentDisplayMode(0, &DM);
         float scale = (std::min)(((float)DM.w) / ricom->nx, ((float)DM.h) / ricom->ny) * 0.8;
         bool b_redraw = false;
-        image_windows.push_back(SdlImageWindow("riCOM", ricom->srf_ricom, ricom->nx,ricom->ny, scale));
+        image_windows.push_back(SdlImageWindow("riCOM", ricom->srf_ricom, ricom->nx, ricom->ny, scale));
         if (ricom->b_vSTEM)
         {
-            image_windows.push_back(SdlImageWindow("vSTEM",ricom->srf_stem, ricom->nx,ricom->ny, scale));
+            image_windows.push_back(SdlImageWindow("vSTEM", ricom->srf_stem, ricom->nx, ricom->ny, scale));
         }
         if (ricom->b_e_mag)
         {
-            image_windows.push_back(SdlImageWindow("E-Field",ricom->srf_e_mag, ricom->nx,ricom->ny, scale));
+            image_windows.push_back(SdlImageWindow("E-Field", ricom->srf_e_mag, ricom->nx, ricom->ny, scale));
         }
 
         bool b_open_window = true;

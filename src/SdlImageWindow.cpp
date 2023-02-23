@@ -13,19 +13,19 @@
 
 #include "SdlImageWindow.h"
 
-SdlImageWindow::SdlImageWindow(const char * title, SDL_Surface *srf, int nx, int ny, int scale)
+SdlImageWindow::SdlImageWindow(const char *title, SDL_Surface *srf, int nx, int ny, int scale)
 {
     this->title = title;
     create_window(srf, nx, ny, scale);
 };
 
-SdlImageWindow::SdlImageWindow(const char * title)
+SdlImageWindow::SdlImageWindow(const char *title)
 {
     this->title = title;
-    this->window = NULL;         // Pointer for the window
-    this->renderer = NULL;       // Pointer for the renderer
-    this->tex = NULL;            // Texture for the window
-    this->srf = NULL;            // Surface (data source)
+    this->window = NULL;   // Pointer for the window
+    this->renderer = NULL; // Pointer for the renderer
+    this->tex = NULL;      // Texture for the window
+    this->srf = NULL;      // Surface (data source)
 };
 
 void SdlImageWindow::create_window(SDL_Surface *srf, int nx, int ny, int scale)
@@ -49,7 +49,7 @@ void SdlImageWindow::create_window(SDL_Surface *srf, int nx, int ny, int scale)
         std::cout << "Texture could not be created! SDL Error: " << SDL_GetError() << std::endl;
     }
     // Maintain Pixel aspect ratio on resizing
-    if (SDL_RenderSetLogicalSize(renderer, scale *nx, scale * ny) < 0)
+    if (SDL_RenderSetLogicalSize(renderer, scale * nx, scale * ny) < 0)
     {
         std::cout << "Logical size could not be set! SDL Error: " << SDL_GetError() << std::endl;
     }
