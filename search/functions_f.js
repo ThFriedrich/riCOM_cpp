@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['wait_5ffor_5fcompletion_361',['wait_for_completion',['../d5/df8/classBoundedThreadPool.html#a9a62eaf3e1de79a3c55373e93c710565',1,'BoundedThreadPool']]]
+  ['v_5fsplitter_363',['v_splitter',['../d9/d46/GuiUtils_8cpp.html#add33c5c5dc0a5718de5e5c8d887eccff',1,'v_splitter(float thickness, float &amp;size0, const float &amp;min_h, const float &amp;max_h, const float &amp;offset):&#160;GuiUtils.cpp'],['../d7/db2/GuiUtils_8h.html#add33c5c5dc0a5718de5e5c8d887eccff',1,'v_splitter(float thickness, float &amp;size0, const float &amp;min_h, const float &amp;max_h, const float &amp;offset):&#160;GuiUtils.cpp']]]
 ];

@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['plot_5fcbed_319',['plot_cbed',['../d8/d91/classRicom.html#aaf843bdf67c99f475d316e8b19e83e9a',1,'Ricom']]],
-  ['process_5fdata_320',['process_data',['../d8/d91/classRicom.html#ad7bdc76144815743c7baa43ce50138ba',1,'Ricom::process_data(CAMERA::Camera&lt; CameraInterface, CAMERA::FRAME_BASED &gt; *camera)'],['../d8/d91/classRicom.html#a7a284bcd7f9c255126243ac119e62565',1,'Ricom::process_data(CAMERA::Camera&lt; CameraInterface, CAMERA::EVENT_BASED &gt; *camera)']]],
-  ['progressmonitor_321',['ProgressMonitor',['../d1/dcc/classProgressMonitor.html#a09e439ae24e631233305a9f4f9cecd73',1,'ProgressMonitor']]],
-  ['push_5ftask_322',['push_task',['../d5/df8/classBoundedThreadPool.html#a336e801b2a069c1d4ea3dad964ad1d28',1,'BoundedThreadPool::push_task(const T &amp;task)'],['../d5/df8/classBoundedThreadPool.html#a35d9f7e914c17c0299afe0f410c5c697',1,'BoundedThreadPool::push_task(const T &amp;task, const A &amp;...args)']]],
-  ['pw_323',['pw',['../d0/db0/ImGuiImageWindow_8cpp.html#a44eb0fc8e0ea700c13f43245b14aaac8',1,'ImGuiImageWindow.cpp']]]
+  ['open_5ffile_317',['open_file',['../d1/dd7/classFileConnector.html#a24814c50088d02e7f5812a573d468826',1,'FileConnector']]],
+  ['operator_26_318',['operator&amp;',['../d0/db0/ImGuiImageWindow_8cpp.html#aee76ba176fc20edfbaba794b816b6f8e',1,'operator&amp;(GIM_Flags lhs, GIM_Flags rhs):&#160;ImGuiImageWindow.cpp'],['../d4/d6e/ImGuiImageWindow_8h.html#aee76ba176fc20edfbaba794b816b6f8e',1,'operator&amp;(GIM_Flags lhs, GIM_Flags rhs):&#160;ImGuiImageWindow.cpp']]],
+  ['operator_2b_2b_319',['operator++',['../d1/dcc/classProgressMonitor.html#ac735dab0df1a98b885b5f59ca7b18dff',1,'ProgressMonitor']]],
+  ['operator_5b_5d_320',['operator[]',['../d4/d97/classCAMERA_1_1Default__configurations.html#a90fcf72bebf525eee0f1f9b3b5169178',1,'CAMERA::Default_configurations']]],
+  ['operator_7c_321',['operator|',['../d0/db0/ImGuiImageWindow_8cpp.html#a657d4193b35af1f77d4ada8d8ccd9377',1,'operator|(GIM_Flags lhs, GIM_Flags rhs):&#160;ImGuiImageWindow.cpp'],['../d4/d6e/ImGuiImageWindow_8h.html#a657d4193b35af1f77d4ada8d8ccd9377',1,'operator|(GIM_Flags lhs, GIM_Flags rhs):&#160;ImGuiImageWindow.cpp']]]
 ];

@@ -83,63 +83,103 @@ $(function() {
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment"> *   Chu-Ping Yu &lt;chu-ping.yu@uantwerpen.be&gt;</span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"> */</span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160; </div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="../../de/dfc/Ricom_8h.html">Ricom.h</a>&quot;</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="../../dd/de4/Camera_8h.html">Camera.h</a>&quot;</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160; </div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment">// Forward Declarations</span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="keywordtype">int</span> <a class="code" href="../../df/d0a/main_8cpp.html#a8ad6339f7e590543fd379cf0815cfde9">run_cli</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[], <a class="code" href="../../d8/d91/classRicom.html">Ricom</a> *ricom, <a class="code" href="../../d4/d97/classCAMERA_1_1Default__configurations.html">CAMERA::Default_configurations</a> &amp;hardware_configurations);</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="keywordtype">int</span> <a class="code" href="../../df/d0a/main_8cpp.html#a32370edd3b2d351c07c28b95e0b8e70f">run_gui</a>(<a class="code" href="../../d8/d91/classRicom.html">Ricom</a> *ricom, <a class="code" href="../../d4/d97/classCAMERA_1_1Default__configurations.html">CAMERA::Default_configurations</a> &amp;hardware_configurations);</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../df/d0a/main_8cpp.html#ab916cd111c242592963ef24f8a94e490">log2file</a>(<a class="code" href="../../d8/d91/classRicom.html">Ricom</a> *ricom);</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160; </div>
-<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="../../df/d0a/main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">   22</a></span>&#160;<span class="keywordtype">int</span> <a class="code" href="../../df/d0a/main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[])</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;{</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="../../de/dfc/Ricom_8h.html">Ricom.h</a>&quot;</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="../../dd/de4/Camera_8h.html">Camera.h</a>&quot;</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160; </div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="keyword">static</span> std::string version(<span class="stringliteral">&quot;0.0.4-beta&quot;</span>);</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160; </div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment">// Forward Declarations</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keywordtype">int</span> <a class="code" href="../../df/d0a/main_8cpp.html#a8ad6339f7e590543fd379cf0815cfde9">run_cli</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[], <a class="code" href="../../d8/d91/classRicom.html">Ricom</a> *ricom, <a class="code" href="../../d4/d97/classCAMERA_1_1Default__configurations.html">CAMERA::Default_configurations</a> &amp;hardware_configurations);</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="keywordtype">int</span> <a class="code" href="../../df/d0a/main_8cpp.html#a32370edd3b2d351c07c28b95e0b8e70f">run_gui</a>(<a class="code" href="../../d8/d91/classRicom.html">Ricom</a> *ricom, <a class="code" href="../../d4/d97/classCAMERA_1_1Default__configurations.html">CAMERA::Default_configurations</a> &amp;hardware_configurations);</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../df/d0a/main_8cpp.html#ab916cd111c242592963ef24f8a94e490">log2file</a>(<a class="code" href="../../d8/d91/classRicom.html">Ricom</a> *ricom);</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160; </div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <a class="code" href="../../d8/d91/classRicom.html">Ricom</a> ricom;</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <a class="code" href="../../d8/d91/classRicom.html">Ricom</a> *ricom_ptr = &amp;ricom;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <a class="code" href="../../d4/d97/classCAMERA_1_1Default__configurations.html">CAMERA::Default_configurations</a> hardware_configurations;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <span class="keywordflow">if</span> (argc == 1)</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    {</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#ifdef _WIN32</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;        FreeConsole();</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        <a class="code" href="../../df/d0a/main_8cpp.html#ab916cd111c242592963ef24f8a94e490">log2file</a>(ricom_ptr);</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="../../df/d0a/main_8cpp.html#a32370edd3b2d351c07c28b95e0b8e70f">run_gui</a>(ricom_ptr, hardware_configurations);</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    }</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordflow">else</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    {</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="../../df/d0a/main_8cpp.html#a8ad6339f7e590543fd379cf0815cfde9">run_cli</a>(argc, argv, ricom_ptr, hardware_configurations);</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    }</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;}</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="preprocessor"># ifdef __linux__</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="preprocessor">#include &lt;sys/utsname.h&gt;</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;std::string <a class="code" href="../../df/d0a/main_8cpp.html#a3635567ef58f7a36173e9d13082557b9">get_os</a>()</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;{</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <span class="keyword">struct </span>utsname uts;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    uname(&amp;uts);</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="keywordflow">return</span> std::string(uts.sysname) + <span class="stringliteral">&quot; Kernel : &quot;</span> + std::string(uts.version);</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;}</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#elif defined(_WIN32) || defined(WIN32)</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">    #include &lt;stdio.h&gt;</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">    #include &lt;stdlib.h&gt;</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">    #include &lt;windows.h&gt;</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keyword">typedef</span> LONG NTSTATUS, *PNTSTATUS;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="preprocessor">    #define STATUS_SUCCESS (0x00000000)</span></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keyword">typedef</span> NTSTATUS (WINAPI* RtlGetVersionPtr)(PRTL_OSVERSIONINFOW);</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="comment">// Redirect all output of cout into a log-file for GUI mode</span></div>
-<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="../../df/d0a/main_8cpp.html#ab916cd111c242592963ef24f8a94e490">   44</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../df/d0a/main_8cpp.html#ab916cd111c242592963ef24f8a94e490">log2file</a>(<a class="code" href="../../d8/d91/classRicom.html">Ricom</a> *ricom)</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;{</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keywordflow">if</span> (freopen(<span class="stringliteral">&quot;ricom.log&quot;</span>, <span class="stringliteral">&quot;a&quot;</span>, stdout) == NULL)</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    {</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        std::cout &lt;&lt; <span class="stringliteral">&quot;Error redirecting output to log file&quot;</span> &lt;&lt; std::endl;</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    }</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="keywordflow">if</span> (freopen(<span class="stringliteral">&quot;ricom.log&quot;</span>, <span class="stringliteral">&quot;a&quot;</span>, stderr) == NULL)</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    {</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        std::cout &lt;&lt; <span class="stringliteral">&quot;Error redirecting error output to log file&quot;</span> &lt;&lt; std::endl;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    }</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    ricom-&gt;<a class="code" href="../../d8/d91/classRicom.html#af0e981519f3312ae02894f5028f182c5">b_print2file</a> = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    time_t timetoday;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    time(&amp;timetoday);</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    std::cout &lt;&lt; std::endl</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;              &lt;&lt; <span class="stringliteral">&quot;##########################################################################&quot;</span> &lt;&lt; std::endl;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    std::cout &lt;&lt; <span class="stringliteral">&quot;              Ricom started at &quot;</span> &lt;&lt; asctime(localtime(&amp;timetoday));</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    std::cout &lt;&lt; <span class="stringliteral">&quot;##########################################################################&quot;</span> &lt;&lt; std::endl;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;}</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    std::string <a class="code" href="../../df/d0a/main_8cpp.html#a3635567ef58f7a36173e9d13082557b9">get_os</a>() {</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    HMODULE hMod = ::GetModuleHandleW(L<span class="stringliteral">&quot;ntdll.dll&quot;</span>);</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <span class="keywordflow">if</span> (hMod) {</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        RtlGetVersionPtr fxPtr = (RtlGetVersionPtr)::GetProcAddress(hMod, <span class="stringliteral">&quot;RtlGetVersion&quot;</span>);</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="keywordflow">if</span> (fxPtr != <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;            RTL_OSVERSIONINFOW rovi = { 0 };</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;            rovi.dwOSVersionInfoSize = <span class="keyword">sizeof</span>(rovi);</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;            <span class="keywordflow">if</span> ( STATUS_SUCCESS == fxPtr(&amp;rovi) ) {</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;                <span class="keywordflow">return</span> <span class="stringliteral">&quot;Windows &quot;</span> + std::to_string(rovi.dwMajorVersion) + <span class="stringliteral">&quot;.&quot;</span> + std::to_string(rovi.dwMinorVersion) ;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            }</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        }</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    }</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    RTL_OSVERSIONINFOW rovi = { 0 };</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordflow">return</span> <span class="stringliteral">&quot;Windows&quot;</span>;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;}</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno"><a class="line" href="../../df/d0a/main_8cpp.html#a3635567ef58f7a36173e9d13082557b9">   59</a></span>&#160;    std::string <a class="code" href="../../df/d0a/main_8cpp.html#a3635567ef58f7a36173e9d13082557b9">get_os</a>() {<span class="keywordflow">return</span> <span class="stringliteral">&quot;Unknown&quot;</span>};</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
+<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="../../df/d0a/main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">   62</a></span>&#160;<span class="keywordtype">int</span> <a class="code" href="../../df/d0a/main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[])</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;{</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <a class="code" href="../../d8/d91/classRicom.html">Ricom</a> ricom;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <a class="code" href="../../d8/d91/classRicom.html">Ricom</a> *ricom_ptr = &amp;ricom;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <a class="code" href="../../d4/d97/classCAMERA_1_1Default__configurations.html">CAMERA::Default_configurations</a> hardware_configurations;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="keywordflow">if</span> (argc == 1)</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    {</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        FreeConsole();</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <a class="code" href="../../df/d0a/main_8cpp.html#ab916cd111c242592963ef24f8a94e490">log2file</a>(ricom_ptr);</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="../../df/d0a/main_8cpp.html#a32370edd3b2d351c07c28b95e0b8e70f">run_gui</a>(ricom_ptr, hardware_configurations);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    }</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    {</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="../../df/d0a/main_8cpp.html#a8ad6339f7e590543fd379cf0815cfde9">run_cli</a>(argc, argv, ricom_ptr, hardware_configurations);</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    }</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;}</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment">// Redirect all output of cout into a log-file for GUI mode</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno"><a class="line" href="../../df/d0a/main_8cpp.html#ab916cd111c242592963ef24f8a94e490">   84</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../df/d0a/main_8cpp.html#ab916cd111c242592963ef24f8a94e490">log2file</a>(<a class="code" href="../../d8/d91/classRicom.html">Ricom</a> *ricom)</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;{</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <span class="keywordflow">if</span> (freopen(<span class="stringliteral">&quot;ricom.log&quot;</span>, <span class="stringliteral">&quot;a&quot;</span>, stdout) == NULL)</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    {</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        std::cout &lt;&lt; <span class="stringliteral">&quot;Error redirecting output to log file&quot;</span> &lt;&lt; std::endl;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    }</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keywordflow">if</span> (freopen(<span class="stringliteral">&quot;ricom.log&quot;</span>, <span class="stringliteral">&quot;a&quot;</span>, stderr) == NULL)</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    {</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;        std::cout &lt;&lt; <span class="stringliteral">&quot;Error redirecting error output to log file&quot;</span> &lt;&lt; std::endl;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    }</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    ricom-&gt;<a class="code" href="../../d8/d91/classRicom.html#af0e981519f3312ae02894f5028f182c5">b_print2file</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <span class="keyword">auto</span> t = std::time(<span class="keyword">nullptr</span>);</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    <span class="keyword">auto</span> tm = *std::localtime(&amp;t);</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    std::cout &lt;&lt; std::endl;</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    std::cout &lt;&lt; <span class="stringliteral">&quot;Ricom version &quot;</span> &lt;&lt; version &lt;&lt; <span class="stringliteral">&quot; started at &quot;</span> &lt;&lt; std::put_time(&amp;tm, <span class="stringliteral">&quot;%d/%m/%Y %H:%M:%S&quot;</span>) &lt;&lt; std::endl;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    std::cout &lt;&lt; <span class="stringliteral">&quot;OS: &quot;</span> &lt;&lt; <a class="code" href="../../df/d0a/main_8cpp.html#a3635567ef58f7a36173e9d13082557b9">get_os</a>() &lt;&lt; std::endl;</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;}</div>
 <div class="ttc" id="aCamera_8h_html"><div class="ttname"><a href="../../dd/de4/Camera_8h.html">Camera.h</a></div></div>
 <div class="ttc" id="aRicom_8h_html"><div class="ttname"><a href="../../de/dfc/Ricom_8h.html">Ricom.h</a></div></div>
 <div class="ttc" id="aclassCAMERA_1_1Default__configurations_html"><div class="ttname"><a href="../../d4/d97/classCAMERA_1_1Default__configurations.html">CAMERA::Default_configurations</a></div><div class="ttdef"><b>Definition:</b> <a href="../../dd/de4/Camera_8h_source.html#l00102">Camera.h:103</a></div></div>
-<div class="ttc" id="aclassRicom_html"><div class="ttname"><a href="../../d8/d91/classRicom.html">Ricom</a></div><div class="ttdef"><b>Definition:</b> <a href="../../de/dfc/Ricom_8h_source.html#l00147">Ricom.h:148</a></div></div>
-<div class="ttc" id="aclassRicom_html_af0e981519f3312ae02894f5028f182c5"><div class="ttname"><a href="../../d8/d91/classRicom.html#af0e981519f3312ae02894f5028f182c5">Ricom::b_print2file</a></div><div class="ttdeci">bool b_print2file</div><div class="ttdef"><b>Definition:</b> <a href="../../de/dfc/Ricom_8h_source.html#l00216">Ricom.h:216</a></div></div>
-<div class="ttc" id="amain_8cpp_html_a0ddf1224851353fc92bfbff6f499fa97"><div class="ttname"><a href="../../df/d0a/main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a></div><div class="ttdeci">int main(int argc, char *argv[])</div><div class="ttdef"><b>Definition:</b> <a href="../../df/d0a/main_8cpp_source.html#l00022">main.cpp:22</a></div></div>
+<div class="ttc" id="aclassRicom_html"><div class="ttname"><a href="../../d8/d91/classRicom.html">Ricom</a></div><div class="ttdef"><b>Definition:</b> <a href="../../de/dfc/Ricom_8h_source.html#l00151">Ricom.h:152</a></div></div>
+<div class="ttc" id="aclassRicom_html_af0e981519f3312ae02894f5028f182c5"><div class="ttname"><a href="../../d8/d91/classRicom.html#af0e981519f3312ae02894f5028f182c5">Ricom::b_print2file</a></div><div class="ttdeci">bool b_print2file</div><div class="ttdef"><b>Definition:</b> <a href="../../de/dfc/Ricom_8h_source.html#l00220">Ricom.h:220</a></div></div>
+<div class="ttc" id="amain_8cpp_html_a0ddf1224851353fc92bfbff6f499fa97"><div class="ttname"><a href="../../df/d0a/main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a></div><div class="ttdeci">int main(int argc, char *argv[])</div><div class="ttdef"><b>Definition:</b> <a href="../../df/d0a/main_8cpp_source.html#l00062">main.cpp:62</a></div></div>
 <div class="ttc" id="amain_8cpp_html_a32370edd3b2d351c07c28b95e0b8e70f"><div class="ttname"><a href="../../df/d0a/main_8cpp.html#a32370edd3b2d351c07c28b95e0b8e70f">run_gui</a></div><div class="ttdeci">int run_gui(Ricom *ricom, CAMERA::Default_configurations &amp;hardware_configurations)</div><div class="ttdef"><b>Definition:</b> <a href="../../d2/d30/RunGUI_8cpp_source.html#l00068">RunGUI.cpp:68</a></div></div>
+<div class="ttc" id="amain_8cpp_html_a3635567ef58f7a36173e9d13082557b9"><div class="ttname"><a href="../../df/d0a/main_8cpp.html#a3635567ef58f7a36173e9d13082557b9">get_os</a></div><div class="ttdeci">std::string get_os()</div><div class="ttdef"><b>Definition:</b> <a href="../../df/d0a/main_8cpp_source.html#l00059">main.cpp:59</a></div></div>
 <div class="ttc" id="amain_8cpp_html_a8ad6339f7e590543fd379cf0815cfde9"><div class="ttname"><a href="../../df/d0a/main_8cpp.html#a8ad6339f7e590543fd379cf0815cfde9">run_cli</a></div><div class="ttdeci">int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations &amp;hardware_configurations)</div><div class="ttdef"><b>Definition:</b> <a href="../../d5/d6c/RunCLI_8cpp_source.html#l00021">RunCLI.cpp:21</a></div></div>
-<div class="ttc" id="amain_8cpp_html_ab916cd111c242592963ef24f8a94e490"><div class="ttname"><a href="../../df/d0a/main_8cpp.html#ab916cd111c242592963ef24f8a94e490">log2file</a></div><div class="ttdeci">void log2file(Ricom *ricom)</div><div class="ttdef"><b>Definition:</b> <a href="../../df/d0a/main_8cpp_source.html#l00044">main.cpp:44</a></div></div>
+<div class="ttc" id="amain_8cpp_html_ab916cd111c242592963ef24f8a94e490"><div class="ttname"><a href="../../df/d0a/main_8cpp.html#ab916cd111c242592963ef24f8a94e490">log2file</a></div><div class="ttdeci">void log2file(Ricom *ricom)</div><div class="ttdef"><b>Definition:</b> <a href="../../df/d0a/main_8cpp_source.html#l00084">main.cpp:84</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['v_5fsplitter_360',['v_splitter',['../d9/d46/GuiUtils_8cpp.html#aa0e46dd03446be8b08071d8fcfbbb098',1,'v_splitter(float thickness, float &amp;size0, float &amp;min_h, float &amp;max_h, float offset):&#160;GuiUtils.cpp'],['../d7/db2/GuiUtils_8h.html#aa0e46dd03446be8b08071d8fcfbbb098',1,'v_splitter(float thickness, float &amp;size0, float &amp;min_h, float &amp;max_h, float offset):&#160;GuiUtils.cpp']]]
+  ['update_5fimage_360',['update_image',['../d0/d05/classSdlImageWindow.html#ad57460643eace38953fe3e42d5a9d1d5',1,'SdlImageWindow']]],
+  ['update_5flist_361',['Update_list',['../da/df1/classUpdate__list.html#a3bee74552e8c4a16f6e059f8f4a9f957',1,'Update_list']]],
+  ['update_5fviews_362',['update_views',['../d2/d30/RunGUI_8cpp.html#ab116c62b2b43df743e80f6faeec89bb0',1,'RunGUI.cpp']]]
 ];

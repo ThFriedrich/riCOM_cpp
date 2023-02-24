@@ -6,7 +6,7 @@ var searchData=
   ['fftshift_5fmap_59',['fftshift_map',['../de/d71/classRicom__kernel.html#ae15f92baf2b4237f312d25c3d69d6a46',1,'Ricom_kernel']]],
   ['file_60',['FILE',['../d2/d8f/namespaceRICOM.html#a31b452a6e457451cf52b54552e0ec4a6a7aa5423fb27afdd62478a6241a3f20ac',1,'RICOM']]],
   ['file_5fpath_61',['file_path',['../d8/d91/classRicom.html#a777e0ce949697feed146ac6818553789',1,'Ricom']]],
-  ['fileconnector_62',['FileConnector',['../d1/dd7/classFileConnector.html',1,'']]],
+  ['fileconnector_62',['FileConnector',['../d1/dd7/classFileConnector.html#a32e96ca8ecf5e23b58ff16356e707d2b',1,'FileConnector::FileConnector()'],['../d1/dd7/classFileConnector.html',1,'FileConnector']]],
   ['fileconnector_2ecpp_63',['FileConnector.cpp',['../d3/d44/FileConnector_8cpp.html',1,'']]],
   ['fileconnector_2eh_64',['FileConnector.h',['../da/dab/FileConnector_8h.html',1,'']]],
   ['first_5fframe_65',['first_frame',['../d1/dcc/classProgressMonitor.html#a8d6d3dc60f1053f996f6924aa9f937eb',1,'ProgressMonitor']]],
