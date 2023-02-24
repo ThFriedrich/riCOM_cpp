@@ -99,13 +99,13 @@ namespace ImGuiINI
         return values;
     }
 
-    std::string ImVec2string(ImVec4 &v)
+    std::string ImVec2string(const ImVec4 &v)
     {
         std::string s = std::to_string(v.x) + "," + std::to_string(v.y) + "," + std::to_string(v.z) + "," + std::to_string(v.w);
         return s;
     }
 
-    std::string ImVec2string(ImVec2 &v)
+    std::string ImVec2string(const ImVec2 &v)
     {
         std::string s = std::to_string(v.x) + "," + std::to_string(v.y);
         return s;

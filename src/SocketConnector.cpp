@@ -15,12 +15,11 @@
 
 int SocketConnector::read_data(char *buffer, int data_size)
 {
-    int bytes_payload_count = 0;
     int bytes_payload_total = 0;
 
     while (bytes_payload_total < data_size)
     {
-        bytes_payload_count = recv(rc_socket,
+        int bytes_payload_count = recv(rc_socket,
                                    &buffer[bytes_payload_total],
                                    data_size - bytes_payload_total,
                                    0);
@@ -45,12 +44,11 @@ void SocketConnector::flush_socket()
     close_socket();
     connect_socket();
     char *buffer = {0};
-    int bytes_count = 0;
     int bytes_total = 0;
 
     while (true)
     {
-        bytes_count = recv(rc_socket, &buffer[0], 1, 0);
+        int bytes_count = recv(rc_socket, &buffer[0], 1, 0);
 
         if (bytes_count <= 0)
         {
@@ -112,7 +110,7 @@ void SocketConnector::connect_socket()
 }
 
 #ifdef WIN32
-void SocketConnector::handle_socket_errors(std::string raised_at)
+void SocketConnector::handle_socket_errors(const std::string &raised_at)
 {
     wchar_t *s = NULL;
     FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -130,7 +128,7 @@ void SocketConnector::close_socket()
     WSACleanup();
 }
 #else
-void SocketConnector::handle_socket_errors(std::string raised_at)
+void SocketConnector::handle_socket_errors(const std::string &raised_at)
 {
     std::cout << "Error occured while " << raised_at << "." << std::endl;
     std::cout << std::strerror(errno) << std::endl;

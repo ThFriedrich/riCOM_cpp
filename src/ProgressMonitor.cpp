@@ -13,18 +13,16 @@
 
 #include "ProgressMonitor.h"
 
-ProgressMonitor::ProgressMonitor(unsigned long fr_total, bool b_bar, float report_interval, std::ostream &out) : fr_count(0), fr_count_i(0), fr_freq(0), report_set(false), report_set_public(false), first_frame(true), fr(0), fr_avg(0), fr_count_a(0)
+ProgressMonitor::ProgressMonitor(size_t fr_total, bool b_bar, float report_interval, std::ostream &out) : fr_count(0), fr_count_i(0), fr_freq(0),
+                                                                                                          report_set(false), report_set_public(false),
+                                                                                                          first_frame(true), fr(0), fr_avg(0), fr_count_a(0),
+                                                                                                          time_stamp(chc::high_resolution_clock::now()), unit("kHz"),
+                                                                                                          unit_bar("#"), unit_space("-")
 {
-
     this->fr_total = fr_total;
     this->b_bar = b_bar;
     this->out = &out;
     this->report_interval = report_interval;
-
-    time_stamp = chc::high_resolution_clock::now();
-    unit = "kHz";
-    unit_bar = "#";
-    unit_space = "-";
 }
 
 int ProgressMonitor::GetBarLength()
@@ -103,10 +101,6 @@ void ProgressMonitor::Report(unsigned long idx, float print_val)
             }
             *out << "]" << std::setw(CHARACTER_WIDTH_PERCENTAGE + 1);
             *out << std::setprecision(2) << std::fixed << print_val << std::fixed << " " << unit << std::flush;
-        }
-        else // Print out the Frequency only
-        {
-            *out << std::setprecision(2) << std::fixed << print_val << std::fixed << " " << unit << "\t" << std::flush;
         }
         if (idx >= fr_total)
         {

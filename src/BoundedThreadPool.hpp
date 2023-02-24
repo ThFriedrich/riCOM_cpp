@@ -40,13 +40,6 @@ private:
         }
     }
 
-    void wait_for_space()
-    {
-        std::unique_lock<std::mutex> lock(mtx_queue);
-        cnd_buffer_full.wait(lock, [this]
-                             { return (tasks.size() < (size_t)limit); });
-    }
-
     void wait_for_task()
     {
         std::unique_lock<std::mutex> lock(mtx_queue);
@@ -128,17 +121,17 @@ public:
         create_threads();
     }
 
-    BoundedThreadPool(int n_threads) : b_running(true), limit(8)
+    explicit BoundedThreadPool(int n_threads) : limit(8)
     {
         init(n_threads, limit);
     }
 
-    BoundedThreadPool(int n_threads, int limit) : b_running(true)
+    explicit BoundedThreadPool(int n_threads, int limit)
     {
         init(n_threads, limit);
     }
 
-    BoundedThreadPool() : n_threads(0) {}
+    BoundedThreadPool() :  b_running(false), n_threads(0), limit(0) {}
 
     ~BoundedThreadPool()
     {

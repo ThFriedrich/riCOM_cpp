@@ -23,7 +23,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations
     ricom->b_plot_cbed = false;
     std::string save_img = "";
     std::string save_dat = "";
-    std::vector<SdlImageWindow> image_windows;
+    
     // command line arguments
     for (int i = 1; i < argc; i++)
     {
@@ -194,6 +194,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations
 
     if (ricom->b_plot2SDL)
     {
+        std::vector<SdlImageWindow> image_windows;
         std::thread run_thread;
         run_thread = std::thread(RICOM::run_ricom, ricom, ricom->mode);
         while (ricom->srf_ricom == NULL)

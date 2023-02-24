@@ -1,12 +1,12 @@
-/* Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu, 
- * University of Antwerp - All Rights Reserved. 
+/* Copyright (C) 2021 Thomas Friedrich, Chu-Ping Yu,
+ * University of Antwerp - All Rights Reserved.
  * You may use, distribute and modify
  * this code under the terms of the GPL3 license.
  * You should have received a copy of the GPL3 license with
- * this file. If not, please visit: 
+ * this file. If not, please visit:
  * https://www.gnu.org/licenses/gpl-3.0.en.html
- * 
- * Authors: 
+ *
+ * Authors:
  *   Thomas Friedrich <thomas.friedrich@uantwerpen.be>
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
@@ -51,8 +51,8 @@ void MerlinInterface::read_data(char *buffer, int data_size)
 
 void MerlinInterface::init_uv(std::vector<int> &u, std::vector<int> &v)
 {
-    u.reserve(nx);
-    v.reserve(ny);
+    u.resize(nx);
+    v.resize(ny);
 
     for (int i = 0; i < ny; i++)
     {
@@ -98,10 +98,9 @@ void MerlinInterface::convert_binary_to_chars(std::vector<T> &data)
 {
     size_t T_size = static_cast<size_t>(sizeof(T) * 8);
     size_t i_dat = static_cast<size_t>(data.size() / T_size);
-    size_t idx = 0;
     for (size_t i = i_dat - 1; i > 0; i--)
     {
-        idx = i * T_size;
+        size_t idx = i * T_size;
         for (size_t j = 0; j < T_size; j++)
         {
             data[idx + j] = static_cast<T>((data[i] >> j) & 1);
@@ -143,7 +142,7 @@ int MerlinInterface::read_aquisition_header()
     while (p)
     {
         acq += std::string(p) + "\n";
-        std::cout << p << std::endl; //printing each token
+        std::cout << p << std::endl; // printing each token
         p = strtok(NULL, "\n");
     }
     socket->connection_information = acq;
@@ -289,7 +288,7 @@ void MerlinInterface::init_interface(SocketConnector *socket)
     socket->connect_socket();
 };
 
-void MerlinInterface::init_interface(std::string &path)
+void MerlinInterface::init_interface(const std::string &path)
 {
     mode = MODE_FILE;
     file.path = path;
@@ -311,3 +310,11 @@ void MerlinInterface::close_interface()
         break;
     }
 };
+
+MerlinInterface::MerlinInterface() : socket(), file(), dtype(),
+                                     head_buffer(), head(), tcp_buffer(),
+                                     rcv(), ds_merlin(),
+                                     b_raw(true), b_binary(true),
+                                     nx(256), ny(256),
+                                     data_depth(1), mode(MODE_FILE),
+                                     acq(), acq_header(){};

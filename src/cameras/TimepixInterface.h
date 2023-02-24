@@ -72,9 +72,9 @@ public:
                         size_t first_frame, size_t end_frame);
 
     inline void read_event(e_event &ev);
-    void init_interface(std::string &t3p_path);
+    void init_interface(const std::string &t3p_path);
     void close_interface();
 
-    TimepixInterface() : nx(256), ny(256), dt(1000){};
+    TimepixInterface() : mode(MODE_FILE), nx(256), ny(256), dt(1000){};
 };
 #endif // TIMEPIX_INTERFACE_H

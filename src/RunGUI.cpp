@@ -682,10 +682,10 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
 
         if (b_acq_open)
         {
-            ImVec2 pos = viewport->Pos;
-            pos[0] += control_menu_size[0] + 128;
-            pos[1] += menu_bar_size[1] + 128;
-            ImGui::SetNextWindowPos(pos, ImGuiCond_FirstUseEver);
+            ImVec2 pos_t = viewport->Pos;
+            pos_t[0] += control_menu_size[0] + 128;
+            pos_t[1] += menu_bar_size[1] + 128;
+            ImGui::SetNextWindowPos(pos_t, ImGuiCond_FirstUseEver);
             ImVec2 size = {200, 400};
             ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 

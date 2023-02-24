@@ -47,7 +47,7 @@ template <class T>
 class ImGuiImageWindow
 {
 public:
-    ImGuiImageWindow(std::string title, GLuint *tex_id, bool auto_render, int data_cmap, GIM_Flags flags = GIM_Flags::None, bool *visible = nullptr);
+    ImGuiImageWindow(const std::string &title, GLuint *tex_id, bool auto_render, int data_cmap, GIM_Flags flags = GIM_Flags::None, bool *visible = nullptr);
     void set_data(int width, int height, std::vector<T> *data);
     void render_window(bool b_redraw, int last_y, int render_update_offset, bool b_trigger_update);
     void render_window(bool b_redraw, int last_y, bool b_trigger_update);
@@ -112,8 +112,6 @@ private:
     inline void set_min_max(int last_y);
     inline void reset_limits();
     inline void set_pixel(int idx, int idy);
-    inline void draw_pixel(int x, int y, float val);
-    inline void draw_pixel(int x, int y, float ang, float mag);
     inline void compute_fft();
     inline bool has(GIM_Flags flag);
     inline bool detect_frame_switch(int &fr_count);

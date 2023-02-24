@@ -11,13 +11,53 @@
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
 
+#include <string>
 #include "Ricom.h"
 #include "Camera.h"
+
+static std::string version("0.0.4-beta");
 
 // Forward Declarations
 int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations &hardware_configurations);
 int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configurations);
 void log2file(Ricom *ricom);
+
+# ifdef __linux__
+#include <sys/utsname.h>
+std::string get_os()
+{
+    struct utsname uts;
+    uname(&uts);
+    return std::string(uts.sysname) + " Kernel : " + std::string(uts.version);
+}
+#elif defined(_WIN32) || defined(WIN32)
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <windows.h>
+
+    typedef LONG NTSTATUS, *PNTSTATUS;
+    #define STATUS_SUCCESS (0x00000000)
+
+    typedef NTSTATUS (WINAPI* RtlGetVersionPtr)(PRTL_OSVERSIONINFOW);
+
+    std::string get_os() {
+    HMODULE hMod = ::GetModuleHandleW(L"ntdll.dll");
+    if (hMod) {
+        RtlGetVersionPtr fxPtr = (RtlGetVersionPtr)::GetProcAddress(hMod, "RtlGetVersion");
+        if (fxPtr != nullptr) {
+            RTL_OSVERSIONINFOW rovi = { 0 };
+            rovi.dwOSVersionInfoSize = sizeof(rovi);
+            if ( STATUS_SUCCESS == fxPtr(&rovi) ) {
+                return "Windows " + std::to_string(rovi.dwMajorVersion) + "." + std::to_string(rovi.dwMinorVersion) ;
+            }
+        }
+    }
+    RTL_OSVERSIONINFOW rovi = { 0 };
+    return "Windows";
+}
+#else
+    std::string get_os() {return "Unknown"};
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -52,10 +92,9 @@ void log2file(Ricom *ricom)
         std::cout << "Error redirecting error output to log file" << std::endl;
     }
     ricom->b_print2file = true;
-    time_t timetoday;
-    time(&timetoday);
-    std::cout << std::endl
-              << "##########################################################################" << std::endl;
-    std::cout << "              Ricom started at " << asctime(localtime(&timetoday));
-    std::cout << "##########################################################################" << std::endl;
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::cout << std::endl;
+    std::cout << "Ricom version " << version << " started at " << std::put_time(&tm, "%d/%m/%Y %H:%M:%S") << std::endl;
+    std::cout << "OS: " << get_os() << std::endl;
 }

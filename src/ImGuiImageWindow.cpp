@@ -83,11 +83,11 @@ void ImGuiImageWindow<T>::render_image()
 template <typename T>
 void ImGuiImageWindow<T>::render_image(int last_idr)
 {
-    int last_y = (last_idr / nx);
+    int last_yt = (last_idr / nx);
     if (b_data_set)
     {
         set_min_max(last_idr);
-        for (int y = (std::max)(0, this->last_y - render_update_offset); y < (std::min)(last_y + render_update_offset, ny); y++)
+        for (int y = (std::max)(0, this->last_y - render_update_offset); y < (std::min)(last_yt + render_update_offset, ny); y++)
         {
             for (int x = 0; x < nx; x++)
             {
@@ -95,7 +95,7 @@ void ImGuiImageWindow<T>::render_image(int last_idr)
             }
         }
     }
-    this->last_y = last_y;
+    this->last_y = last_yt;
     this->last_idr = last_idr;
 }
 
@@ -141,10 +141,9 @@ float ImGuiImageWindow<std::complex<float>>::get_val(int idr)
 template <typename T>
 void ImGuiImageWindow<T>::set_min_max(int last_idr)
 {
-    float val;
     for (int idr = this->last_idr; idr < last_idr; idr++)
     {
-        val = get_val(idr);
+        float val = get_val(idr);
         if (val < data_min)
         {
             data_min = val;
@@ -163,10 +162,9 @@ void ImGuiImageWindow<T>::set_min_max(int last_idr)
 template <typename T>
 void ImGuiImageWindow<T>::set_min_max()
 {
-    float val;
     for (int idr = 0; idr < nxy; idr++)
     {
-        val = get_val(idr);
+        float val = get_val(idr);
         if (val < data_min)
         {
             data_min = val;
@@ -183,7 +181,7 @@ void ImGuiImageWindow<T>::set_min_max()
 }
 
 template <typename T>
-ImGuiImageWindow<T>::ImGuiImageWindow(std::string title, GLuint *tex_id, bool auto_render, int data_cmap, GIM_Flags flags, bool *visible)
+ImGuiImageWindow<T>::ImGuiImageWindow(const std::string &title, GLuint *tex_id, bool auto_render, int data_cmap, GIM_Flags flags, bool *visible)
 {
 
     this->title = title;

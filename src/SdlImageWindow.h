@@ -23,8 +23,8 @@ class SdlImageWindow
 {
 public:
     const char *title; // Window title
-    SdlImageWindow(const char *title);
-    SdlImageWindow(const char *title, SDL_Surface *srf, int nx, int ny, int scale);
+    explicit SdlImageWindow(const char *title);
+    explicit SdlImageWindow(const char *title, SDL_Surface *srf, int nx, int ny, int scale);
     void create_window(SDL_Surface *srf, int nx, int ny, int scale);
     void update_image();
 

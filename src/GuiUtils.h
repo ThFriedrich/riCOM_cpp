@@ -32,7 +32,7 @@ public:
     ImGuiID dock_id;
     const ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_DockSpace;
     const ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-    Main_Dock(ImGuiID dock_id);
+    explicit Main_Dock(ImGuiID dock_id);
     void render(ImVec2 pos, ImVec2 size);
 };
 
@@ -41,7 +41,7 @@ void save_numpy(std::string *path, int nx, int ny, std::vector<T> *data);
 
 void save_image(std::string *path, SDL_Surface *sdl_srf);
 
-void v_splitter(float thickness, float &size0, float &min_h, float &max_h, float offset);
+void v_splitter(float thickness,float &size0, const float &min_h, const float &max_h, const float &offset);
 namespace SDL_Utils
 {
     void draw_pixel(SDL_Surface *surface, int x, int y, float val, int color_map);

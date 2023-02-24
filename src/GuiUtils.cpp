@@ -38,7 +38,7 @@ void save_image(std::string *path, SDL_Surface *sdl_srf)
 }
 
 // Vertical Splitter Container
-void v_splitter(float thickness, float &size0, float &min_h, float &max_h, float offset)
+void v_splitter(float thickness, float &size0, const float &min_h, const float &max_h, const float &offset)
 {
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyle().Colors[ImGuiCol_ScrollbarGrab]);

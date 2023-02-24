@@ -27,6 +27,7 @@ public:
     void open_file();
     void close_file();
     void read_data(char *buffer, size_t data_size);
+    FileConnector();
 
 private:
     std::ifstream stream;

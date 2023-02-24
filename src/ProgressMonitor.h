@@ -45,11 +45,11 @@ public:
     bool first_frame;                     // first frame flag
     ProgressMonitor &operator++();
     void reset_flags();
-    ProgressMonitor(unsigned long fr_total, bool b_bar = true, float report_interval = 250.0, std::ostream &out = std::cerr);
+    explicit ProgressMonitor(size_t fr_total, bool b_bar = true, float report_interval = 250.0, std::ostream &out = std::cerr);
 
 private:
     bool b_bar;             // Print progress bar
-    unsigned long fr_total; // Total number of frames
+    size_t fr_total; // Total number of frames
     std::ostream *out;      // Output stream
 
     float fr;                    // Frequncy per frame

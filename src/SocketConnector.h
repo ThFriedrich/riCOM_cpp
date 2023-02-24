@@ -60,6 +60,6 @@ private:
 #else
     int opt = 1;
 #endif
-    void handle_socket_errors(std::string raised_at);
+    void handle_socket_errors(const std::string &raised_at);
 };
 #endif // SOCKET_CONNECTOR_H

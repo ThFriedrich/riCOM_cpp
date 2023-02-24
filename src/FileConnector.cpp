@@ -60,3 +60,5 @@ void FileConnector::reset_file()
     stream.clear();
     stream.seekg(0, std::ios::beg);
 }
+
+FileConnector::FileConnector(): path(), stream(), file_size(0), pos(0) {};

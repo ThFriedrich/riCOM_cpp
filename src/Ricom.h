@@ -75,9 +75,13 @@ public:
                      b_filter(false),
                      kernel_filter_frequency{1, 4},
                      k_width_sym(0),
+                     k_area(0),
                      rotation(0.0),
                      kernel_x(),
-                     kernel_y()
+                     kernel_y(),
+                     kernel_filter(),
+                     f_approx(),
+                     srf_kx(), srf_ky()
     {
         compute_kernel();
     };
@@ -141,7 +145,7 @@ namespace RICOM
         TCP
     };
     void run_ricom(Ricom *r, RICOM::modes mode);
-    void run_connection_script(Ricom *r, MerlinSettings *merlin, std::string python_path);
+    void run_connection_script(Ricom *r, MerlinSettings *merlin, const std::string &python_path);
 }
 
 class Ricom

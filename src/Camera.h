@@ -72,7 +72,7 @@ namespace CAMERA
     {
     public:
         Camera();
-        Camera(Camera_BASE &cam);
+        explicit Camera(Camera_BASE &cam);
         void run(Ricom *ricom);
         template <typename T>
         void read_frame(std::vector<T> &data, bool b_first);
@@ -84,7 +84,7 @@ namespace CAMERA
     {
     public:
         Camera();
-        Camera(Camera_BASE &cam);
+        explicit Camera(Camera_BASE &cam);
         void run(Ricom *ricom);
         void read_frame_com(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
                             std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,

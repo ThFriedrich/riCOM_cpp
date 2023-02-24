@@ -28,29 +28,21 @@ void Ricom_kernel::compute_kernel()
     k_area = k_width_sym * k_width_sym;
     kernel_x.assign(k_area, 0);
     kernel_y.assign(k_area, 0);
-    float d;
-    float ix_sd;
-    float iy_sd;
-    int ix_s;
-    int iy_s;
-    int ix_e;
-    int iy_e;
 
     for (int iy = 0; iy < k_width_sym; iy++)
     {
-        iy_e = (iy + 1) * k_width_sym - 1;
+        int iy_e = (iy + 1) * k_width_sym - 1;
         for (int ix = 0; ix < k_width_sym; ix++)
         {
-            ix_s = ix - kernel_size;
-            iy_s = iy - kernel_size;
-            d = ix_s * ix_s + iy_s * iy_s;
-
-            ix_e = k_area - iy_e + ix - 1;
+            int ix_s = ix - kernel_size;
+            int iy_s = iy - kernel_size;
+            float d = ix_s * ix_s + iy_s * iy_s;
+            int ix_e = k_area - iy_e + ix - 1;
 
             if (d > 0)
             {
-                ix_sd = (ix_s / d);
-                iy_sd = (iy_s / d);
+                float ix_sd = (ix_s / d);
+                float iy_sd = (iy_s / d);
                 kernel_x[ix_e] = cos_rot * ix_sd - sin_rot * iy_sd;
                 kernel_y[ix_e] = sin_rot * ix_sd + cos_rot * iy_sd;
             }
@@ -73,8 +65,6 @@ void Ricom_kernel::compute_kernel()
 // Compute the filter
 void Ricom_kernel::compute_filter()
 {
-    float dist = 0;
-    int ic = 0;
     kernel_filter.assign(k_area, 0);
     float lb = pow(kernel_filter_frequency[0], 2);
     float ub = pow(kernel_filter_frequency[1], 2);
@@ -83,8 +73,8 @@ void Ricom_kernel::compute_filter()
     {
         for (int ix = 0; ix < k_width_sym; ix++)
         {
-            dist = pow(ix - kernel_size, 2) + pow(iy - kernel_size, 2);
-            ic = iy * k_width_sym + ix;
+            float dist = pow(ix - kernel_size, 2) + pow(iy - kernel_size, 2);
+            int ic = iy * k_width_sym + ix;
             if (dist <= ub && dist > lb)
             {
                 kernel_filter[ic] = 1;
@@ -132,10 +122,7 @@ void Ricom_kernel::approximate_frequencies(size_t nx_im)
             f_max = f_approx[i];
         }
     }
-    for (float &f : f_approx)
-    {
-        f /= f_max;
-    }
+    std::for_each(f_approx.begin(), f_approx.end(), [f_max](float &x) { x/=f_max; });
 }
 
 void Ricom_kernel::draw_surfaces()
@@ -156,10 +143,9 @@ void Ricom_kernel::draw_surfaces()
     std::pair ky_min_max = std::minmax_element(kernel_y.begin(), kernel_y.end());
     // Update pixel at location
 
-    int ic;
     for (int y = 0; y < k_width_sym; y++)
     {
-        ic = y * k_width_sym;
+        int ic = y * k_width_sym;
         for (int x = 0; x < k_width_sym; x++)
         {
             float valx = (kernel_x[ic + x] - kx_min_max.first[0]) / (kx_min_max.second[0] - kx_min_max.first[0]);
@@ -331,22 +317,19 @@ template <typename T>
 void Ricom::com(std::vector<T> *data, std::array<float, 2> &com)
 {
     float dose = 0;
-    T px;
-    size_t sum_x_temp;
     std::vector<size_t> sum_x(camera.nx_cam);
     std::vector<size_t> sum_y(camera.ny_cam);
     sum_x.assign(camera.nx_cam, 0);
     sum_y.assign(camera.ny_cam, 0);
     com = {0.0, 0.0};
 
-    size_t y_nx;
     for (int idy = 0; idy < camera.ny_cam; idy++)
     {
-        y_nx = idy * camera.nx_cam;
-        sum_x_temp = 0;
+        size_t y_nx = idy * camera.nx_cam;
+        size_t sum_x_temp = 0;
         for (int idx = 0; idx < camera.nx_cam; idx++)
         {
-            px = data->data()[y_nx + idx];
+            T px = data->data()[y_nx + idx];
             swap_endianess(px);
             sum_x_temp += px;
             sum_y[idx] += px;
@@ -575,13 +558,12 @@ void Ricom::plot_cbed(std::vector<T> *cbed_data)
 {
     float v_min = INFINITY;
     float v_max = 0.0;
-    float vl_f;
 
     for (size_t id = 0; id < (*cbed_data).size(); id++)
     {
         T vl = (*cbed_data)[id];
         swap_endianess(vl);
-        vl_f = log(1.0 + (float)vl);
+        float vl_f = log1p((float)vl);
         if (vl_f > v_max)
         {
             v_max = vl_f;
@@ -593,14 +575,13 @@ void Ricom::plot_cbed(std::vector<T> *cbed_data)
         cbed_log[id] = vl_f;
     }
 
-    int iy_t;
     float v_rng = v_max - v_min;
     for (int ix = 0; ix < camera.ny_cam; ix++)
     {
-        iy_t = camera.v[ix] * camera.nx_cam;
+        int iy_t = camera.v[ix] * camera.nx_cam;
         for (int iy = 0; iy < camera.nx_cam; iy++)
         {
-            vl_f = cbed_log[iy_t + camera.u[iy]];
+            float vl_f = cbed_log[iy_t + camera.u[iy]];
             float val = (vl_f - v_min) / v_rng;
             SDL_Utils::draw_pixel(srf_cbed, ix, iy, val, cbed_cmap);
         }
@@ -860,7 +841,7 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
     std::array<float, 2> com_xy = {0.0, 0.0};
     std::array<float, 2> *p_com_xy = &com_xy;
     std::array<float, 2> com_xy_sum = {0.0, 0.0};
-    int idxx = 0;
+
     int ix = 0;
     int iy = 0;
     int acc_cbed = 0;
@@ -882,7 +863,7 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
     while (true)
     {
         // process two frames before the probe position to avoid toa problem
-        idxx = prog_mon.fr_count - nxy * img_num - 2;
+        int idxx = prog_mon.fr_count - nxy * img_num - 2;
 
         ++prog_mon;
         fr_count = prog_mon.fr_count;
@@ -1112,7 +1093,7 @@ void RICOM::run_ricom(Ricom *r, RICOM::modes mode)
     }
 }
 
-void RICOM::run_connection_script(Ricom *ricom, MerlinSettings *merlin, std::string python_path)
+void RICOM::run_connection_script(Ricom *ricom, MerlinSettings *merlin, const std::string &python_path)
 {
 
     int m_fr_total = ((ricom->nx + ricom->skip_row) * ricom->ny + ricom->skip_img) * ricom->rep;
