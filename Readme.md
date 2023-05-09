@@ -30,8 +30,8 @@ This repository contains the C++ implementation of the riCOM (Real Time Centre O
 ```bash
 mkdir build
 cd build
-cmake --config Release ..
-make
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build .
 ```
 
 ### Build instructions Windows
