@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['v_5fsplitter_363',['v_splitter',['../d9/d46/GuiUtils_8cpp.html#add33c5c5dc0a5718de5e5c8d887eccff',1,'v_splitter(float thickness, float &amp;size0, const float &amp;min_h, const float &amp;max_h, const float &amp;offset):&#160;GuiUtils.cpp'],['../d7/db2/GuiUtils_8h.html#add33c5c5dc0a5718de5e5c8d887eccff',1,'v_splitter(float thickness, float &amp;size0, const float &amp;min_h, const float &amp;max_h, const float &amp;offset):&#160;GuiUtils.cpp']]]
+  ['v_5fsplitter_323',['v_splitter',['../dc/d69/Gui__utils_8cpp.html#aa0e46dd03446be8b08071d8fcfbbb098',1,'v_splitter(float thickness, float &amp;size0, float &amp;min_h, float &amp;max_h, float offset):&#160;Gui_utils.cpp'],['../d5/d80/Gui__utils_8h.html#aa0e46dd03446be8b08071d8fcfbbb098',1,'v_splitter(float thickness, float &amp;size0, float &amp;min_h, float &amp;max_h, float offset):&#160;Gui_utils.cpp']]]
 ];

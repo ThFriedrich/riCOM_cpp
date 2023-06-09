@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['mini_5fcase_5fsensitive_490',['MINI_CASE_SENSITIVE',['../d2/d30/RunGUI_8cpp.html#aeca8f939c0ec92f4562e9b6eb44e1dfe',1,'RunGUI.cpp']]]
+  ['socket_442',['SOCKET',['../d0/d3c/SocketConnector_8h.html#aff55fe551a9992a54ec54621c524d0a4',1,'SocketConnector.h']]],
+  ['socket_5ferror_443',['SOCKET_ERROR',['../d0/d3c/SocketConnector_8h.html#a633b0396ff93d336a088412a190a5072',1,'SocketConnector.h']]]
 ];
