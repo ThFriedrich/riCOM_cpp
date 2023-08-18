@@ -98,8 +98,8 @@ $(function() {
 <h3>Building from Command Line</h3>
 <div class="fragment"><div class="line">mkdir build</div>
 <div class="line">cd build</div>
-<div class="line">cmake -S . -D CMAKE_BUILD_TYPE=Release ..</div>
-<div class="line">make</div>
+<div class="line">cmake -DCMAKE_BUILD_TYPE=Release ..</div>
+<div class="line">cmake --build .</div>
 </div><!-- fragment --><h2>Build instructions Windows</h2>
 <h3>Dependencies</h3>
 <ul>
@@ -130,7 +130,7 @@ $(function() {
 <h2>Running example files</h2>
 <p>A set of compatible example datasets are provided in an open data repository on <a href="https://zenodo.org/record/5572123#.YbHNzNso9hF">Zenodo</a>.</p>
 <h2>Command Line Interface</h2>
-<p>The program can be run from command line without opening a GUI. The input file path and other parameters are being specified by additional parameters as listed <a href="https://github.com/ThFriedrich/riCOM_cpp/blob/303d8a9fb5b056810d83f51e5f858dc5cd608d56/src/main.cpp#L880">here</a>. <br  />
+<p>The program can be run from command line without opening a GUI. The input file path and other parameters are being specified by additional parameters as listed <a href="https://github.com/ThFriedrich/riCOM_cpp/blob/master/src/RunCLI.cpp">here</a>. <br  />
  Example usage: </p><div class="fragment"><div class="line">./RICOM -filename default1.mib -nx 64 -ny 64</div>
 </div><!-- fragment --><p> This functionality was originally intended for dubugging purposes. It is therefore not fully developed yet, but may be useful for some users nevertheless.</p>
 <h1>License</h1>

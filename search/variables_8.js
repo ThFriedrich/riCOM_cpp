@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['mode_376',['mode',['../d8/d91/classRicom.html#a48ed12293e8da5669ac6d45cfc91ccdb',1,'Ricom']]],
-  ['model_377',['model',['../d3/d29/classCAMERA_1_1Camera__BASE.html#a6922ef1f8044a643f1c7aa3937b811d8',1,'CAMERA::Camera_BASE']]]
+  ['last_5fy_417',['last_y',['../d8/d91/classRicom.html#a27dcb6f3ef87f24df3287da44dfa74ec',1,'Ricom']]],
+  ['limit_418',['limit',['../d5/df8/classBoundedThreadPool.html#a6695feb6083a73373b01f26988e8b20f',1,'BoundedThreadPool']]]
 ];

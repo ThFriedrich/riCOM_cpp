@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['u_414',['u',['../d3/d29/classCAMERA_1_1Camera__BASE.html#abe462fa6278683dc73202eea71e84a90',1,'CAMERA::Camera_BASE']]],
-  ['update_5fdose_5flowbound_415',['update_dose_lowbound',['../d8/d91/classRicom.html#afcd0375fe013c485f46dfdb12e4443b9',1,'Ricom']]],
-  ['update_5foffset_416',['update_offset',['../d8/d91/classRicom.html#a406e6dc9d511ea645cd088c180fb5bb0',1,'Ricom']]]
+  ['title_460',['title',['../d0/d05/classSdlImageWindow.html#a19ad3b09bf31e681001d45530ea39231',1,'SdlImageWindow']]],
+  ['type_461',['type',['../d3/d29/classCAMERA_1_1Camera__BASE.html#a49f3b3cd97c99bb2a2d0cb03b5031018',1,'CAMERA::Camera_BASE']]]
 ];
