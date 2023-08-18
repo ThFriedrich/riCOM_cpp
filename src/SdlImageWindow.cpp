@@ -13,7 +13,7 @@
 
 #include "SdlImageWindow.h"
 
-SdlImageWindow::SdlImageWindow(const char *title, SDL_Surface *srf, int nx, int ny, int scale)
+SdlImageWindow::SdlImageWindow(const char *title, SDL_Surface *srf, int nx, int ny, float scale)
 {
     this->title = title;
     create_window(srf, nx, ny, scale);
@@ -28,7 +28,7 @@ SdlImageWindow::SdlImageWindow(const char *title)
     this->srf = NULL;      // Surface (data source)
 };
 
-void SdlImageWindow::create_window(SDL_Surface *srf, int nx, int ny, int scale)
+void SdlImageWindow::create_window(SDL_Surface *srf, int nx, int ny, float scale)
 {
     // Creating window
     window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, scale * nx, scale * ny, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
