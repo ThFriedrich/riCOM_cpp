@@ -43,13 +43,14 @@ public:
     std::atomic<bool> report_set;         // update flag (reset internally)
     std::atomic<bool> report_set_public;  // update flag (reset externally)
     bool first_frame;                     // first frame flag
+    size_t fr_total; // Total number of frames
     ProgressMonitor &operator++();
+    ProgressMonitor &operator+=(int step);
     void reset_flags();
     explicit ProgressMonitor(size_t fr_total, bool b_bar = true, float report_interval = 250.0, std::ostream &out = std::cerr);
 
 private:
     bool b_bar;             // Print progress bar
-    size_t fr_total; // Total number of frames
     std::ostream *out;      // Output stream
 
     float fr;                    // Frequncy per frame
@@ -63,9 +64,9 @@ private:
     const char *unit_bar;
     const char *unit_space;
 
-    void Report(unsigned long idx, float print_val);
-    void ClearBarField();
-    int GetBarLength();
+    inline void Report(size_t idx, float print_val);
+    inline void ClearBarField();
+    inline int GetBarLength();
 };
 
 #endif // _PROGRESS_MONITOR_

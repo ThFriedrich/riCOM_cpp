@@ -59,6 +59,25 @@ ProgressMonitor &ProgressMonitor::operator++()
     return *this;
 }
 
+ProgressMonitor &ProgressMonitor::operator+=(int step)
+{
+    fr_count_i += step;
+    fr_count += step;
+    auto mil_secs = chc::duration_cast<float_ms>(chc::high_resolution_clock::now() - time_stamp).count();
+    if (mil_secs > report_interval || fr_count >= fr_total)
+    {
+        fr = fr_count_i / mil_secs;
+        fr_avg += fr;
+        fr_count_a++;
+        fr_freq = fr_avg / fr_count_a;
+        Report(fr_count, fr_avg / fr_count_a);
+        report_set = true;
+        report_set_public = true;
+    }
+    return *this;
+}
+
+
 void ProgressMonitor::reset_flags()
 {
     fr_count_i = 0;
@@ -66,7 +85,7 @@ void ProgressMonitor::reset_flags()
     time_stamp = chc::high_resolution_clock::now();
 }
 
-void ProgressMonitor::Report(unsigned long idx, float print_val)
+void ProgressMonitor::Report(size_t idx, float print_val)
 {
     try
     {
@@ -108,7 +127,7 @@ void ProgressMonitor::Report(unsigned long idx, float print_val)
                  << std::flush;
         }
     }
-    catch (unsigned long e)
+    catch (size_t e)
     {
         ClearBarField();
         std::cerr << "EXCEPTION: frame index (" << e << ") went out of bounds (fr_total = " << fr_total << ")." << std::endl

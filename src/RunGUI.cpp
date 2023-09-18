@@ -250,6 +250,7 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
 
     ImGuiID dock_id = 3775;
     Main_Dock main_dock(dock_id);
+    static int drag_min_pos = 1;
 
     // Main loop
     while (!b_done)
@@ -305,11 +306,11 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
                 {
                     ini_cfg["Merlin"]["Live Interface Menu"] = std::to_string(b_merlin_live_menu);
                 }
-                if (ImGui::DragInt("nx Merlin", &hardware_configurations[CAMERA::MERLIN].nx_cam, 1, 1, 2048))
+                if (ImGui::DragScalar("nx Merlin", ImGuiDataType_U16, &hardware_configurations[CAMERA::MERLIN].nx_cam, 1, &drag_min_pos))
                 {
                     ini_cfg["Merlin"]["nx"] = std::to_string(hardware_configurations[CAMERA::MERLIN].nx_cam);
                 }
-                if (ImGui::DragInt("ny Merlin", &hardware_configurations[CAMERA::MERLIN].ny_cam, 1, 1, 2048))
+                if (ImGui::DragScalar("ny Merlin", ImGuiDataType_U16, &hardware_configurations[CAMERA::MERLIN].ny_cam, 1, &drag_min_pos))
                 {
                     ini_cfg["Merlin"]["ny"] = std::to_string(hardware_configurations[CAMERA::MERLIN].ny_cam);
                 }
@@ -333,14 +334,15 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
 
                 ImGui::Text("Timepix Camera");
                 // ImGui::Checkbox("Live Interface Menu", &b_timepix_live_menu);
-                if (ImGui::DragInt("nx Timepix", &hardware_configurations[CAMERA::TIMEPIX].nx_cam, 1, 1, 2048))
+                if (ImGui::DragScalar("nx Timepix", ImGuiDataType_U16, &hardware_configurations[CAMERA::TIMEPIX].nx_cam, 1, &drag_min_pos))
                 {
                     ini_cfg["Timepix"]["nx"] = std::to_string(hardware_configurations[CAMERA::TIMEPIX].nx_cam);
                 }
-                if (ImGui::DragInt("ny Timepix", &hardware_configurations[CAMERA::TIMEPIX].ny_cam, 1, 1, 2048))
+                if (ImGui::DragScalar("ny Timepix", ImGuiDataType_U16, &hardware_configurations[CAMERA::TIMEPIX].ny_cam, 1, &drag_min_pos))
                 {
                     ini_cfg["Timepix"]["ny"] = std::to_string(hardware_configurations[CAMERA::TIMEPIX].ny_cam);
                 }
+
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Additional Imaging Modes"))
@@ -437,7 +439,7 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
             }
 
             ImGui::Text("CBED Centre");
-            int *max_nx = (std::max)(&ricom->camera.nx_cam, &ricom->camera.ny_cam);
+            uint16_t *max_nx = (std::max)(&ricom->camera.nx_cam, &ricom->camera.ny_cam);
             bool offset_changed = ImGui::DragFloat2("Centre", &ricom->offset[0], 0.1f, 0.0, (float)*max_nx);
             if (offset_changed)
             {
@@ -518,11 +520,11 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
                     ImGui::Text("Depth");
                     ImGui::SameLine();
                     ImGui::BeginGroup();
-                    ImGui::RadioButton("1", &ricom->camera.depth, 1);
+                    ImGui::RadioButton("1", ricom->camera.depth == 1);
                     ImGui::SameLine();
-                    ImGui::RadioButton("6", &ricom->camera.depth, 6);
+                    ImGui::RadioButton("6", ricom->camera.depth == 6);
                     ImGui::SameLine();
-                    ImGui::RadioButton("12", &ricom->camera.depth, 12);
+                    ImGui::RadioButton("12", ricom->camera.depth == 12);
                     ImGui::EndGroup();
                 }
 
@@ -584,11 +586,11 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
                 {
                     ImGui::BeginGroup();
                     ImGui::Text("Depth");
-                    ImGui::RadioButton("1", &ricom->camera.depth, 1);
+                    ImGui::RadioButton("1", ricom->camera.depth == 1);
                     ImGui::SameLine();
-                    ImGui::RadioButton("6", &ricom->camera.depth, 6);
+                    ImGui::RadioButton("6", ricom->camera.depth == 6);
                     ImGui::SameLine();
-                    ImGui::RadioButton("12", &ricom->camera.depth, 12);
+                    ImGui::RadioButton("12", ricom->camera.depth == 12);
                     ImGui::EndGroup();
                     if (ImGui::IsItemHovered())
                     {

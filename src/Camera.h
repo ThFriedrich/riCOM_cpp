@@ -42,11 +42,13 @@ namespace CAMERA
     public:
         Camera_model model;
         Camera_type type;
-        int nx_cam;
-        int ny_cam;
+        uint16_t nx_cam;
+        uint16_t ny_cam;
         bool swap_endian;
-        int depth;
+        uint16_t depth;
+        size_t group_size;
         int dwell_time;
+
         std::vector<int> u;
         std::vector<int> v;
         void init_uv_default();
@@ -57,7 +59,9 @@ namespace CAMERA
                         ny_cam(256),
                         swap_endian(true),
                         depth(1),
+                        group_size(1),
                         dwell_time(1000){};
+
     };
 
     // primary template
@@ -86,17 +90,21 @@ namespace CAMERA
         Camera();
         explicit Camera(Camera_BASE &cam);
         void run(Ricom *ricom);
-        void read_frame_com(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
-                            std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
-                            std::vector<float> &stem_map, bool b_stem,
-                            std::array<float, 2> &offset, std::array<float, 2> &radius,
-                            size_t first_frame, size_t end_frame);
-        void read_frame_com_cbed(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
-                                 std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
-                                 std::vector<float> &stem_map, bool b_stem,
-                                 std::array<float, 2> &offset, std::array<float, 2> &radius,
-                                 std::vector<uint16_t> &frame, size_t frame_id,
-                                 size_t first_frame, size_t end_frame);
+        void read_frame_com(
+            std::vector<size_t> &dose_map,
+            std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
+            std::vector<float> &stem_map, bool b_stem,
+            std::array<float, 2> &offset, std::array<float, 2> &radius,
+            bool &b_stop, int &finished_line, size_t &first_frame, size_t &end_frame
+        );
+        void read_frame_com_cbed(
+            std::vector<size_t> &dose_map,
+            std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
+            std::vector<float> &stem_map, bool b_stem,
+            std::array<float, 2> &offset, std::array<float, 2> &radius,
+            std::vector<size_t> &frame, std::array<std::atomic<size_t>, 3> &frame_id_plot_cbed,
+            bool &b_stop, int &finished_line, size_t &first_frame, size_t &end_frame
+        );
     };
 
     class Default_configurations

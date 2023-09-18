@@ -122,7 +122,8 @@ void Ricom_kernel::approximate_frequencies(size_t nx_im)
             f_max = f_approx[i];
         }
     }
-    std::for_each(f_approx.begin(), f_approx.end(), [f_max](float &x) { x/=f_max; });
+    std::for_each(f_approx.begin(), f_approx.end(), [f_max](float &x)
+                  { x /= f_max; });
 }
 
 void Ricom_kernel::draw_surfaces()
@@ -267,16 +268,16 @@ Ricom::Ricom() : stem_max(-FLT_MAX), stem_min(FLT_MAX),
                  p_prog_mon(nullptr),
                  b_busy(false),
                  update_offset(true),
-                 b_vSTEM(false), b_e_mag(false), b_plot_cbed(true), b_plot2SDL(false),
-                 b_recompute_detector(false), b_recompute_kernel(false),
-                 detector(),
+                 b_vSTEM(false), b_e_mag(false),
+                 b_plot_cbed(true),
+                 b_plot2SDL(false), b_recompute_detector(false),
+                 b_recompute_kernel(false), detector(),
                  kernel(),
-                 offset{127.5, 127.5}, com_public{0.0, 0.0},
+                 offset{256, 256}, com_public{0.0, 0.0},
                  com_map_x(), com_map_y(),
                  ricom_data(),
                  stem_data(),
-                 e_field_data(),
-                 nx(256), ny(256), nxy(0),
+                 nx(1024), ny(1024), nxy(0),
                  rep(1), fr_total(0),
                  skip_row(1), skip_img(0),
                  n_threads(1), queue_size(64),
@@ -554,14 +555,14 @@ void Ricom::set_e_field_pixel(size_t idx, size_t idy)
 
 // Draw a CBED in log-scale to the SDL surface srf_cbed
 template <typename T>
-void Ricom::plot_cbed(std::vector<T> *cbed_data)
+void Ricom::plot_cbed(std::vector<T> &cbed_data)
 {
     float v_min = INFINITY;
     float v_max = 0.0;
 
-    for (size_t id = 0; id < (*cbed_data).size(); id++)
+    for (size_t id = 0; id < cbed_data.size(); id++)
     {
-        T vl = (*cbed_data)[id];
+        T vl = cbed_data[id];
         swap_endianess(vl);
         float vl_f = log1p((float)vl);
         if (vl_f > v_max)
@@ -667,7 +668,7 @@ void Ricom::com_icom(std::vector<T> data, int ix, int iy, std::array<float, 2> *
     fr_count = p_prog_mon->fr_count;
     if (p_prog_mon->report_set)
     {
-        update_surfaces(iy, data_ptr);
+        update_surfaces(iy, *data_ptr);
         last_y = iy;
         fr_freq = p_prog_mon->fr_freq;
         rescales_recomputes();
@@ -707,7 +708,7 @@ void Ricom::com_icom(std::vector<T> *data_ptr, int ix, int iy, std::array<float,
     fr_count = p_prog_mon->fr_count;
     if (p_prog_mon->report_set)
     {
-        update_surfaces(iy, data_ptr);
+        update_surfaces(iy, *data_ptr);
         last_y = iy;
         fr_freq = p_prog_mon->fr_freq;
         rescales_recomputes();
@@ -802,26 +803,27 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *c
 }
 
 template <typename T>
-void Ricom::update_surfaces(int iy, std::vector<T> *p_frame)
+void Ricom::update_surfaces(int iy, std::vector<T> &frame)
 {
     if (b_plot2SDL)
     {
-        draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), (std::min)(iy + kernel.kernel_size, ny - 1));
+        // draw_ricom_image((std::max)(0, last_y - kernel.kernel_size), (std::min)(iy + kernel.kernel_size, ny - 1));
+        draw_ricom_image((std::max)(0, last_y % ny - kernel.kernel_size - 1), iy);
         if (b_vSTEM)
         {
-            draw_stem_image(last_y, iy);
+            draw_stem_image(last_y % ny, iy);
         }
         if (b_e_mag)
         {
-            draw_e_field_image(last_y, iy);
+            draw_e_field_image(last_y % ny, iy);
         }
     }
     if (b_plot_cbed)
     {
-        plot_cbed(p_frame);
+        plot_cbed(frame);
     }
 }
-// Process EVENT_BASED camera data
+
 template <class CameraInterface>
 void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *camera_spec)
 {
@@ -829,28 +831,28 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
     std::vector<size_t> dose_map(nxy);
     std::vector<size_t> sumx_map(nxy);
     std::vector<size_t> sumy_map(nxy);
-    std::vector<uint16_t> frame(camera_spec->nx_cam * camera_spec->ny_cam);
-    std::vector<uint16_t> *p_frame = &frame;
+    std::vector<size_t> frame(camera_spec->nx_cam * camera_spec->ny_cam);
 
     BoundedThreadPool pool;
+
+    camera_spec->scan_x = nx;
+    camera_spec->scan_y = ny;
+    camera.group_size = nx;
 
     // Start Thread Pool
     if (n_threads > 1)
         pool.init(n_threads, queue_size);
 
-    std::array<float, 2> com_xy = {0.0, 0.0};
-    std::array<float, 2> *p_com_xy = &com_xy;
-    std::array<float, 2> com_xy_sum = {0.0, 0.0};
+    frame_id_plot_cbed[0] = 0;
+    frame_id_plot_cbed[2] = 0;
 
-    int ix = 0;
-    int iy = 0;
-    int acc_cbed = 0;
-    int acc_idx = 0;
 
     size_t img_num = 0;
     size_t first_frame = img_num * nxy;
     size_t end_frame = (img_num + 1) * nxy;
     size_t fr_total_u = (size_t)fr_total;
+    bool b_stop = false;
+    int finished_line = 0;
 
     ProgressMonitor prog_mon(fr_total, !b_print2file, redraw_interval);
     p_prog_mon = &prog_mon;
@@ -860,116 +862,275 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
     sumy_map.assign(nxy, 0);
     reinit_vectors_limits();
 
-    while (true)
+    std::clock_t start_time = std::clock();
+    bool fin = false;
+
+    // start the reading and preprocess threads
+    camera_spec->read_frame_com_cbed(
+        dose_map, sumx_map, sumy_map,
+        stem_data, b_vSTEM,
+        offset, detector.radius2,
+        frame, frame_id_plot_cbed,
+        b_stop, finished_line, first_frame, end_frame
+    );
+
+    if (finished_line < 1)
     {
-        // process two frames before the probe position to avoid toa problem
-        int idxx = prog_mon.fr_count - nxy * img_num - 2;
+        start_time = std::clock();
+    }
+    while (!fin)
+    {
+        // std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        // std::cout << finished_line << std::endl;
 
-        ++prog_mon;
-        fr_count = prog_mon.fr_count;
+        line_processor(
+            img_num, dose_map, sumx_map, sumy_map, frame,
+            first_frame, end_frame, p_prog_mon, camera_spec, fr_total_u, fin, &pool,
+            b_stop, finished_line);
+        // std::cout<<finished_line<<std::endl;
+    }
+    std::clock_t end_time = std::clock();
 
-        if (acc_cbed < 3 && b_plot_cbed)
+    // close the reading and preprocess threads
+    camera_spec->read_frame_com_cbed(
+        dose_map, sumx_map, sumy_map,
+        stem_data, b_vSTEM,
+        offset, detector.radius2,
+        frame, frame_id_plot_cbed,
+        b_stop, finished_line, first_frame, end_frame
+    );
+
+    double time_taken = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC;
+    int cnt = 0;
+    for (int i = 0; i < nxy; i++)
+    {
+        cnt += dose_map[i];
+    }
+    std::cout << cnt << " electrons in " << time_taken << " seconds" << std::endl;
+    p_prog_mon = nullptr;
+}
+
+template <class CameraInterface>
+void Ricom::line_processor(
+    size_t &img_num,
+    std::vector<size_t> &dose_map,
+    std::vector<size_t> &sumx_map,
+    std::vector<size_t> &sumy_map,
+    std::vector<size_t> &frame,
+    size_t &first_frame,
+    size_t &end_frame,
+    ProgressMonitor *prog_mon,
+    CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *camera_spec,
+    size_t &fr_total_u,
+    bool &fin,
+    BoundedThreadPool *pool,
+    bool &b_stop,
+    int &finished_line
+)
+{
+    int delay_update = (kernel.kernel_size+1)*2*nx;
+    int idxx = 0;
+    // process newly finished lines, if there are any
+    if ((int)(prog_mon->fr_count / nx) < finished_line)
+    {
+        idxx = (int)(prog_mon->fr_count) % nxy;
+        *prog_mon += nx;
+
+        // if (idxx==delay_update){
+        //     reset_limits();
+        // }
+
+        // actual processing start
+        std::array<float, 2> com_xy = {0.0, 0.0};
+        std::array<float, 2> com_xy_sum = {0.0, 0.0};
+        for (size_t i = 0; i < camera.group_size; i++)
         {
-            camera_spec->read_frame_com_cbed(prog_mon.fr_count,
-                                             dose_map, sumx_map, sumy_map,
-                                             stem_data, b_vSTEM,
-                                             offset, detector.radius2,
-                                             frame, acc_idx,
-                                             first_frame, end_frame);
-            acc_cbed += 1;
-        }
-        else
-        {
-            camera_spec->read_frame_com(prog_mon.fr_count,
-                                        dose_map, sumx_map, sumy_map,
-                                        stem_data, b_vSTEM,
-                                        offset, detector.radius2,
-                                        first_frame, end_frame);
-        }
-
-        if (idxx >= 0)
-        {
-            if (dose_map[idxx] == 0)
+            int idxx_p_i = idxx + i;
+            if ((idxx_p_i >= 0) | (camera.group_size > 1))
             {
-                com_xy[0] = offset[0];
-                com_xy[1] = offset[1];
-            }
-            else
-            {
-                com_xy[0] = sumx_map[idxx] / dose_map[idxx];
-                com_xy[1] = sumy_map[idxx] / dose_map[idxx];
-            }
-            com_map_x[idxx] = com_xy[0];
-            com_map_y[idxx] = com_xy[1];
-            com_xy_sum[0] += com_xy[0];
-            com_xy_sum[1] += com_xy[1];
-
-            ix = idxx % nx;
-            iy = floor(idxx / nx);
-
-            if (n_threads > 1)
-            {
-                pool.push_task([=]
-                               { icom(com_xy, ix, iy); });
-            }
-            else
-            {
-                icom(p_com_xy, ix, iy);
+                if (dose_map[idxx_p_i] == 0)
+                {
+                    com_map_x[idxx_p_i] = offset[0];
+                    com_map_y[idxx_p_i] = offset[1];
+                }
+                else
+                {
+                    com_map_x[idxx_p_i] = sumx_map[idxx_p_i] / dose_map[idxx_p_i];
+                    com_map_y[idxx_p_i] = sumy_map[idxx_p_i] / dose_map[idxx_p_i];
+                }
+                com_xy_sum[0] += com_map_x[idxx_p_i];
+                com_xy_sum[1] += com_map_y[idxx_p_i];
+                if (!b_cumulative) {
+                    sumx_map[idxx_p_i] = 0;
+                    sumy_map[idxx_p_i] = 0;
+                    dose_map[idxx_p_i] = 0;
+                }
             }
             if (b_e_mag)
             {
-                compute_electric_field(com_xy, idxx);
+                com_xy[0] = com_map_x[idxx_p_i];
+                com_xy[1] = com_map_y[idxx_p_i];
+                compute_electric_field(com_xy, idxx_p_i);
             }
         }
 
-        if (prog_mon.report_set)
+        if (n_threads > 1)
         {
-            update_surfaces(iy, p_frame);
+            pool->push_task([=]
+                            { icom_group_classical(idxx); });
+        }
+        else
+        {
+            icom_group_classical(idxx);
+        }
+        // end of line handler
+        if ((prog_mon->report_set) && (idxx / nx - kernel.kernel_size*2)>0)
+        {
+            update_surfaces(idxx / nx - kernel.kernel_size*2, frame);
             if (b_plot_cbed)
             {
-                frame.assign(camera_spec->nx_cam * camera_spec->ny_cam, 0);
-                acc_cbed = 0;
-                acc_idx = fr_count;
+                frame_id_plot_cbed[2] = 1;
             }
-            fr_freq = prog_mon.fr_freq;
+            fr_freq = prog_mon->fr_freq;
             rescales_recomputes();
             for (int i = 0; i < 2; i++)
             {
-                com_public[i] = com_xy_sum[i] / prog_mon.fr_count_i;
+                com_public[i] = com_xy_sum[i] / camera.group_size;
                 com_xy_sum[i] = 0;
             }
-            prog_mon.reset_flags();
-            last_y = iy;
-        }
-
-        if (prog_mon.fr_count >= end_frame)
-        {
-            if (prog_mon.fr_count != fr_total_u)
-            {
-                img_num++;
-                first_frame = img_num * nxy;
-                end_frame = (img_num + 1) * nxy;
-                reinit_vectors_limits();
-                dose_map.assign(nxy, 0);
-                sumx_map.assign(nxy, 0);
-                sumy_map.assign(nxy, 0);
-            }
-
-            if (update_offset)
-            {
-                offset[0] = com_public[0];
-                offset[1] = com_public[1];
-            }
-        }
-
-        if (prog_mon.fr_count == fr_total_u || rc_quit)
-        {
-            pool.wait_for_completion();
-            p_prog_mon = nullptr;
-            return;
+            prog_mon->reset_flags();
         }
     }
-    p_prog_mon = nullptr;
+
+    // end of image handler
+
+    if (prog_mon->fr_count >= end_frame)
+
+    {
+        if (b_continuous) {
+            prog_mon->fr_total += nxy;
+            fr_total_u += nxy;
+        }
+        if (prog_mon->fr_count != fr_total_u)
+        {
+            img_num++;
+            first_frame = img_num * nxy;
+            end_frame = (img_num + 1) * nxy;
+            if (!b_cumulative)
+            {
+                reinit_vectors_limits();
+                //dose_map.assign(nxy, 0);
+                //sumx_map.assign(nxy, 0);
+                //sumy_map.assign(nxy, 0);
+            }
+        }
+        if (update_offset)
+        {
+            offset[0] = com_public[0];
+            offset[1] = com_public[1];
+        }
+    }
+
+    // end of recon handler
+    if (((prog_mon->fr_count >= fr_total_u) && (!b_continuous)) || rc_quit)
+    {
+        // camera_spec->finish = true;
+        pool->wait_for_completion();
+        p_prog_mon = nullptr;
+        fin = true;
+        b_cumulative = false;
+        b_continuous = false;
+        b_stop = true;
+    }
+}
+
+void Ricom::icom_group_decompose(int idxx)
+{
+    id_x_y idr;
+    for (int idc = idxx; idc < (idxx + (int)camera.group_size); idc++)
+    {
+        for (int id = 0; id < kernel.k_area; id++)
+        {
+            update_list.shift(idr, id, idc);
+            if (idr.valid)
+            {
+                ricom_data[idr.id] += ((com_map_x[idc] - offset[0]) * kernel.kernel_x[id] +
+                                       (com_map_y[idc] - offset[1]) * kernel.kernel_y[id]);
+            }
+        }
+        if (ricom_data[idc] > ricom_max)
+        {
+            ricom_max = ricom_data[idc];
+            rescale_ricom = true;
+        }
+        if (ricom_data[idc] < ricom_min)
+        {
+            ricom_min = ricom_data[idc];
+            rescale_ricom = true;
+        }
+    }
+}
+
+void Ricom::icom_group_classical(int idxx)
+{
+    int idk;
+    int idc;
+    int id;
+    int idr_x;
+    int idr_delay;
+    int k_bias = kernel.k_width_sym * (kernel.kernel_size + 1);
+
+
+
+
+    if (((idxx / nx - 2*kernel.kernel_size) >= 0))
+    {
+
+
+        for (int i_line = 0, idr_delay = idxx - kernel.kernel_size * nx;
+        i_line < (int)camera.group_size;
+        i_line++, idr_delay++)
+        { ricom_data[idr_delay]=0; }
+
+
+        for (int iy = -kernel.kernel_size; iy <= kernel.kernel_size; iy++)
+        {
+            for (
+                int i_line = 0, idr_delay = idxx - kernel.kernel_size * nx;
+                i_line < (int)camera.group_size;
+                i_line++, idr_delay++)
+            {
+                idc = idr_delay + iy * nx;
+                idr_x = idr_delay % nx;
+                idk = (kernel.kernel_size + iy) * kernel.k_width_sym;
+                for (int ix = -kernel.kernel_size; ix <= kernel.kernel_size; ix++)
+                {
+                    if (((idr_x + ix) >= 0) & ((idr_x + ix) < nx))
+                    {
+                        // ricom_data[idr] += ((com_map_x[idc + ix] - offset[0]) * -kernel.kernel_x[idk] +
+                        //                     (com_map_y[idc + ix] - offset[1]) * -kernel.kernel_y[idk]);
+
+                        ricom_data[idr_delay] += ((com_map_x[idc + ix] - offset[0]) * -kernel.kernel_x[idk] +
+                                                  (com_map_y[idc + ix] - offset[1]) * -kernel.kernel_y[idk]);
+                    }
+                    ++idk;
+                }
+                if (ricom_data[idr_delay] > ricom_max)
+                {
+                    ricom_max = ricom_data[idr_delay];
+                    rescale_ricom = true;
+                }
+                if (ricom_data[idr_delay] < ricom_min)
+                {
+                    ricom_min = ricom_data[idr_delay];
+                    rescale_ricom = true;
+                }
+            }
+        }
+        last_y = (idxx / nx - kernel.kernel_size);
+        fr_count = idxx;
+    }
+
 }
 
 // Entrance function for Ricom_reconstructinon
@@ -1031,6 +1192,7 @@ template void Ricom::run_reconstruction<MerlinInterface>(RICOM::modes);
 template void Ricom::run_reconstruction<TimepixInterface>(RICOM::modes);
 template void Ricom::process_data<uint8_t>(CAMERA::Camera<MerlinInterface, CAMERA::FRAME_BASED> *camera_spec);
 template void Ricom::process_data<uint16_t>(CAMERA::Camera<MerlinInterface, CAMERA::FRAME_BASED> *camera_spec);
+template void Ricom::process_data<uint32_t>(CAMERA::Camera<MerlinInterface, CAMERA::FRAME_BASED> *camera_spec);
 template void Ricom::process_data(CAMERA::Camera<TimepixInterface, CAMERA::EVENT_BASED> *camera_spec);
 
 // Helper functions
@@ -1044,10 +1206,14 @@ void Ricom::reset_limits()
 
 void Ricom::reinit_vectors_limits()
 {
-    ricom_data.assign(nxy, 0);
-    stem_data.assign(nxy, 0);
-    com_map_x.assign(nxy, 0);
-    com_map_y.assign(nxy, 0);
+    //ricom_data.assign(nxy, 0);
+    //stem_data.assign(nxy, 0);
+    //com_map_x.assign(nxy, 0);
+    //com_map_y.assign(nxy, 0);
+    // std::fill(ricom_data.begin(), ricom_data.end(), 0);
+    std::fill(stem_data.begin(), stem_data.end(), 0);
+    // std::fill(com_map_x.begin(), com_map_x.end(), 0);
+    // std::fill(com_map_y.begin(), com_map_y.end(), 0);
     last_y = 0;
     reset_limits();
 }

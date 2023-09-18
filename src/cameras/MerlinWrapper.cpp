@@ -59,6 +59,7 @@ void Camera<MerlinInterface, FRAME_BASED>::read_frame(std::vector<T> &data, bool
 // Template Specializations to avoid linker issues
 template void Camera<MerlinInterface, FRAME_BASED>::read_frame(std::vector<uint8_t> &data, bool dump_head);
 template void Camera<MerlinInterface, FRAME_BASED>::read_frame(std::vector<uint16_t> &data, bool dump_head);
+template void Camera<MerlinInterface, FRAME_BASED>::read_frame(std::vector<uint32_t> &data, bool dump_head);
 
 // Run method wrapper
 template <>

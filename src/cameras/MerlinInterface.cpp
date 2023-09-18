@@ -279,6 +279,7 @@ void MerlinInterface::read_frame(std::vector<T> &data, bool dump_head)
 // Template Specializations to avoid linker issues
 template void MerlinInterface::read_frame(std::vector<uint8_t> &data, bool dump_head);
 template void MerlinInterface::read_frame(std::vector<uint16_t> &data, bool dump_head);
+template void MerlinInterface::read_frame(std::vector<uint32_t> &data, bool dump_head);
 
 void MerlinInterface::init_interface(SocketConnector *socket)
 {

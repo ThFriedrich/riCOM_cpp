@@ -36,6 +36,7 @@
 #include <fftw3.h>
 #include <chrono>
 #include <algorithm>
+#include <ctime>
 
 #include "BoundedThreadPool.hpp"
 #include "tinycolormap.hpp"
@@ -179,7 +180,7 @@ private:
     // Private Methods - General
     void init_surface();
     template <typename T>
-    inline void update_surfaces(int iy, std::vector<T> *p_frame);
+    inline void update_surfaces(int iy, std::vector<T> &frame);
     void reinit_vectors_limits();
     void reset_limits();
     void reset_file();
@@ -189,6 +190,44 @@ private:
     inline void skip_frames(int n_skip, std::vector<T> &data, CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *camera_fr);
     template <typename T>
     inline void swap_endianess(T &val);
+
+    template <class CameraInterface>
+    void line_processor(
+        size_t &img_num,
+        std::vector<size_t> &dose_map,
+        std::vector<size_t> &sumx_map,
+        std::vector<size_t> &sumy_map,
+        std::vector<size_t> &frame,
+        size_t &first_frame,
+        size_t &end_frame,
+        ProgressMonitor *prog_mon,
+        CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *camera_spec,
+        size_t &fr_total_u,
+        bool &fin,
+        BoundedThreadPool *pool,
+        bool &b_stop,
+        int &finished_line
+    );
+
+    template <class CameraInterface>
+    void process_data_process(
+        size_t &img_num,
+        int idxx,
+        std::vector<size_t> &dose_map, 
+        std::vector<size_t> &sumx_map, 
+        std::vector<size_t> &sumy_map,
+        std::vector<uint16_t> &frame,
+        int &acc_cbed,
+        size_t &first_frame,
+        size_t &end_frame,
+        CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *camera_spec,
+        ProgressMonitor *prog_mon,
+        size_t fr_total_u,
+        bool &fin,
+        BoundedThreadPool *pool
+    );
+    void icom_group_decompose(int idxx);
+    void icom_group_classical(int idxx);
 
     // Private Methods - riCOM
     inline void icom(std::array<float, 2> *com, int x, int y);
@@ -219,13 +258,17 @@ public:
     RICOM::modes mode;
     bool b_print2file;
     int redraw_interval;
-    int last_y;
+    std::atomic<int> last_y;
     ProgressMonitor *p_prog_mon;
     bool b_busy;
     bool update_offset;
+    bool b_continuous=false;
+    bool b_cumulative=false;
     bool b_vSTEM;
     bool b_e_mag;
     bool b_plot_cbed;
+    std::array<std::atomic<size_t>, 3> frame_id_plot_cbed = {0, 1, 0};
+
     bool b_plot2SDL;
     bool b_recompute_detector;
     bool b_recompute_kernel;
@@ -280,7 +323,7 @@ public:
     void run_reconstruction(RICOM::modes mode);
     void reset();
     template <typename T>
-    void plot_cbed(std::vector<T> *p_data);
+    void plot_cbed(std::vector<T> &data);
     template <typename T, class CameraInterface>
     void process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *camera);
     template <class CameraInterface>

@@ -196,13 +196,14 @@ int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations
     {
         std::vector<SdlImageWindow> image_windows;
         std::thread run_thread;
-        run_thread = std::thread(RICOM::run_ricom, ricom, ricom->mode);
+        // run_thread = std::thread(RICOM::run_ricom, ricom, ricom->mode);
         while (ricom->srf_ricom == NULL)
         {
             SDL_Delay(ricom->redraw_interval);
         }
 
-        run_thread.detach();
+        // run_thread.detach();
+        RICOM::run_ricom(ricom, ricom->mode);
 
         // // Initializing SDL
         SDL_DisplayMode DM; // To get the current display size

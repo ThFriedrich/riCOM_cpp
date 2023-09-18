@@ -28,7 +28,8 @@ private:
     std::vector<std::thread> threads;
     std::queue<std::function<void()>> tasks;
     std::atomic<bool> b_running;
-    std::mutex mtx_queue;
+    std::mutex mtx_queue_full;
+    std::mutex mtx_queue_empty;
     std::condition_variable cnd_buffer_full;
     std::condition_variable cnd_buffer_empty;
 
@@ -40,17 +41,23 @@ private:
         }
     }
 
-    void wait_for_task()
+    inline void execute_task(std::unique_lock<std::mutex> *lock)
     {
-        std::unique_lock<std::mutex> lock(mtx_queue);
+        std::function<void()> task = std::move(tasks.front());
+        tasks.pop();
+        cnd_buffer_full.notify_one();
+        lock->unlock();
+        task();
+        lock->lock();
+    }
+    inline void wait_for_task()
+    {
+        std::unique_lock<std::mutex> lock(mtx_queue_empty);
         cnd_buffer_empty.wait(lock, [this]
                               { return !tasks.empty() || !b_running; });
         if (!tasks.empty())
         {
-            std::function<void()> task = std::move(tasks.front());
-            tasks.pop();
-            cnd_buffer_full.notify_one();
-            task();
+            execute_task(&lock);
         }
     }
 
@@ -74,9 +81,9 @@ public:
     int limit;
 
     template <typename T>
-    void push_task(const T &task)
+    inline void push_task(const T &task)
     {
-        std::unique_lock<std::mutex> lock(mtx_queue);
+        std::unique_lock<std::mutex> lock(mtx_queue_full);
         cnd_buffer_full.wait(lock, [this]
                              { return ((int)tasks.size() < limit); });
         tasks.push(std::function<void()>(task));
@@ -84,7 +91,7 @@ public:
     }
 
     template <typename T, typename... A>
-    void push_task(const T &task, const A &...args)
+    inline void push_task(const T &task, const A &...args)
     {
         push_task([task, args...]
                   { task(args...); });
@@ -92,7 +99,7 @@ public:
 
     void wait_for_completion()
     {
-        std::unique_lock<std::mutex> lock(mtx_queue);
+        std::unique_lock<std::mutex> lock(mtx_queue_full);
         cnd_buffer_full.wait(lock, [this]
                              { return tasks.empty(); });
     }
@@ -131,7 +138,7 @@ public:
         init(n_threads, limit);
     }
 
-    BoundedThreadPool() :  b_running(false), n_threads(0), limit(0) {}
+    BoundedThreadPool() : b_running(false), n_threads(0), limit(0) {}
 
     ~BoundedThreadPool()
     {

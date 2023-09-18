@@ -27,6 +27,8 @@
 #include <atomic>
 #include <vector>
 #include <array>
+#include <thread>
+#include <chrono>
 
 #include "FileConnector.h"
 
@@ -39,10 +41,73 @@ PACK(struct e_event
          uint16_t tot;
      });
 
+const size_t PRELOC_SIZE = 1000*25;
+const size_t N_BUFFER = 4;
+
+
+
 class TimepixInterface
 {
 private:
     FileConnector file;
+    int sleep = 1;
+    // read buffer
+    std::thread read_guy;
+    bool read_started = false;
+    // process buffer
+    std::thread proc_guy;
+    bool proc_started = false;
+    int preloc_size = PRELOC_SIZE;
+    int n_buffer = N_BUFFER;
+    std::array<std::array<e_event, PRELOC_SIZE>, N_BUFFER> buffer;
+    int n_buffer_filled=0;
+    int n_buffer_processed=0;
+    uint64_t current_line = 0;
+    // event
+    uint64_t probe_position;
+    uint64_t probe_position_total;
+    uint16_t kx;
+    uint16_t ky;
+
+    // read methods
+    inline void read_file(FileConnector *file, bool *b_stop);
+    
+    // process methods
+    inline void process_buffer(
+        std::vector<size_t> *dose_map,
+        std::vector<size_t> *sumx_map,
+        std::vector<size_t> *sumy_map,
+        std::vector<float> *stem_map,
+        bool *b_stem,
+        std::array<float, 2> *offset,
+        std::array<float, 2> *radius,
+        std::vector<size_t> *frame, std::array<std::atomic<size_t>, 3> *frame_id_plot_cbed,
+        bool *b_stop, int *finished_line, size_t *first_frame, size_t *end_frame, bool *b_cbed
+    );
+    void process_event(
+        e_event *packet,
+        std::vector<size_t> *dose_map,
+        std::vector<size_t> *sumx_map,
+        std::vector<size_t> *sumy_map,
+        std::vector<float> *stem_map,
+        bool *b_stem,
+        std::array<float, 2> *offset,
+        std::array<float, 2> *radius
+    );
+    void process_event(
+        e_event *packet,
+        std::vector<size_t> *dose_map,
+        std::vector<size_t> *sumx_map,
+        std::vector<size_t> *sumy_map,
+        std::vector<float> *stem_map,
+        bool *b_stem,
+        std::array<float, 2> *offset,
+        std::array<float, 2> *radius,
+        std::vector<size_t> *frame, 
+        std::array<std::atomic<size_t>, 3> *frame_id_plot_cbed
+    );
+
+    inline void reset();
 
 protected:
     enum Mode
@@ -54,26 +119,34 @@ protected:
     int nx;
     int ny;
     int dt; // unit: ns
+    uint32_t gs;
 
 public:
-    void read_frame_com(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
-                        std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, 
-                        std::vector<float> &stem_map, bool b_stem,
-                        std::array<float, 2> &offset, std::array<float, 2> &radius,
-                        size_t first_frame, size_t end_frame
-                        );
+    void read_frame_com(
+        std::vector<size_t> &dose_map,
+        std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
+        std::vector<float> &stem_map, bool b_stem,
+        std::array<float, 2> &offset, std::array<float, 2> &radius,
+        bool &b_stop, int &finished_line, size_t &first_frame, size_t &end_frame
+    );
 
-    template <typename T>                    
-    void read_frame_com(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
-                        std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
-                        std::vector<float> &stem_map, bool b_stem,
-                        std::array<float, 2> &offset, std::array<float, 2> &radius,
-                        std::vector<T> &frame, size_t frame_id,
-                        size_t first_frame, size_t end_frame);
-
+    void read_frame_com(    
+        std::vector<size_t> &dose_map,
+        std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
+        std::vector<float> &stem_map, bool b_stem,
+        std::array<float, 2> &offset, std::array<float, 2> &radius,
+        std::vector<size_t> &frame, std::array<std::atomic<size_t>, 3> &frame_id_plot_cbed,
+        bool &b_stop, int &finished_line, size_t &first_frame, size_t &end_frame
+    );
     inline void read_event(e_event &ev);
     void init_interface(const std::string &t3p_path);
     void close_interface();
+
+    // scan
+    uint32_t scan_x;
+    uint32_t scan_y;
+    uint32_t scan_n;
+    bool finish = false;
 
     TimepixInterface() : mode(MODE_FILE), nx(256), ny(256), dt(1000){};
 };
