@@ -369,16 +369,6 @@ void Ricom::stem(std::vector<T> *data, size_t id_stem)
         {
             swap_endianess(px);
             stem_temp += px;
-            if (stem_temp > stem_max)
-            {
-                stem_max = stem_temp;
-                rescale_stem = true;
-            }
-            if (stem_temp < stem_min)
-            {
-                stem_min = stem_temp;
-                rescale_stem = true;
-            }
         }
     }
     stem_data[id_stem] = stem_temp;
@@ -457,6 +447,11 @@ void Ricom::draw_ricom_image()
 void Ricom::draw_ricom_image(int y0, int ye)
 {
     std::lock_guard<std::mutex> lock(ricom_mutex);
+    if (y0 < (kernel.kernel_size+2)) {
+        ricom_min = 0;
+        ricom_max = 0;
+    }
+
     for (int y = y0; y <= ye; y++)
     {
         for (int x = 0; x < nx; x++)
@@ -471,8 +466,12 @@ void Ricom::draw_ricom_image(int y0, int ye)
 void Ricom::set_ricom_pixel(int idx, int idy)
 {
     // determine location index of value in memory
+
     int idr = idy * nx + idx;
-    float val = (ricom_data[idr] - ricom_min) / (ricom_max - ricom_min);
+    ricom_min = std::min(ricom_data[idr], ricom_min);
+    ricom_max = std::max(ricom_data[idr], ricom_max);
+
+    float val = (ricom_data[idr] - ricom_min) / ((ricom_max - ricom_min));
 
     // Update pixel at location
     SDL_Utils::draw_pixel(srf_ricom, idx, idy, val, ricom_cmap);
@@ -494,6 +493,11 @@ void Ricom::draw_stem_image()
 // Redraws the stem image from line y0 to line ye
 void Ricom::draw_stem_image(int y0, int ye)
 {
+    if (y0==0) {
+        stem_min = stem_data[y0*nx];
+        stem_max = stem_data[y0*nx];
+    }
+
     std::lock_guard<std::mutex> lock(stem_mutex);
     for (int y = y0; y <= ye; y++)
     {
@@ -507,11 +511,13 @@ void Ricom::draw_stem_image(int y0, int ye)
 void Ricom::draw_e_field_image(int y0, int ye)
 {
     std::lock_guard<std::mutex> lock(e_field_mutex);
+    int idr;
     for (int y = y0; y <= ye; y++)
     {
         for (int x = 0; x < nx; x++)
         {
             set_e_field_pixel(x, y);
+            idr = y * nx + x;
         }
     }
 }
@@ -534,10 +540,14 @@ void Ricom::set_stem_pixel(size_t idx, size_t idy)
 {
     // determine location index of value in memory
     int idr = idy * nx + idx;
+    stem_min = std::min(stem_data[idr], stem_min);
+    stem_max = std::max(stem_data[idr], stem_max);
+
     float val = (stem_data[idr] - stem_min) / (stem_max - stem_min);
 
     // Update pixel at location
     SDL_Utils::draw_pixel(srf_stem, idx, idy, val, stem_cmap);
+    // stem_data[idr] = 0;
 }
 
 // set pixel in stem image srf_stem at location idx, idy to value corresponding
@@ -811,11 +821,11 @@ void Ricom::update_surfaces(int iy, std::vector<T> &frame)
         draw_ricom_image((std::max)(0, last_y % ny - kernel.kernel_size - 1), iy);
         if (b_vSTEM)
         {
-            draw_stem_image(last_y % ny, iy);
+            draw_stem_image(iy, iy+1);
         }
         if (b_e_mag)
         {
-            draw_e_field_image(last_y % ny, iy);
+            draw_e_field_image(iy, iy+1);
         }
     }
     if (b_plot_cbed)
@@ -1018,10 +1028,11 @@ void Ricom::line_processor(
             end_frame = (img_num + 1) * nxy;
             if (!b_cumulative)
             {
-                reinit_vectors_limits();
+                // reinit_vectors_limits();
                 //dose_map.assign(nxy, 0);
                 //sumx_map.assign(nxy, 0);
                 //sumy_map.assign(nxy, 0);
+                std::fill(stem_data.begin(), stem_data.end(), 0);
             }
         }
         if (update_offset)
@@ -1080,9 +1091,6 @@ void Ricom::icom_group_classical(int idxx)
     int idr_delay;
     int k_bias = kernel.k_width_sym * (kernel.kernel_size + 1);
 
-
-
-
     if (((idxx / nx - 2*kernel.kernel_size) >= 0))
     {
 
@@ -1095,8 +1103,7 @@ void Ricom::icom_group_classical(int idxx)
 
         for (int iy = -kernel.kernel_size; iy <= kernel.kernel_size; iy++)
         {
-            for (
-                int i_line = 0, idr_delay = idxx - kernel.kernel_size * nx;
+            for (int i_line = 0, idr_delay = idxx - kernel.kernel_size * nx;
                 i_line < (int)camera.group_size;
                 i_line++, idr_delay++)
             {
@@ -1114,16 +1121,6 @@ void Ricom::icom_group_classical(int idxx)
                                                   (com_map_y[idc + ix] - offset[1]) * -kernel.kernel_y[idk]);
                     }
                     ++idk;
-                }
-                if (ricom_data[idr_delay] > ricom_max)
-                {
-                    ricom_max = ricom_data[idr_delay];
-                    rescale_ricom = true;
-                }
-                if (ricom_data[idr_delay] < ricom_min)
-                {
-                    ricom_min = ricom_data[idr_delay];
-                    rescale_ricom = true;
                 }
             }
         }
@@ -1198,8 +1195,10 @@ template void Ricom::process_data(CAMERA::Camera<TimepixInterface, CAMERA::EVENT
 // Helper functions
 void Ricom::reset_limits()
 {
-    ricom_max = -FLT_MAX;
-    ricom_min = FLT_MAX;
+    // ricom_max = -FLT_MAX;
+    // ricom_min = FLT_MAX;
+    ricom_max = 0;
+    ricom_min = 0;
     stem_max = -FLT_MAX;
     stem_min = FLT_MAX;
 }
@@ -1207,11 +1206,11 @@ void Ricom::reset_limits()
 void Ricom::reinit_vectors_limits()
 {
     //ricom_data.assign(nxy, 0);
-    //stem_data.assign(nxy, 0);
+    stem_data.assign(nxy, 0);
     //com_map_x.assign(nxy, 0);
     //com_map_y.assign(nxy, 0);
     // std::fill(ricom_data.begin(), ricom_data.end(), 0);
-    std::fill(stem_data.begin(), stem_data.end(), 0);
+    // std::fill(stem_data.begin(), stem_data.end(), 0);
     // std::fill(com_map_x.begin(), com_map_x.end(), 0);
     // std::fill(com_map_y.begin(), com_map_y.end(), 0);
     last_y = 0;
