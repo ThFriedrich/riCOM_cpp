@@ -468,8 +468,8 @@ void Ricom::set_ricom_pixel(int idx, int idy)
     // determine location index of value in memory
 
     int idr = idy * nx + idx;
-    ricom_min = std::min(ricom_data[idr], ricom_min);
-    ricom_max = std::max(ricom_data[idr], ricom_max);
+    if (ricom_data[idr] < ricom_min) {ricom_min = ricom_data[idr];}
+    if (ricom_data[idr] > ricom_max) {ricom_max = ricom_data[idr];}
 
     float val = (ricom_data[idr] - ricom_min) / ((ricom_max - ricom_min));
 
@@ -540,8 +540,9 @@ void Ricom::set_stem_pixel(size_t idx, size_t idy)
 {
     // determine location index of value in memory
     int idr = idy * nx + idx;
-    stem_min = std::min(stem_data[idr], stem_min);
-    stem_max = std::max(stem_data[idr], stem_max);
+
+    if (stem_data[idr] < stem_min) {stem_min = stem_data[idr];}
+    if (stem_data[idr] > stem_max) {stem_max = stem_data[idr];}
 
     float val = (stem_data[idr] - stem_min) / (stem_max - stem_min);
 
