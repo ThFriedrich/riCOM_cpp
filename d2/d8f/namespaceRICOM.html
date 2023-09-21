@@ -144,36 +144,36 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html#l01262">1262</a> of file <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html">Ricom.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l01263"></a><span class="lineno"> 1263</span>&#160;{</div>
-<div class="line"><a name="l01264"></a><span class="lineno"> 1264</span>&#160; </div>
-<div class="line"><a name="l01265"></a><span class="lineno"> 1265</span>&#160;    <span class="keywordtype">int</span> m_fr_total = ((ricom-&gt;nx + ricom-&gt;skip_row) * ricom-&gt;ny + ricom-&gt;skip_img) * ricom-&gt;rep;</div>
-<div class="line"><a name="l01266"></a><span class="lineno"> 1266</span>&#160; </div>
-<div class="line"><a name="l01267"></a><span class="lineno"> 1267</span>&#160;    std::ofstream run_script(<span class="stringliteral">&quot;run_script.py&quot;</span>);</div>
-<div class="line"><a name="l01268"></a><span class="lineno"> 1268</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;from merlin_interface.merlin_interface import MerlinInterface&quot;</span> &lt;&lt; std::endl;</div>
-<div class="line"><a name="l01269"></a><span class="lineno"> 1269</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m = MerlinInterface(tcp_ip = \&quot;&quot;</span> &lt;&lt; ricom-&gt;socket.ip &lt;&lt; <span class="stringliteral">&quot;\&quot; , tcp_port=&quot;</span> &lt;&lt; merlin-&gt;com_port &lt;&lt; <span class="stringliteral">&quot;)&quot;</span> &lt;&lt; std::endl;</div>
-<div class="line"><a name="l01270"></a><span class="lineno"> 1270</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.hvbias = &quot;</span> &lt;&lt; merlin-&gt;hvbias &lt;&lt; std::endl;</div>
-<div class="line"><a name="l01271"></a><span class="lineno"> 1271</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.threshold0 = &quot;</span> &lt;&lt; merlin-&gt;threshold0 &lt;&lt; std::endl;</div>
-<div class="line"><a name="l01272"></a><span class="lineno"> 1272</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.threshold1 = &quot;</span> &lt;&lt; merlin-&gt;threshold1 &lt;&lt; std::endl;</div>
-<div class="line"><a name="l01273"></a><span class="lineno"> 1273</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.continuousrw = &quot;</span> &lt;&lt; (int)merlin-&gt;continuousrw &lt;&lt; std::endl;</div>
-<div class="line"><a name="l01274"></a><span class="lineno"> 1274</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.counterdepth = &quot;</span> &lt;&lt; ricom-&gt;camera.depth &lt;&lt; std::endl;</div>
-<div class="line"><a name="l01275"></a><span class="lineno"> 1275</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.acquisitiontime = &quot;</span> &lt;&lt; merlin-&gt;dwell_time &lt;&lt; std::endl;</div>
-<div class="line"><a name="l01276"></a><span class="lineno"> 1276</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.acquisitionperiod = &quot;</span> &lt;&lt; merlin-&gt;dwell_time &lt;&lt; std::endl;</div>
-<div class="line"><a name="l01277"></a><span class="lineno"> 1277</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.numframestoacquire = &quot;</span> &lt;&lt; m_fr_total + 1 &lt;&lt; std::endl; <span class="comment">// Ich verstehe nicht warum, aber er werkt.</span></div>
-<div class="line"><a name="l01278"></a><span class="lineno"> 1278</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.fileenable = &quot;</span> &lt;&lt; (<span class="keywordtype">int</span>)merlin-&gt;save &lt;&lt; std::endl;</div>
-<div class="line"><a name="l01279"></a><span class="lineno"> 1279</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.runheadless = &quot;</span> &lt;&lt; (int)merlin-&gt;headless &lt;&lt; std::endl;</div>
-<div class="line"><a name="l01280"></a><span class="lineno"> 1280</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.fileformat = &quot;</span> &lt;&lt; (<span class="keywordtype">int</span>)merlin-&gt;raw * 2 &lt;&lt; std::endl;</div>
-<div class="line"><a name="l01281"></a><span class="lineno"> 1281</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.triggerstart = &quot;</span> &lt;&lt; merlin-&gt;trigger &lt;&lt; std::endl;</div>
-<div class="line"><a name="l01282"></a><span class="lineno"> 1282</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.startacquisition()&quot;</span>;</div>
-<div class="line"><a name="l01283"></a><span class="lineno"> 1283</span>&#160;    run_script.close();</div>
-<div class="line"><a name="l01284"></a><span class="lineno"> 1284</span>&#160; </div>
-<div class="line"><a name="l01285"></a><span class="lineno"> 1285</span>&#160;    std::string command = python_path + <span class="stringliteral">&quot; run_script.py&quot;</span>;</div>
-<div class="line"><a name="l01286"></a><span class="lineno"> 1286</span>&#160;    <span class="keywordtype">int</span> r = std::system(command.c_str());</div>
-<div class="line"><a name="l01287"></a><span class="lineno"> 1287</span>&#160;    <span class="keywordflow">if</span> (r != 0)</div>
-<div class="line"><a name="l01288"></a><span class="lineno"> 1288</span>&#160;    {</div>
-<div class="line"><a name="l01289"></a><span class="lineno"> 1289</span>&#160;        std::cout &lt;&lt; <span class="stringliteral">&quot;main::run_connection_script: Cannot execute python run_script. Shell exited with code &quot;</span> &lt;&lt; r &lt;&lt; std::endl;</div>
-<div class="line"><a name="l01290"></a><span class="lineno"> 1290</span>&#160;    }</div>
-<div class="line"><a name="l01291"></a><span class="lineno"> 1291</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html#l01261">1261</a> of file <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html">Ricom.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l01262"></a><span class="lineno"> 1262</span>&#160;{</div>
+<div class="line"><a name="l01263"></a><span class="lineno"> 1263</span>&#160; </div>
+<div class="line"><a name="l01264"></a><span class="lineno"> 1264</span>&#160;    <span class="keywordtype">int</span> m_fr_total = ((ricom-&gt;nx + ricom-&gt;skip_row) * ricom-&gt;ny + ricom-&gt;skip_img) * ricom-&gt;rep;</div>
+<div class="line"><a name="l01265"></a><span class="lineno"> 1265</span>&#160; </div>
+<div class="line"><a name="l01266"></a><span class="lineno"> 1266</span>&#160;    std::ofstream run_script(<span class="stringliteral">&quot;run_script.py&quot;</span>);</div>
+<div class="line"><a name="l01267"></a><span class="lineno"> 1267</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;from merlin_interface.merlin_interface import MerlinInterface&quot;</span> &lt;&lt; std::endl;</div>
+<div class="line"><a name="l01268"></a><span class="lineno"> 1268</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m = MerlinInterface(tcp_ip = \&quot;&quot;</span> &lt;&lt; ricom-&gt;socket.ip &lt;&lt; <span class="stringliteral">&quot;\&quot; , tcp_port=&quot;</span> &lt;&lt; merlin-&gt;com_port &lt;&lt; <span class="stringliteral">&quot;)&quot;</span> &lt;&lt; std::endl;</div>
+<div class="line"><a name="l01269"></a><span class="lineno"> 1269</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.hvbias = &quot;</span> &lt;&lt; merlin-&gt;hvbias &lt;&lt; std::endl;</div>
+<div class="line"><a name="l01270"></a><span class="lineno"> 1270</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.threshold0 = &quot;</span> &lt;&lt; merlin-&gt;threshold0 &lt;&lt; std::endl;</div>
+<div class="line"><a name="l01271"></a><span class="lineno"> 1271</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.threshold1 = &quot;</span> &lt;&lt; merlin-&gt;threshold1 &lt;&lt; std::endl;</div>
+<div class="line"><a name="l01272"></a><span class="lineno"> 1272</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.continuousrw = &quot;</span> &lt;&lt; (int)merlin-&gt;continuousrw &lt;&lt; std::endl;</div>
+<div class="line"><a name="l01273"></a><span class="lineno"> 1273</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.counterdepth = &quot;</span> &lt;&lt; ricom-&gt;camera.depth &lt;&lt; std::endl;</div>
+<div class="line"><a name="l01274"></a><span class="lineno"> 1274</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.acquisitiontime = &quot;</span> &lt;&lt; merlin-&gt;dwell_time &lt;&lt; std::endl;</div>
+<div class="line"><a name="l01275"></a><span class="lineno"> 1275</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.acquisitionperiod = &quot;</span> &lt;&lt; merlin-&gt;dwell_time &lt;&lt; std::endl;</div>
+<div class="line"><a name="l01276"></a><span class="lineno"> 1276</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.numframestoacquire = &quot;</span> &lt;&lt; m_fr_total + 1 &lt;&lt; std::endl; <span class="comment">// Ich verstehe nicht warum, aber er werkt.</span></div>
+<div class="line"><a name="l01277"></a><span class="lineno"> 1277</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.fileenable = &quot;</span> &lt;&lt; (<span class="keywordtype">int</span>)merlin-&gt;save &lt;&lt; std::endl;</div>
+<div class="line"><a name="l01278"></a><span class="lineno"> 1278</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.runheadless = &quot;</span> &lt;&lt; (int)merlin-&gt;headless &lt;&lt; std::endl;</div>
+<div class="line"><a name="l01279"></a><span class="lineno"> 1279</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.fileformat = &quot;</span> &lt;&lt; (<span class="keywordtype">int</span>)merlin-&gt;raw * 2 &lt;&lt; std::endl;</div>
+<div class="line"><a name="l01280"></a><span class="lineno"> 1280</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.triggerstart = &quot;</span> &lt;&lt; merlin-&gt;trigger &lt;&lt; std::endl;</div>
+<div class="line"><a name="l01281"></a><span class="lineno"> 1281</span>&#160;    run_script &lt;&lt; <span class="stringliteral">&quot;m.startacquisition()&quot;</span>;</div>
+<div class="line"><a name="l01282"></a><span class="lineno"> 1282</span>&#160;    run_script.close();</div>
+<div class="line"><a name="l01283"></a><span class="lineno"> 1283</span>&#160; </div>
+<div class="line"><a name="l01284"></a><span class="lineno"> 1284</span>&#160;    std::string command = python_path + <span class="stringliteral">&quot; run_script.py&quot;</span>;</div>
+<div class="line"><a name="l01285"></a><span class="lineno"> 1285</span>&#160;    <span class="keywordtype">int</span> r = std::system(command.c_str());</div>
+<div class="line"><a name="l01286"></a><span class="lineno"> 1286</span>&#160;    <span class="keywordflow">if</span> (r != 0)</div>
+<div class="line"><a name="l01287"></a><span class="lineno"> 1287</span>&#160;    {</div>
+<div class="line"><a name="l01288"></a><span class="lineno"> 1288</span>&#160;        std::cout &lt;&lt; <span class="stringliteral">&quot;main::run_connection_script: Cannot execute python run_script. Shell exited with code &quot;</span> &lt;&lt; r &lt;&lt; std::endl;</div>
+<div class="line"><a name="l01289"></a><span class="lineno"> 1289</span>&#160;    }</div>
+<div class="line"><a name="l01290"></a><span class="lineno"> 1290</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -203,22 +203,22 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html#l01247">1247</a> of file <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html">Ricom.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l01248"></a><span class="lineno"> 1248</span>&#160;{</div>
-<div class="line"><a name="l01249"></a><span class="lineno"> 1249</span>&#160;    <span class="keywordflow">switch</span> (r-&gt;<a class="code" href="../../d8/d91/classRicom.html#acb15a5311c9475d97fcf5dacdf06931b">camera</a>.<a class="code" href="../../d3/d29/classCAMERA_1_1Camera__BASE.html#a6922ef1f8044a643f1c7aa3937b811d8">model</a>)</div>
-<div class="line"><a name="l01250"></a><span class="lineno"> 1250</span>&#160;    {</div>
-<div class="line"><a name="l01251"></a><span class="lineno"> 1251</span>&#160;    <span class="keywordflow">case</span> <a class="code" href="../../da/d71/namespaceCAMERA.html#a1a9dc899b585e673ed1c84ac398bc330aec937be59e8463c1e0fd431dc66240fc">CAMERA::MERLIN</a>:</div>
-<div class="line"><a name="l01252"></a><span class="lineno"> 1252</span>&#160;        r-&gt;<a class="code" href="../../d8/d91/classRicom.html#a7d9842cb4013cbb3504cf605e919d456">run_reconstruction</a>&lt;MerlinInterface&gt;(mode);</div>
-<div class="line"><a name="l01253"></a><span class="lineno"> 1253</span>&#160;        <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l01254"></a><span class="lineno"> 1254</span>&#160;    <span class="keywordflow">case</span> <a class="code" href="../../da/d71/namespaceCAMERA.html#a1a9dc899b585e673ed1c84ac398bc330a3c25c816ae325233846217f32262bc09">CAMERA::TIMEPIX</a>:</div>
-<div class="line"><a name="l01255"></a><span class="lineno"> 1255</span>&#160;        r-&gt;<a class="code" href="../../d8/d91/classRicom.html#a7d9842cb4013cbb3504cf605e919d456">run_reconstruction</a>&lt;TimepixInterface&gt;(mode);</div>
-<div class="line"><a name="l01256"></a><span class="lineno"> 1256</span>&#160;        <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l01257"></a><span class="lineno"> 1257</span>&#160;    <span class="keywordflow">default</span>:</div>
-<div class="line"><a name="l01258"></a><span class="lineno"> 1258</span>&#160;        <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l01259"></a><span class="lineno"> 1259</span>&#160;    }</div>
-<div class="line"><a name="l01260"></a><span class="lineno"> 1260</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html#l01246">1246</a> of file <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html">Ricom.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l01247"></a><span class="lineno"> 1247</span>&#160;{</div>
+<div class="line"><a name="l01248"></a><span class="lineno"> 1248</span>&#160;    <span class="keywordflow">switch</span> (r-&gt;<a class="code" href="../../d8/d91/classRicom.html#acb15a5311c9475d97fcf5dacdf06931b">camera</a>.<a class="code" href="../../d3/d29/classCAMERA_1_1Camera__BASE.html#a6922ef1f8044a643f1c7aa3937b811d8">model</a>)</div>
+<div class="line"><a name="l01249"></a><span class="lineno"> 1249</span>&#160;    {</div>
+<div class="line"><a name="l01250"></a><span class="lineno"> 1250</span>&#160;    <span class="keywordflow">case</span> <a class="code" href="../../da/d71/namespaceCAMERA.html#a1a9dc899b585e673ed1c84ac398bc330aec937be59e8463c1e0fd431dc66240fc">CAMERA::MERLIN</a>:</div>
+<div class="line"><a name="l01251"></a><span class="lineno"> 1251</span>&#160;        r-&gt;<a class="code" href="../../d8/d91/classRicom.html#a7d9842cb4013cbb3504cf605e919d456">run_reconstruction</a>&lt;MerlinInterface&gt;(mode);</div>
+<div class="line"><a name="l01252"></a><span class="lineno"> 1252</span>&#160;        <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l01253"></a><span class="lineno"> 1253</span>&#160;    <span class="keywordflow">case</span> <a class="code" href="../../da/d71/namespaceCAMERA.html#a1a9dc899b585e673ed1c84ac398bc330a3c25c816ae325233846217f32262bc09">CAMERA::TIMEPIX</a>:</div>
+<div class="line"><a name="l01254"></a><span class="lineno"> 1254</span>&#160;        r-&gt;<a class="code" href="../../d8/d91/classRicom.html#a7d9842cb4013cbb3504cf605e919d456">run_reconstruction</a>&lt;TimepixInterface&gt;(mode);</div>
+<div class="line"><a name="l01255"></a><span class="lineno"> 1255</span>&#160;        <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l01256"></a><span class="lineno"> 1256</span>&#160;    <span class="keywordflow">default</span>:</div>
+<div class="line"><a name="l01257"></a><span class="lineno"> 1257</span>&#160;        <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l01258"></a><span class="lineno"> 1258</span>&#160;    }</div>
+<div class="line"><a name="l01259"></a><span class="lineno"> 1259</span>&#160;}</div>
 <div class="ttc" id="aclassCAMERA_1_1Camera__BASE_html_a6922ef1f8044a643f1c7aa3937b811d8"><div class="ttname"><a href="../../d3/d29/classCAMERA_1_1Camera__BASE.html#a6922ef1f8044a643f1c7aa3937b811d8">CAMERA::Camera_BASE::model</a></div><div class="ttdeci">Camera_model model</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/de4/Camera_8h_source.html#l00043">Camera.h:43</a></div></div>
-<div class="ttc" id="aclassRicom_html_a7d9842cb4013cbb3504cf605e919d456"><div class="ttname"><a href="../../d8/d91/classRicom.html#a7d9842cb4013cbb3504cf605e919d456">Ricom::run_reconstruction</a></div><div class="ttdeci">void run_reconstruction(RICOM::modes mode)</div><div class="ttdef"><b>Definition:</b> <a href="../../d4/d9b/Ricom_8cpp_source.html#l01138">Ricom.cpp:1138</a></div></div>
+<div class="ttc" id="aclassRicom_html_a7d9842cb4013cbb3504cf605e919d456"><div class="ttname"><a href="../../d8/d91/classRicom.html#a7d9842cb4013cbb3504cf605e919d456">Ricom::run_reconstruction</a></div><div class="ttdeci">void run_reconstruction(RICOM::modes mode)</div><div class="ttdef"><b>Definition:</b> <a href="../../d4/d9b/Ricom_8cpp_source.html#l01135">Ricom.cpp:1135</a></div></div>
 <div class="ttc" id="aclassRicom_html_acb15a5311c9475d97fcf5dacdf06931b"><div class="ttname"><a href="../../d8/d91/classRicom.html#acb15a5311c9475d97fcf5dacdf06931b">Ricom::camera</a></div><div class="ttdeci">CAMERA::Camera_BASE camera</div><div class="ttdef"><b>Definition:</b> <a href="../../de/dfc/Ricom_8h_source.html#l00257">Ricom.h:257</a></div></div>
 <div class="ttc" id="anamespaceCAMERA_html_a1a9dc899b585e673ed1c84ac398bc330a3c25c816ae325233846217f32262bc09"><div class="ttname"><a href="../../da/d71/namespaceCAMERA.html#a1a9dc899b585e673ed1c84ac398bc330a3c25c816ae325233846217f32262bc09">CAMERA::TIMEPIX</a></div><div class="ttdeci">@ TIMEPIX</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/de4/Camera_8h_source.html#l00030">Camera.h:30</a></div></div>
 <div class="ttc" id="anamespaceCAMERA_html_a1a9dc899b585e673ed1c84ac398bc330aec937be59e8463c1e0fd431dc66240fc"><div class="ttname"><a href="../../da/d71/namespaceCAMERA.html#a1a9dc899b585e673ed1c84ac398bc330aec937be59e8463c1e0fd431dc66240fc">CAMERA::MERLIN</a></div><div class="ttdeci">@ MERLIN</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/de4/Camera_8h_source.html#l00029">Camera.h:29</a></div></div>
