@@ -2,8 +2,8 @@ var searchData=
 [
   ['read_5fdata_333',['read_data',['../d7/d76/classSocketConnector.html#ab214d4c16b7c5383a0bebb37e6b3558f',1,'SocketConnector::read_data()'],['../d1/dd7/classFileConnector.html#a915920ac48960cbac2b5a1c54fd019f1',1,'FileConnector::read_data()']]],
   ['read_5fframe_334',['read_frame',['../d6/d0f/classCAMERA_1_1Camera_3_01CameraInterface_00_01FRAME__BASED_01_4.html#a3a42fc33cf9a07cce42f87138766f3d7',1,'CAMERA::Camera&lt; CameraInterface, FRAME_BASED &gt;']]],
-  ['read_5fframe_5fcom_335',['read_frame_com',['../da/df9/classCAMERA_1_1Camera_3_01CameraInterface_00_01EVENT__BASED_01_4.html#a22d66e8d04fca5ff51ca9796a5a896ca',1,'CAMERA::Camera&lt; CameraInterface, EVENT_BASED &gt;']]],
-  ['read_5fframe_5fcom_5fcbed_336',['read_frame_com_cbed',['../da/df9/classCAMERA_1_1Camera_3_01CameraInterface_00_01EVENT__BASED_01_4.html#ac6f069647024e3fdc36f31c8569a6ba5',1,'CAMERA::Camera&lt; CameraInterface, EVENT_BASED &gt;']]],
+  ['read_5fframe_5fcom_335',['read_frame_com',['../da/df9/classCAMERA_1_1Camera_3_01CameraInterface_00_01EVENT__BASED_01_4.html#af4dfccd34235284bb9bf56f659cc921c',1,'CAMERA::Camera&lt; CameraInterface, EVENT_BASED &gt;']]],
+  ['read_5fframe_5fcom_5fcbed_336',['read_frame_com_cbed',['../da/df9/classCAMERA_1_1Camera_3_01CameraInterface_00_01EVENT__BASED_01_4.html#a7daf5ee685a7a4eb6bace35d16f46e57',1,'CAMERA::Camera&lt; CameraInterface, EVENT_BASED &gt;']]],
   ['render_337',['render',['../d5/da5/classMain__Dock.html#a9a4abbfb89158b63f6601dae6447e891',1,'Main_Dock']]],
   ['render_5fwindow_338',['render_window',['../d5/d5d/classImGuiImageWindow.html#adfe55804ef7225bc8b3a87288d769126',1,'ImGuiImageWindow::render_window(bool b_redraw, int last_y, int render_update_offset, bool b_trigger_update)'],['../d5/d5d/classImGuiImageWindow.html#ab0617fa3098a9b55ef115bbb0f7ca911',1,'ImGuiImageWindow::render_window(bool b_redraw, int last_y, bool b_trigger_update)']]],
   ['reset_339',['reset',['../d8/d91/classRicom.html#aaacc09f9bda8bf4e7f660367a4eef810',1,'Ricom']]],
