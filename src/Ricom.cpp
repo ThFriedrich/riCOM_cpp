@@ -548,7 +548,6 @@ void Ricom::set_stem_pixel(size_t idx, size_t idy)
 
     // Update pixel at location
     SDL_Utils::draw_pixel(srf_stem, idx, idy, val, stem_cmap);
-    // stem_data[idr] = 0;
 }
 
 // set pixel in stem image srf_stem at location idx, idy to value corresponding
@@ -862,8 +861,8 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
     size_t first_frame = img_num * nxy;
     size_t end_frame = (img_num + 1) * nxy;
     size_t fr_total_u = (size_t)fr_total;
-    bool b_stop = false;
-    int finished_line = 0;
+    int processor_line = 0;
+    int preprocessor_line = 0;
 
     ProgressMonitor prog_mon(fr_total, !b_print2file, redraw_interval);
     p_prog_mon = &prog_mon;
@@ -882,23 +881,23 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
         stem_data, b_vSTEM,
         offset, detector.radius2,
         frame, frame_id_plot_cbed,
-        b_stop, finished_line, first_frame, end_frame
+        processor_line, preprocessor_line, first_frame, end_frame
     );
 
-    if (finished_line < 1)
+    if (preprocessor_line < 1)
     {
         start_time = std::clock();
     }
     while (!fin)
     {
         // std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        // std::cout << finished_line << std::endl;
+        // std::cout << preprocessor_line << std::endl;
 
         line_processor(
             img_num, dose_map, sumx_map, sumy_map, frame,
             first_frame, end_frame, p_prog_mon, camera_spec, fr_total_u, fin, &pool,
-            b_stop, finished_line);
-        // std::cout<<finished_line<<std::endl;
+            processor_line, preprocessor_line);
+        // std::cout<<preprocessor_line<<std::endl;
     }
     std::clock_t end_time = std::clock();
 
@@ -908,7 +907,7 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
         stem_data, b_vSTEM,
         offset, detector.radius2,
         frame, frame_id_plot_cbed,
-        b_stop, finished_line, first_frame, end_frame
+        processor_line, preprocessor_line, first_frame, end_frame
     );
 
     double time_taken = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC;
@@ -935,15 +934,16 @@ void Ricom::line_processor(
     size_t &fr_total_u,
     bool &fin,
     BoundedThreadPool *pool,
-    bool &b_stop,
-    int &finished_line
+    int &processor_line,
+    int &preprocessor_line
 )
 {
     int delay_update = (kernel.kernel_size+1)*2*nx;
     int idxx = 0;
     // process newly finished lines, if there are any
-    if ((int)(prog_mon->fr_count / nx) < finished_line)
+    if ((int)(prog_mon->fr_count / nx) < preprocessor_line)
     {
+        processor_line = (int)(prog_mon->fr_count) / nx;
         idxx = (int)(prog_mon->fr_count) % nxy;
         *prog_mon += nx;
 
@@ -995,9 +995,11 @@ void Ricom::line_processor(
             icom_group_classical(idxx);
         }
         // end of line handler
-        if ((prog_mon->report_set) && (idxx / nx - kernel.kernel_size*2)>0)
+        int update_line = idxx / nx - kernel.kernel_size*2;
+        if ((prog_mon->report_set) && (update_line)>0)
         {
-            update_surfaces(idxx / nx - kernel.kernel_size*2, frame);
+            update_surfaces(update_line, frame);
+
             if (b_plot_cbed)
             {
                 frame_id_plot_cbed[2] = 1;
@@ -1033,7 +1035,7 @@ void Ricom::line_processor(
                 //dose_map.assign(nxy, 0);
                 //sumx_map.assign(nxy, 0);
                 //sumy_map.assign(nxy, 0);
-                std::fill(stem_data.begin(), stem_data.end(), 0);
+                // std::fill(stem_data.begin(), stem_data.end(), 0);
             }
         }
         if (update_offset)
@@ -1052,7 +1054,7 @@ void Ricom::line_processor(
         fin = true;
         b_cumulative = false;
         b_continuous = false;
-        b_stop = true;
+        processor_line = -1;
     }
 }
 
@@ -1206,14 +1208,10 @@ void Ricom::reset_limits()
 
 void Ricom::reinit_vectors_limits()
 {
-    //ricom_data.assign(nxy, 0);
-    stem_data.assign(nxy, 0);
-    //com_map_x.assign(nxy, 0);
-    //com_map_y.assign(nxy, 0);
-    // std::fill(ricom_data.begin(), ricom_data.end(), 0);
-    // std::fill(stem_data.begin(), stem_data.end(), 0);
-    // std::fill(com_map_x.begin(), com_map_x.end(), 0);
-    // std::fill(com_map_y.begin(), com_map_y.end(), 0);
+    std::fill(ricom_data.begin(), ricom_data.end(), 0);
+    std::fill(stem_data.begin(), stem_data.end(), 0);
+    std::fill(com_map_x.begin(), com_map_x.end(), 0);
+    std::fill(com_map_y.begin(), com_map_y.end(), 0);
     last_y = 0;
     reset_limits();
 }

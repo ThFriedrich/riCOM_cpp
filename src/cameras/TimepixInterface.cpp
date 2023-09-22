@@ -19,7 +19,7 @@ void TimepixInterface::read_frame_com(
     std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
     std::vector<float> &stem_map, bool b_stem,
     std::array<float, 2> &offset, std::array<float, 2> &radius,
-    bool &b_stop, int &finished_line, size_t &first_frame, size_t &end_frame
+    int &processor_line, int &preprocessor_line, size_t &first_frame, size_t &end_frame
 )
 {
     if (!read_started)
@@ -29,7 +29,7 @@ void TimepixInterface::read_frame_com(
         switch (mode)
         {
         case MODE_FILE:
-            read_guy = std::thread(&TimepixInterface::read_file, this, &file, &b_stop);
+            read_guy = std::thread(&TimepixInterface::read_file, this, &file, &processor_line, &preprocessor_line);
             break;
         }
         read_guy.detach();
@@ -42,7 +42,7 @@ void TimepixInterface::read_frame_com(
     {
         proc_started = true;
         scan_n = scan_x * scan_y;
-        proc_guy = std::thread(&TimepixInterface::process_buffer, this, &dose_map, &sumx_map, &sumy_map, &stem_map, &b_stem, &offset, &radius, &dummy_frame, &dummy_frame_id_plot_cbed,  &b_stop, &finished_line, &first_frame, &end_frame, &b_cbed);
+        proc_guy = std::thread(&TimepixInterface::process_buffer, this, &dose_map, &sumx_map, &sumy_map, &stem_map, &b_stem, &offset, &radius, &dummy_frame, &dummy_frame_id_plot_cbed,  &processor_line, &preprocessor_line, &first_frame, &end_frame, &b_cbed);
         proc_guy.detach();
     }
 
@@ -63,7 +63,7 @@ void TimepixInterface::read_frame_com(
     std::vector<float> &stem_map, bool b_stem,
     std::array<float, 2> &offset, std::array<float, 2> &radius,
     std::vector<size_t> &frame, std::array<std::atomic<size_t>, 3> &frame_id_plot_cbed,
-    bool &b_stop, int &finished_line, size_t &first_frame, size_t &end_frame
+    int &processor_line, int &preprocessor_line, size_t &first_frame, size_t &end_frame
 )
 {
     if (!read_started)
@@ -73,7 +73,7 @@ void TimepixInterface::read_frame_com(
         switch (mode)
         {
         case MODE_FILE:
-            read_guy = std::thread(&TimepixInterface::read_file, this, &file, &b_stop);
+            read_guy = std::thread(&TimepixInterface::read_file, this, &file, &processor_line, &preprocessor_line);
             break;
         }
         read_guy.detach();
@@ -85,10 +85,10 @@ void TimepixInterface::read_frame_com(
         proc_started = true;
         scan_n = scan_x * scan_y;
 
-        proc_guy = std::thread(&TimepixInterface::process_buffer, this, &dose_map, &sumx_map, &sumy_map, &stem_map, &b_stem, &offset, &radius, &frame, &frame_id_plot_cbed, &b_stop, &finished_line, &first_frame, &end_frame, &b_cbed);
+        proc_guy = std::thread(&TimepixInterface::process_buffer, this, &dose_map, &sumx_map, &sumy_map, &stem_map, &b_stem, &offset, &radius, &frame, &frame_id_plot_cbed, &processor_line, &preprocessor_line, &first_frame, &end_frame, &b_cbed);
         proc_guy.detach();    
 
-        // process_buffer(&dose_map, &sumx_map, &sumy_map, &stem_map, &b_stem, &offset, &radius, &frame, &frame_id_plot_cbed, &b_stop, &finished_line, &first_frame, &end_frame, &b_cbed);
+        // process_buffer(&dose_map, &sumx_map, &sumy_map, &stem_map, &b_stem, &offset, &radius, &frame, &frame_id_plot_cbed, &processor_line, &preprocessor_line, &first_frame, &end_frame, &b_cbed);
     }
 
     if (finish & read_guy.joinable())
@@ -102,12 +102,13 @@ void TimepixInterface::read_frame_com(
 }
     
 
-void TimepixInterface::read_file(FileConnector *file, bool *b_stop)
+void TimepixInterface::read_file(FileConnector *file, int *processor_line, int *preprocessor_line)
 {
     int buffer_id;
-    while (!(*b_stop))
+    while ((*processor_line)!=-1)
     {
-        if (n_buffer_filled < (n_buffer + n_buffer_processed))
+        std::cout << *preprocessor_line << "," << *processor_line <<std::endl;
+        if ( (n_buffer_filled < (n_buffer + n_buffer_processed)) && (*preprocessor_line < (*processor_line + (int)(scan_y/2))) ) 
         {
             buffer_id = n_buffer_filled % n_buffer;
             file->read_data((char *)&buffer[buffer_id], sizeof(buffer[buffer_id]));
@@ -130,11 +131,11 @@ void TimepixInterface::process_buffer(
     std::array<float, 2> *offset,
     std::array<float, 2> *radius,
     std::vector<size_t> *frame, std::array<std::atomic<size_t>, 3> *frame_id_plot_cbed,
-    bool *b_stop, int *finished_line, size_t *first_frame, size_t *end_frame, bool *b_cbed)
+    int *processor_line, int *preprocessor_line, size_t *first_frame, size_t *end_frame, bool *b_cbed)
 {
     int buffer_id;
 
-    while (!(*b_stop))
+    while ((*processor_line)!=-1)
     {
         // std::cout << n_buffer_filled << "," << n_buffer_processed << std::endl;
         if (n_buffer_processed < n_buffer_filled)
@@ -160,8 +161,8 @@ void TimepixInterface::process_buffer(
                 }
             }
             ++n_buffer_processed;
-            *finished_line = (int)current_line;
-            // std::cout<<*finished_line<<std::endl;
+            *preprocessor_line = (int)current_line;
+            // std::cout<<*preprocessor_line<<std::endl;
         }
         else
         {
@@ -201,6 +202,16 @@ void TimepixInterface::process_event(
 
     if ((probe_position_total / scan_x) > current_line){
         current_line++;
+        if ( (current_line+3)%scan_y < (current_line+2)%scan_y ){
+            std::fill(
+                (*stem_map).begin()+(((current_line+2)%scan_y)*scan_x), 
+                (*stem_map).end(), 0);
+        }
+        else {
+            std::fill(
+                (*stem_map).begin()+(((current_line+2)%scan_y)*scan_x), 
+                (*stem_map).begin()+(((current_line+2)%scan_y)*scan_x)+scan_x, 0);
+        }
     }
 }
 
@@ -243,6 +254,9 @@ void TimepixInterface::process_event(
 
     if ((probe_position_total / scan_x) > current_line){
         current_line++;
+        std::fill(
+            (*stem_map).begin()+(((current_line+2)%scan_y)*scan_x), 
+            (*stem_map).begin()+(((current_line+3)%scan_y)*scan_x), 0);
     }
 }
 

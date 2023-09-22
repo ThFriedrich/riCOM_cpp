@@ -205,8 +205,8 @@ private:
         size_t &fr_total_u,
         bool &fin,
         BoundedThreadPool *pool,
-        bool &b_stop,
-        int &finished_line
+        int &processor_line,
+        int &preprocessor_line
     );
 
     template <class CameraInterface>

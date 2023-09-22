@@ -63,10 +63,10 @@ void Camera<TimepixInterface, EVENT_BASED>::read_frame_com(
     std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, 
     std::vector<float> &stem_map, bool b_stem,
     std::array<float, 2> &offset, std::array<float, 2> &radius,
-    bool &b_stop, int &finished_line, size_t &first_frame, size_t &end_frame
+    int &processor_line, int &preprocessor_line, size_t &first_frame, size_t &end_frame
 )
 {
-    TimepixInterface::read_frame_com(dose_map, sumx_map, sumy_map, stem_map, b_stem, offset, radius, b_stop, finished_line, first_frame, end_frame);
+    TimepixInterface::read_frame_com(dose_map, sumx_map, sumy_map, stem_map, b_stem, offset, radius, processor_line, preprocessor_line, first_frame, end_frame);
 }
 
 // read_frame_com method wrapper
@@ -77,10 +77,10 @@ void Camera<TimepixInterface, EVENT_BASED>::read_frame_com_cbed(
     std::vector<float> &stem_map, bool b_stem,
     std::array<float, 2> &offset, std::array<float, 2> &radius,
     std::vector<size_t> &frame, std::array<std::atomic<size_t>, 3> &frame_id_plot_cbed,
-    bool &b_stop, int &finished_line, size_t &first_frame, size_t &end_frame
+    int &processor_line, int &preprocessor_line, size_t &first_frame, size_t &end_frame
 )
 {
-    TimepixInterface::read_frame_com(dose_map, sumx_map, sumy_map, stem_map, b_stem, offset, radius, frame, frame_id_plot_cbed, b_stop, finished_line, first_frame, end_frame);
+    TimepixInterface::read_frame_com(dose_map, sumx_map, sumy_map, stem_map, b_stem, offset, radius, frame, frame_id_plot_cbed, processor_line, preprocessor_line, first_frame, end_frame);
 }
 
 // Run method wrapper
