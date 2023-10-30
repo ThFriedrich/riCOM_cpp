@@ -22,12 +22,15 @@
 // Only forward declaration for Ricom class
 class Ricom;
 
+
+
 namespace CAMERA
 {
     enum Camera_model
     {
         MERLIN,
         TIMEPIX,
+        CHEETAH,
         MODELS_COUNT
     };
 
@@ -93,14 +96,14 @@ namespace CAMERA
         void read_frame_com(
             std::vector<size_t> &dose_map,
             std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
-            std::vector<float> &stem_map, bool b_stem,
+            std::vector<float> &stem_map, bool &b_stem,
             std::array<float, 2> &offset, std::array<float, 2> &radius,
             int &processor_line, int &preprocessor_line, size_t &first_frame, size_t &end_frame
         );
         void read_frame_com_cbed(
             std::vector<size_t> &dose_map,
             std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
-            std::vector<float> &stem_map, bool b_stem,
+            std::vector<float> &stem_map, bool &b_stem,
             std::array<float, 2> &offset, std::array<float, 2> &radius,
             std::vector<size_t> &frame, std::array<std::atomic<size_t>, 3> &frame_id_plot_cbed,
             int &processor_line, int &preprocessor_line, size_t &first_frame, size_t &end_frame

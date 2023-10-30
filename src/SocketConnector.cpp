@@ -19,11 +19,11 @@ int SocketConnector::read_data(char *buffer, int data_size)
 
     while (bytes_payload_total < data_size)
     {
-        int bytes_payload_count = recv(rc_socket,
+        int bytes_payload_count = recv(client_socket,
                                    &buffer[bytes_payload_total],
                                    data_size - bytes_payload_total,
                                    0);
-
+	std::cout << bytes_payload_count << std::endl;
         if (bytes_payload_count == -1)
         {
             perror("Error reading Data!");
@@ -48,7 +48,7 @@ void SocketConnector::flush_socket()
 
     while (true)
     {
-        int bytes_count = recv(rc_socket, &buffer[0], 1, 0);
+        int bytes_count = recv(client_socket, &buffer[0], 1, 0);
 
         if (bytes_count <= 0)
         {
@@ -60,34 +60,31 @@ void SocketConnector::flush_socket()
     close_socket();
 }
 
-void SocketConnector::connect_socket()
-{
-#ifdef WIN32
-    int error = WSAStartup(0x0202, &w);
-    if (error)
-    {
-        exit(EXIT_FAILURE);
+void SocketConnector::accept_socket(){
+    client_socket = -1;
+    socklen_t addrlen = sizeof(c_address);
+    while (client_socket == -1) {
+        client_socket = accept(rc_socket, (struct sockaddr*)&c_address, &addrlen);
     }
-#endif
+}
 
-    // Creating socket file descriptor
-    rc_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (rc_socket == INVALID_SOCKET)
-    {
-        handle_socket_errors("intitializing Socket");
+void SocketConnector::init_listen(){
+    int bindResult = bind(rc_socket, (struct sockaddr*)&address, sizeof(address));
+    if (bindResult == -1) {
+        handle_socket_errors("binding the Socket");
     }
 
-    if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
-    {
-        handle_socket_errors("setting socket options");
+    int listenResult = listen(rc_socket, 1);  // Queue up to 5 pending connections
+    if (listenResult == -1) {
+        handle_socket_errors("listening on the Socket");
     }
+     else
+    {
+        b_connected = true;
+    }
+}
 
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = inet_addr(ip.c_str());
-    address.sin_port = htons(port);
-
-    std::cout << "Waiting for incoming connection..." << std::endl;
-
+void SocketConnector::init_connect(){
     // Connecting socket to the port
     int error_counter = 0;
     while (true)
@@ -109,6 +106,43 @@ void SocketConnector::connect_socket()
     }
 }
 
+void SocketConnector::connect_socket()
+{
+#ifdef WIN32
+    int error = WSAStartup(0x0202, &w);
+    if (error)
+    {
+        exit(EXIT_FAILURE);
+    }
+#endif
+
+    // Creating socket file descriptor
+    rc_socket = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (rc_socket == INVALID_SOCKET)
+    {
+        handle_socket_errors("intitializing Socket");
+    }
+
+    if (setsockopt(rc_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == SOCKET_ERROR)
+    {
+        handle_socket_errors("setting socket options");
+    }
+
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = inet_addr(ip.c_str());
+    address.sin_port = htons(port);
+
+    if (socket_type == Socket_type::CLIENT)
+    {
+        init_connect();
+    } 
+    else if (socket_type == Socket_type::SERVER)
+    {
+        init_listen();
+    }
+}
+
 #ifdef WIN32
 void SocketConnector::handle_socket_errors(const std::string &raised_at)
 {
@@ -125,6 +159,7 @@ void SocketConnector::handle_socket_errors(const std::string &raised_at)
 void SocketConnector::close_socket()
 {
     closesocket(rc_socket);
+    b_connected = false;
     WSACleanup();
 }
 #else
@@ -137,5 +172,6 @@ void SocketConnector::handle_socket_errors(const std::string &raised_at)
 void SocketConnector::close_socket()
 {
     close(rc_socket);
+    b_connected = false;
 }
 #endif

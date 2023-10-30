@@ -33,10 +33,13 @@
 #include <string>
 #include <iostream>
 
+enum Socket_type {SERVER,CLIENT};
 class SocketConnector
 {
 public:
     SOCKET rc_socket;
+    SOCKET client_socket;
+    Socket_type socket_type;
 
     bool b_connected;
     std::string ip;
@@ -47,13 +50,18 @@ public:
     void flush_socket();
     void connect_socket();
     void close_socket();
+    void accept_socket();
     SocketConnector() : rc_socket(INVALID_SOCKET),
                         b_connected(false),
                         ip("127.0.0.1"),
-                        port(6342){};
+                        // port(6342){}; // merlin
+                        port(8451){}; // cheetah
 
 private:
     struct sockaddr_in address;
+    struct sockaddr_in c_address;
+    void init_connect();
+    void init_listen();
 #ifdef WIN32
     WSADATA w;
     const char opt = 1;

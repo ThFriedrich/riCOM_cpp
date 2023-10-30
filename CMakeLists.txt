@@ -11,7 +11,7 @@
 #   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
 # 
 
-cmake_minimum_required(VERSION 3.16.0)
+cmake_minimum_required(VERSION 3.21.0)
 
 project(RICOM LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
@@ -77,14 +77,15 @@ if (WIN32)
     file(COPY ${SDL2_LIB_DIR}/SDL2_image.dll DESTINATION ${BUILD_DIR})
     file(COPY ${FFTW3_DIR}/libfftw3f-3.dll DESTINATION ${BUILD_DIR})
     file(COPY ${FFTW3_DIR}/libfftw3f-3.lib DESTINATION ${BUILD_DIR})
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:10485760")
 endif (WIN32)
 
 add_executable(RICOM src/main.cpp)
 
 target_sources( RICOM PRIVATE
-    imgui/misc/cpp/imgui_stdlib.cpp
-    imgui/imgui_draw.cpp
-    imgui/imgui_tables.cpp
+imgui/misc/cpp/imgui_stdlib.cpp
+imgui/imgui_draw.cpp
+imgui/imgui_tables.cpp
     imgui/imgui_widgets.cpp
     imgui/backends/imgui_impl_opengl3.cpp
     imgui/backends/imgui_impl_sdl.cpp
@@ -93,6 +94,8 @@ target_sources( RICOM PRIVATE
     src/FileConnector.cpp
     src/ProgressMonitor.cpp
     src/Ricom.cpp 
+    src/cameras/CheetahInterface.cpp
+    src/cameras/CheetahWrapper.cpp
     src/cameras/TimepixInterface.cpp
     src/cameras/TimepixWrapper.cpp
     src/cameras/MerlinInterface.cpp
@@ -106,7 +109,21 @@ target_sources( RICOM PRIVATE
     src/RunGUI.cpp
     )
 
-target_include_directories( RICOM PUBLIC
+## cpr
+include(FetchContent)
+FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
+                            GIT_TAG 0817715923c9705e68994eb52ef9df3f6845beba) # The commit hash for 1.10.x. Replace with the latest from: https://github.com/libcpr/cpr/releases
+set(CPR_ENABLE_SSL OFF)
+FetchContent_MakeAvailable(cpr)
+target_link_libraries(RICOM PRIVATE cpr::cpr)
+##json
+# include(FetchContent)
+# FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+# FetchContent_MakeAvailable(json)
+# target_link_libraries(RICOM PRIVATE nlohmann_json::nlohmann_json)
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+
+target_include_directories( RICOM PRIVATE
     imgui
     imgui/backends
     imgui/misc/cpp
@@ -119,9 +136,15 @@ target_include_directories( RICOM PUBLIC
 
 find_package(OpenGL REQUIRED)
 
-target_link_libraries(RICOM PUBLIC ${OPENGL_LIBRARIES})
+
+
+target_link_libraries(RICOM PRIVATE ${OPENGL_LIBRARIES})
 if (WIN32)
-    target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image libfftw3f-3 ${CMAKE_DL_LIBS})
+    target_link_libraries(RICOM PRIVATE SDL2main SDL2 SDL2_image libfftw3f-3 ${CMAKE_DL_LIBS})
+    add_custom_command(TARGET RICOM POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:RICOM> $<TARGET_RUNTIME_DLLS:RICOM>
+    COMMAND_EXPAND_LISTS
+    )
 else ()
-    target_link_libraries(RICOM PUBLIC SDL2main SDL2 SDL2_image fftw3f ${CMAKE_DL_LIBS})
+    target_link_libraries(RICOM PRIVATE SDL2main SDL2 SDL2_image fftw3f ${CMAKE_DL_LIBS})
 endif (WIN32)

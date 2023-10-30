@@ -44,6 +44,7 @@
 #include "SocketConnector.h"
 #include "ProgressMonitor.h"
 #include "MerlinInterface.h"
+#include "CheetahInterface.h"
 #include "TimepixInterface.h"
 #include "Camera.h"
 #include "GuiUtils.h"

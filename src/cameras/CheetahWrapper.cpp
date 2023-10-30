@@ -11,32 +11,31 @@
  *   Chu-Ping Yu <chu-ping.yu@uantwerpen.be>
  */
 
-#ifndef TIMEPIX_WRAPPER_H
-#define TIMEPIX_WRAPPER_H
+#ifndef CHEETAH_WRAPPER_H
+#define CHEETAH_WRAPPER_H
 
 #include "Camera.h"
-#include "TimepixInterface.h"
+#include "CheetahInterface.h"
 #include "Ricom.h"
 
 using namespace CAMERA;
 
 // Default constructor and definition of default configurations
 template <>
-Camera<TimepixInterface, EVENT_BASED>::Camera()
+Camera<CheetahInterface, EVENT_BASED>::Camera()
 {
-    model = TIMEPIX;
+    model = CHEETAH;
     type = EVENT_BASED;
-    nx_cam = 256;
-    ny_cam = 256;
+    nx_cam = 512;
+    ny_cam = 512;
     swap_endian = false;
-    dwell_time = 1000;
 };
 template <>
-Camera<TimepixInterface, FRAME_BASED>::Camera(){};
+Camera<CheetahInterface, FRAME_BASED>::Camera(){};
 
 // Constructor with camera_base as argument
 template <>
-Camera<TimepixInterface, EVENT_BASED>::Camera(Camera_BASE &cam)
+Camera<CheetahInterface, EVENT_BASED>::Camera(Camera_BASE &cam)
 {
     // Copy members of Camera_BASE for use in Ricom.cpp
     type = cam.type;
@@ -48,17 +47,16 @@ Camera<TimepixInterface, EVENT_BASED>::Camera(Camera_BASE &cam)
     v = cam.v;
     group_size = cam.group_size;
     // Assign additional members used in CheetahInterface.cpp
-    dt = cam.dwell_time;
     nx = cam.nx_cam;
     ny = cam.ny_cam;
-
+    gs = cam.group_size;
 };
 template <>
-Camera<TimepixInterface, FRAME_BASED>::Camera(Camera_BASE &cam) { (void)cam; };
+Camera<CheetahInterface, FRAME_BASED>::Camera(Camera_BASE &cam) { (void)cam; };
 
 // read_frame_com method wrapper
 template <>
-void Camera<TimepixInterface, EVENT_BASED>::read_frame_com(
+void Camera<CheetahInterface, EVENT_BASED>::read_frame_com(
     std::vector<size_t> &dose_map, 
     std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map, 
     std::vector<float> &stem_map, bool &b_stem,
@@ -66,40 +64,42 @@ void Camera<TimepixInterface, EVENT_BASED>::read_frame_com(
     int &processor_line, int &preprocessor_line, size_t &first_frame, size_t &end_frame
 )
 {
-    TimepixInterface::read_frame_com(dose_map, sumx_map, sumy_map, stem_map, b_stem, offset, radius, processor_line, preprocessor_line, first_frame, end_frame);
+    CheetahInterface::read_frame_com(dose_map, sumx_map, sumy_map, stem_map, b_stem, offset, radius, processor_line, preprocessor_line);
 }
 
-// read_frame_com method wrapper
+// read_frame_com_cbed method wrapper
 template <> 
-void Camera<TimepixInterface, EVENT_BASED>::read_frame_com_cbed(
+void Camera<CheetahInterface, EVENT_BASED>::read_frame_com_cbed(
     std::vector<size_t> &dose_map,
     std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
     std::vector<float> &stem_map, bool &b_stem,
     std::array<float, 2> &offset, std::array<float, 2> &radius,
     std::vector<size_t> &frame, std::array<std::atomic<size_t>, 3> &frame_id_plot_cbed,
     int &processor_line, int &preprocessor_line, size_t &first_frame, size_t &end_frame
-)
+    )
 {
-    TimepixInterface::read_frame_com(dose_map, sumx_map, sumy_map, stem_map, b_stem, offset, radius, frame, frame_id_plot_cbed, processor_line, preprocessor_line, first_frame, end_frame);
+    CheetahInterface::read_frame_com(dose_map, sumx_map, sumy_map, stem_map, b_stem, offset, radius, frame, frame_id_plot_cbed, processor_line, preprocessor_line);
 }
 
 // Run method wrapper
 template <>
-void Camera<TimepixInterface, EVENT_BASED>::run(Ricom *ricom)
+void Camera<CheetahInterface, EVENT_BASED>::run(Ricom *ricom)
 {
     switch (ricom->mode)
     {
     case RICOM::FILE:
-        TimepixInterface::init_interface(ricom->file_path);
-        ricom->process_data<TimepixInterface>(this);
+        CheetahInterface::init_interface(ricom->file_path);
+        ricom->process_data<CheetahInterface>(this);
         close_interface();
         break;
     case RICOM::TCP:
-        // TimepixInterface::init_interface(ricom->socket);
-        perror("TCP mode not supported for Timepix yet");
+        ricom->socket.socket_type = Socket_type::SERVER;
+        CheetahInterface::init_interface(&ricom->socket);
+        ricom->process_data<CheetahInterface>(this);
+        close_interface();
     }
 };
 template <>
-void Camera<TimepixInterface, FRAME_BASED>::run(Ricom *ricom) { (void)ricom; };
+void Camera<CheetahInterface, FRAME_BASED>::run(Ricom *ricom) { (void)ricom; };
 
-#endif // TIMEPIX_WRAPPER_H
+#endif // CHEETAH_WRAPPER_H

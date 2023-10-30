@@ -191,28 +191,31 @@ void TimepixInterface::process_event(
     (*sumy_map)[probe_position] += ky;
     (*sumx_map)[probe_position] += kx;
 
-    if (b_stem)
+    if (*b_stem)
     {
         float d2 = pow((float)kx - (*offset)[0], 2) + pow((float)ky - (*offset)[1], 2);
         if (d2 > (*radius)[0] && d2 <= (*radius)[1])
         {
             (*stem_map)[probe_position]++;
         }
+
+        if ((probe_position_total / scan_x) > current_line){
+            current_line++;
+            if ( (current_line+3)%scan_y < (current_line+2)%scan_y ){
+                std::fill(
+                    (*stem_map).begin()+(((current_line+2)%scan_y)*scan_x), 
+                    (*stem_map).end(), 0);
+            }
+            else {
+                std::fill(
+                    (*stem_map).begin()+(((current_line+2)%scan_y)*scan_x), 
+                    (*stem_map).begin()+(((current_line+2)%scan_y)*scan_x)+scan_x, 0);
+            }
+        }
+
+
     }
 
-    if ((probe_position_total / scan_x) > current_line){
-        current_line++;
-        if ( (current_line+3)%scan_y < (current_line+2)%scan_y ){
-            std::fill(
-                (*stem_map).begin()+(((current_line+2)%scan_y)*scan_x), 
-                (*stem_map).end(), 0);
-        }
-        else {
-            std::fill(
-                (*stem_map).begin()+(((current_line+2)%scan_y)*scan_x), 
-                (*stem_map).begin()+(((current_line+2)%scan_y)*scan_x)+scan_x, 0);
-        }
-    }
 }
 
 void TimepixInterface::process_event(

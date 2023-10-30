@@ -163,7 +163,7 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
     // create a file browser instances
     ImGui::FileBrowser openFileDialog;
     openFileDialog.SetTitle("Open .mib or .t3p file");
-    openFileDialog.SetTypeFilters({".mib", ".t3p"});
+    openFileDialog.SetTypeFilters({".mib", ".t3p", ".tpx3"});
     ImGui::FileBrowser saveFileDialog(ImGuiFileBrowserFlags_EnterNewFilename | ImGuiFileBrowserFlags_CreateNewDir);
     saveFileDialog.SetTitle("Save image as .png");
     ImGui::FileBrowser saveDataDialog(ImGuiFileBrowserFlags_EnterNewFilename | ImGuiFileBrowserFlags_CreateNewDir);
@@ -180,6 +180,11 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
 
     // Merlin Settings (to send to the Camera)
     struct MerlinSettings merlin_settings;
+
+    // Cheetah Setting (to send to the server)
+    CheetahComm cheetah_comm;
+    ricom->socket.connect_socket();
+
 
     // INI file settings to restore previous session settings
     // Appearance
@@ -211,6 +216,11 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
     // Timepix Settings
     ImGuiINI::check_ini_setting(ini_cfg, "Timepix", "nx", hardware_configurations[CAMERA::MERLIN].nx_cam);
     ImGuiINI::check_ini_setting(ini_cfg, "Timepix", "ny", hardware_configurations[CAMERA::MERLIN].ny_cam);
+    // Cheetah Settings
+    ImGuiINI::check_ini_setting(ini_cfg, "Cheetah", "nx", hardware_configurations[CAMERA::CHEETAH].nx_cam);
+    ImGuiINI::check_ini_setting(ini_cfg, "Cheetah", "ny", hardware_configurations[CAMERA::CHEETAH].ny_cam);
+    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "data_port", ricom->socket.port);
+    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "ip", ricom->socket.ip);
 
     const char *cmaps[] = {"Parula", "Heat", "Jet", "Turbo", "Hot", "Gray", "Magma", "Inferno", "Plasma", "Viridis", "Cividis", "Github", "HSV"};
     bool b_redraw = false;
@@ -343,6 +353,15 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
                     ini_cfg["Timepix"]["ny"] = std::to_string(hardware_configurations[CAMERA::TIMEPIX].ny_cam);
                 }
 
+                ImGui::Text("Cheetah Camera");
+                if (ImGui::DragScalar("nx Cheetah", ImGuiDataType_U16, &hardware_configurations[CAMERA::CHEETAH].nx_cam, 1, &drag_min_pos))
+                {
+                    ini_cfg["Cheetah"]["nx"] = std::to_string(hardware_configurations[CAMERA::CHEETAH].nx_cam);
+                }
+                if (ImGui::DragScalar("ny Cheetah", ImGuiDataType_U16, &hardware_configurations[CAMERA::CHEETAH].ny_cam, 1, &drag_min_pos))
+                {
+                    ini_cfg["Cheetah"]["ny"] = std::to_string(hardware_configurations[CAMERA::CHEETAH].ny_cam);
+                }
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Additional Imaging Modes"))
@@ -561,6 +580,57 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
                 }
             }
         }
+
+        if (ImGui::CollapsingHeader("Stream reconstruction", ImGuiTreeNodeFlags_DefaultOpen)){
+
+            if (ImGui::Button("Preview", ImVec2(-1.0f, 0.0f)))
+            {
+                cheetah_comm.stop();
+                ricom->b_continuous = true;
+                cheetah_comm.tpx3_det_config();
+                cheetah_comm.tpx3_cam_init();
+                cheetah_comm.tpx3_destination();
+
+
+                // ricom->socket.connect_socket();
+                // ricom->socket.flush_socket();
+                b_started = true;
+                b_restarted = true;
+                run_thread = std::thread(RICOM::run_ricom, ricom, RICOM::TCP);
+                run_thread.detach();
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                cheetah_comm.start();
+                // RICOM::run_ricom(ricom, RICOM::TCP);
+                GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
+            }
+
+            if (ImGui::Button("Acquire", ImVec2(-1.0f, 0.0f)))
+            {
+                cheetah_comm.stop();
+                ricom->b_continuous = false;
+                cheetah_comm.tpx3_det_config();
+                cheetah_comm.tpx3_cam_init();
+                cheetah_comm.tpx3_destination();
+
+                run_thread = std::thread(RICOM::run_ricom, ricom, RICOM::TCP);
+                run_thread.detach();
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                cheetah_comm.start();
+                GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
+            }
+
+            if (ImGui::Button("Stop", ImVec2(-1.0f, 0.0f)))
+            {
+                cheetah_comm.stop();
+                ricom->rc_quit = true;
+                ricom->b_continuous = false;
+                // b_redraw = true;
+            }
+
+            ImGui::Checkbox("Cumulative Mode", &ricom->b_cumulative);
+
+        }
+
 
         if (ImGui::CollapsingHeader("File reconstruction", ImGuiTreeNodeFlags_DefaultOpen))
         {

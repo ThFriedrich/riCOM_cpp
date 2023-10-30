@@ -14,6 +14,7 @@
 #include "Camera.h"
 #include "MerlinInterface.h"
 #include "TimepixInterface.h"
+#include "CheetahInterface.h"
 
 using namespace CAMERA;
 
@@ -38,6 +39,7 @@ Default_configurations::Default_configurations()
     hws_ptr = &hws[0];
     hws[MERLIN] = Camera<MerlinInterface, FRAME_BASED>();
     hws[TIMEPIX] = Camera<TimepixInterface, EVENT_BASED>();
+    hws[CHEETAH] = Camera<CheetahInterface, EVENT_BASED>();
 };
 
 CAMERA::Camera_BASE &Default_configurations::operator[](unsigned int index)

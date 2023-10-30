@@ -1190,10 +1190,12 @@ void Ricom::run_reconstruction(RICOM::modes mode)
 // Template specializations, necessary to avoid linker error
 template void Ricom::run_reconstruction<MerlinInterface>(RICOM::modes);
 template void Ricom::run_reconstruction<TimepixInterface>(RICOM::modes);
+template void Ricom::run_reconstruction<CheetahInterface>(RICOM::modes);
 template void Ricom::process_data<uint8_t>(CAMERA::Camera<MerlinInterface, CAMERA::FRAME_BASED> *camera_spec);
 template void Ricom::process_data<uint16_t>(CAMERA::Camera<MerlinInterface, CAMERA::FRAME_BASED> *camera_spec);
 template void Ricom::process_data<uint32_t>(CAMERA::Camera<MerlinInterface, CAMERA::FRAME_BASED> *camera_spec);
 template void Ricom::process_data(CAMERA::Camera<TimepixInterface, CAMERA::EVENT_BASED> *camera_spec);
+template void Ricom::process_data(CAMERA::Camera<CheetahInterface, CAMERA::EVENT_BASED> *camera_spec);
 
 // Helper functions
 void Ricom::reset_limits()
@@ -1236,6 +1238,11 @@ enum CAMERA::Camera_model Ricom::select_mode_by_file(const char *filename)
         mode = RICOM::FILE;
         return CAMERA::MERLIN;
     }
+    else if (std::filesystem::path(filename).extension() == ".tpx3")
+    {
+        mode = RICOM::FILE;
+        return CAMERA::CHEETAH;
+    }
     else
     {
         return CAMERA::TIMEPIX;
@@ -1251,6 +1258,9 @@ void RICOM::run_ricom(Ricom *r, RICOM::modes mode)
         break;
     case CAMERA::TIMEPIX:
         r->run_reconstruction<TimepixInterface>(mode);
+        break;
+    case CAMERA::CHEETAH:
+        r->run_reconstruction<CheetahInterface>(mode);
         break;
     default:
         break;

@@ -41,10 +41,10 @@ PACK(struct e_event
          uint16_t tot;
      });
 
-const size_t PRELOC_SIZE = 1000*25;
-const size_t N_BUFFER = 4;
-
-
+namespace TimepixBuffer{
+    const size_t PRELOC_SIZE = 1000*25;
+    const size_t N_BUFFER = 4;
+}
 
 class TimepixInterface
 {
@@ -57,9 +57,9 @@ private:
     // process buffer
     std::thread proc_guy;
     bool proc_started = false;
-    int preloc_size = PRELOC_SIZE;
-    int n_buffer = N_BUFFER;
-    std::array<std::array<e_event, PRELOC_SIZE>, N_BUFFER> buffer;
+    int preloc_size = TimepixBuffer::PRELOC_SIZE;
+    int n_buffer = TimepixBuffer::N_BUFFER;
+    std::array<std::array<e_event, TimepixBuffer::PRELOC_SIZE>, TimepixBuffer::N_BUFFER> buffer;
     int n_buffer_filled=0;
     int n_buffer_processed=0;
     uint64_t current_line = 0;
@@ -119,7 +119,6 @@ protected:
     int nx;
     int ny;
     int dt; // unit: ns
-    uint32_t gs;
 
 public:
     void read_frame_com(
