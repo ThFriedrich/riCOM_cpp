@@ -65,7 +65,7 @@ inline void bind_tex(SDL_Surface *srf, GLuint tex_id);
 //            GUI implementation              //
 ////////////////////////////////////////////////
 
-int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configurations)
+int run_gui(Ricom *ricom)
 {
     std::thread run_thread;
     std::thread py_thread;
@@ -207,18 +207,18 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
     ImGuiINI::check_ini_setting(ini_cfg, "Hardware", "Image Refresh Interval [ms]", ricom->redraw_interval);
     // Merlin Settings
     ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "Live Interface Menu", b_merlin_live_menu);
-    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "nx", hardware_configurations[CAMERA::MERLIN].nx_cam);
-    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "ny", hardware_configurations[CAMERA::MERLIN].ny_cam);
+    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "nx", ricom->nx_cam);
+    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "ny", ricom->ny_cam);
     ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "com_port", merlin_settings.com_port);
     ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "data_port", ricom->socket.port);
     ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "ip", ricom->socket.ip);
     ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "python_path", python_path);
     // Timepix Settings
-    ImGuiINI::check_ini_setting(ini_cfg, "Timepix", "nx", hardware_configurations[CAMERA::MERLIN].nx_cam);
-    ImGuiINI::check_ini_setting(ini_cfg, "Timepix", "ny", hardware_configurations[CAMERA::MERLIN].ny_cam);
+    ImGuiINI::check_ini_setting(ini_cfg, "Timepix", "nx", ricom->nx_cam);
+    ImGuiINI::check_ini_setting(ini_cfg, "Timepix", "ny", ricom->ny_cam);
     // Cheetah Settings
-    ImGuiINI::check_ini_setting(ini_cfg, "Cheetah", "nx", hardware_configurations[CAMERA::CHEETAH].nx_cam);
-    ImGuiINI::check_ini_setting(ini_cfg, "Cheetah", "ny", hardware_configurations[CAMERA::CHEETAH].ny_cam);
+    ImGuiINI::check_ini_setting(ini_cfg, "Cheetah", "nx", ricom->nx_cam);
+    ImGuiINI::check_ini_setting(ini_cfg, "Cheetah", "ny", ricom->ny_cam);
     ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "data_port", ricom->socket.port);
     ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "ip", ricom->socket.ip);
 
@@ -316,13 +316,13 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
                 {
                     ini_cfg["Merlin"]["Live Interface Menu"] = std::to_string(b_merlin_live_menu);
                 }
-                if (ImGui::DragScalar("nx Merlin", ImGuiDataType_U16, &hardware_configurations[CAMERA::MERLIN].nx_cam, 1, &drag_min_pos))
+                if (ImGui::DragScalar("nx Merlin", ImGuiDataType_U16, &(ricom->nx_cam), 1, &drag_min_pos))
                 {
-                    ini_cfg["Merlin"]["nx"] = std::to_string(hardware_configurations[CAMERA::MERLIN].nx_cam);
+                    ini_cfg["Merlin"]["nx"] = std::to_string(ricom->nx_cam);
                 }
-                if (ImGui::DragScalar("ny Merlin", ImGuiDataType_U16, &hardware_configurations[CAMERA::MERLIN].ny_cam, 1, &drag_min_pos))
+                if (ImGui::DragScalar("ny Merlin", ImGuiDataType_U16, &(ricom->ny_cam), 1, &drag_min_pos))
                 {
-                    ini_cfg["Merlin"]["ny"] = std::to_string(hardware_configurations[CAMERA::MERLIN].ny_cam);
+                    ini_cfg["Merlin"]["ny"] = std::to_string(ricom->ny_cam);
                 }
                 if (ImGui::InputText("IP", &ricom->socket.ip))
                 {
@@ -344,23 +344,23 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
 
                 ImGui::Text("Timepix Camera");
                 // ImGui::Checkbox("Live Interface Menu", &b_timepix_live_menu);
-                if (ImGui::DragScalar("nx Timepix", ImGuiDataType_U16, &hardware_configurations[CAMERA::TIMEPIX].nx_cam, 1, &drag_min_pos))
+                if (ImGui::DragScalar("nx Timepix", ImGuiDataType_U16, &(ricom->nx_cam), 1, &drag_min_pos))
                 {
-                    ini_cfg["Timepix"]["nx"] = std::to_string(hardware_configurations[CAMERA::TIMEPIX].nx_cam);
+                    ini_cfg["Timepix"]["nx"] = std::to_string(ricom->nx_cam);
                 }
-                if (ImGui::DragScalar("ny Timepix", ImGuiDataType_U16, &hardware_configurations[CAMERA::TIMEPIX].ny_cam, 1, &drag_min_pos))
+                if (ImGui::DragScalar("ny Timepix", ImGuiDataType_U16, &(ricom->ny_cam), 1, &drag_min_pos))
                 {
-                    ini_cfg["Timepix"]["ny"] = std::to_string(hardware_configurations[CAMERA::TIMEPIX].ny_cam);
+                    ini_cfg["Timepix"]["ny"] = std::to_string((ricom->ny_cam));
                 }
 
                 ImGui::Text("Cheetah Camera");
-                if (ImGui::DragScalar("nx Cheetah", ImGuiDataType_U16, &hardware_configurations[CAMERA::CHEETAH].nx_cam, 1, &drag_min_pos))
+                if (ImGui::DragScalar("nx Cheetah", ImGuiDataType_U16, &(ricom->nx_cam), 1, &drag_min_pos))
                 {
-                    ini_cfg["Cheetah"]["nx"] = std::to_string(hardware_configurations[CAMERA::CHEETAH].nx_cam);
+                    ini_cfg["Cheetah"]["nx"] = std::to_string(ricom->nx_cam);
                 }
-                if (ImGui::DragScalar("ny Cheetah", ImGuiDataType_U16, &hardware_configurations[CAMERA::CHEETAH].ny_cam, 1, &drag_min_pos))
+                if (ImGui::DragScalar("ny Cheetah", ImGuiDataType_U16, &(ricom->ny_cam), 1, &drag_min_pos))
                 {
-                    ini_cfg["Cheetah"]["ny"] = std::to_string(hardware_configurations[CAMERA::CHEETAH].ny_cam);
+                    ini_cfg["Cheetah"]["ny"] = std::to_string(ricom->ny_cam);
                 }
                 ImGui::EndMenu();
             }
@@ -646,7 +646,6 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
                 filename = openFileDialog.GetSelected().string();
                 b_file_selected = true;
                 openFileDialog.ClearSelected();
-                ricom->camera = hardware_configurations[ricom->select_mode_by_file(filename.c_str())];
             }
             if (b_file_selected)
             {

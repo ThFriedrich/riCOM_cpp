@@ -241,8 +241,8 @@ void Ricom::init_surface()
         exit(EXIT_FAILURE);
     }
     // SDL surface for CBED image
-    cbed_log.assign(camera.nx_cam * camera.ny_cam, 0.0);
-    srf_cbed = SDL_CreateRGBSurface(0, camera.nx_cam, camera.ny_cam, 32, 0, 0, 0, 0);
+    cbed_log.assign(nx_cam * ny_cam, 0.0);
+    srf_cbed = SDL_CreateRGBSurface(0, nx_cam, ny_cam, 32, 0, 0, 0, 0);
     if (srf_cbed == NULL)
     {
         std::cout << "Surface could not be created! SDL Error: " << SDL_GetError() << std::endl;
@@ -318,17 +318,17 @@ template <typename T>
 void Ricom::com(std::vector<T> *data, std::array<float, 2> &com)
 {
     float dose = 0;
-    std::vector<size_t> sum_x(camera.nx_cam);
-    std::vector<size_t> sum_y(camera.ny_cam);
-    sum_x.assign(camera.nx_cam, 0);
-    sum_y.assign(camera.ny_cam, 0);
+    std::vector<size_t> sum_x(nx_cam);
+    std::vector<size_t> sum_y(ny_cam);
+    sum_x.assign(nx_cam, 0);
+    sum_y.assign(ny_cam, 0);
     com = {0.0, 0.0};
 
-    for (int idy = 0; idy < camera.ny_cam; idy++)
+    for (int idy = 0; idy < ny_cam; idy++)
     {
-        size_t y_nx = idy * camera.nx_cam;
+        size_t y_nx = idy * nx_cam;
         size_t sum_x_temp = 0;
-        for (int idx = 0; idx < camera.nx_cam; idx++)
+        for (int idx = 0; idx < nx_cam; idx++)
         {
             T px = data->data()[y_nx + idx];
             swap_endianess(px);
@@ -341,11 +341,11 @@ void Ricom::com(std::vector<T> *data, std::array<float, 2> &com)
 
     if (dose > 0)
     {
-        for (int i = 0; i < camera.nx_cam; i++)
+        for (int i = 0; i < nx_cam; i++)
         {
             com[0] += sum_x[i] * camera.v[i];
         }
-        for (int i = 0; i < camera.ny_cam; i++)
+        for (int i = 0; i < ny_cam; i++)
         {
             com[1] += sum_y[i] * camera.u[i];
         }
@@ -587,10 +587,10 @@ void Ricom::plot_cbed(std::vector<T> &cbed_data)
     }
 
     float v_rng = v_max - v_min;
-    for (int ix = 0; ix < camera.ny_cam; ix++)
+    for (int ix = 0; ix < ny_cam; ix++)
     {
-        int iy_t = camera.v[ix] * camera.nx_cam;
-        for (int iy = 0; iy < camera.nx_cam; iy++)
+        int iy_t = camera.v[ix] * nx_cam;
+        for (int iy = 0; iy < nx_cam; iy++)
         {
             float vl_f = cbed_log[iy_t + camera.u[iy]];
             float val = (vl_f - v_min) / v_rng;
@@ -605,7 +605,7 @@ inline void Ricom::rescales_recomputes()
 {
     if (b_recompute_detector)
     {
-        detector.compute_detector(camera.nx_cam, camera.ny_cam, offset);
+        detector.compute_detector(nx_cam, ny_cam, offset);
         b_recompute_detector = false;
     }
     if (b_recompute_kernel)
@@ -1150,7 +1150,7 @@ void Ricom::run_reconstruction(RICOM::modes mode)
 
     if (b_vSTEM)
     {
-        detector.compute_detector(camera.nx_cam, camera.ny_cam, offset);
+        detector.compute_detector(nx_cam, ny_cam, offset);
     }
 
     // Compute the integration Kenel

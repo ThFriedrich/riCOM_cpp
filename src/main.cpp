@@ -63,7 +63,6 @@ int main(int argc, char *argv[])
 {
 
     Ricom ricom;
-    CAMERA::Default_configurations hardware_configurations;
 
     if (argc == 1)
     {
@@ -71,11 +70,11 @@ int main(int argc, char *argv[])
         FreeConsole();
 #endif
         log2file(&ricom);
-        return run_gui(&ricom, hardware_configurations);
+        return run_gui(&ricom);
     }
     else
     {
-        return run_cli(argc, argv, &ricom, hardware_configurations);
+        return run_cli(argc, argv, &ricom);
     }
 }
 

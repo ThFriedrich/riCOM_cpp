@@ -55,6 +55,8 @@ class Ricom_kernel
 {
 public:
     // Properties
+    uint16_t nx_cam;
+    uint16_t ny_cam;
     int kernel_size;
     bool b_filter;
     std::array<int, 2> kernel_filter_frequency;
@@ -187,12 +189,11 @@ private:
     void reset_file();
     void calculate_update_list();
     inline void rescales_recomputes();
-    template <typename T, class CameraInterface>
-    inline void skip_frames(int n_skip, std::vector<T> &data, CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *camera_fr);
+    // template <typename T, class CameraInterface>
+    // inline void skip_frames(int n_skip, std::vector<T> &data, CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *camera_fr);
     template <typename T>
     inline void swap_endianess(T &val);
 
-    template <class CameraInterface>
     void line_processor(
         size_t &img_num,
         std::vector<size_t> &dose_map,
@@ -202,7 +203,6 @@ private:
         size_t &first_frame,
         size_t &end_frame,
         ProgressMonitor *prog_mon,
-        CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *camera_spec,
         size_t &fr_total_u,
         bool &fin,
         BoundedThreadPool *pool,
@@ -210,23 +210,6 @@ private:
         int &preprocessor_line
     );
 
-    template <class CameraInterface>
-    void process_data_process(
-        size_t &img_num,
-        int idxx,
-        std::vector<size_t> &dose_map, 
-        std::vector<size_t> &sumx_map, 
-        std::vector<size_t> &sumy_map,
-        std::vector<uint16_t> &frame,
-        int &acc_cbed,
-        size_t &first_frame,
-        size_t &end_frame,
-        CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *camera_spec,
-        ProgressMonitor *prog_mon,
-        size_t fr_total_u,
-        bool &fin,
-        BoundedThreadPool *pool
-    );
     void icom_group_decompose(int idxx);
     void icom_group_classical(int idxx);
 
@@ -255,7 +238,6 @@ private:
 public:
     SocketConnector socket;
     std::string file_path;
-    CAMERA::Camera_BASE camera;
     RICOM::modes mode;
     bool b_print2file;
     int redraw_interval;
@@ -320,16 +302,17 @@ public:
     void draw_stem_image(int y0, int ye);
     void draw_e_field_image();
     void draw_e_field_image(int y0, int ye);
-    template <class CameraInterface>
+    // template <class CameraInterface>
     void run_reconstruction(RICOM::modes mode);
     void reset();
     template <typename T>
     void plot_cbed(std::vector<T> &data);
-    template <typename T, class CameraInterface>
-    void process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *camera);
-    template <class CameraInterface>
-    void process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *camera);
-    enum CAMERA::Camera_model select_mode_by_file(const char *filename);
+    // template <typename T, class CameraInterface>
+    // void process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *camera);
+    // template <class CameraInterface>
+    // void process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *camera);
+    // enum CAMERA::Camera_model select_mode_by_file(const char *filename);
+    void process_data();
 
     // Constructor
     Ricom();
