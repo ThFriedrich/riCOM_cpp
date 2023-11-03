@@ -143,13 +143,13 @@ public:
 
 namespace RICOM
 {
-    enum modes
+    enum cameras
     {
-        FILE,
-        TCP
+        MERLIN,
+        ADVAPIX,
+        CHEETAH
     };
-    void run_ricom(Ricom *r, RICOM::modes mode);
-    void run_connection_script(Ricom *r, MerlinSettings *merlin, const std::string &python_path);
+    void run(Ricom *r, int mode, RICOM::cameras cameras);
 }
 
 class Ricom
@@ -196,15 +196,10 @@ private:
 
     void line_processor(
         size_t &img_num,
-        std::vector<size_t> &dose_map,
-        std::vector<size_t> &sumx_map,
-        std::vector<size_t> &sumy_map,
-        std::vector<size_t> &frame,
         size_t &first_frame,
         size_t &end_frame,
         ProgressMonitor *prog_mon,
         size_t &fr_total_u,
-        bool &fin,
         BoundedThreadPool *pool,
         int &processor_line,
         int &preprocessor_line
@@ -214,17 +209,7 @@ private:
     void icom_group_classical(int idxx);
 
     // Private Methods - riCOM
-    inline void icom(std::array<float, 2> *com, int x, int y);
-    inline void icom(std::array<float, 2> com, int x, int y);
-    template <typename T>
-    inline void com(std::vector<T> *data, std::array<float, 2> &com);
-    template <typename T>
-    void read_com_merlin(std::vector<T> &data, std::array<float, 2> &com);
     inline void set_ricom_pixel(int idx, int idy);
-    template <typename T>
-    inline void com_icom(std::vector<T> data, int ix, int iy, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
-    template <typename T>
-    inline void com_icom(std::vector<T> *p_data, int ix, int iy, std::array<float, 2> *com_xy_sum, ProgressMonitor *p_prog_mon);
 
     // Private Methods - vSTEM
     template <typename T>
@@ -238,7 +223,7 @@ private:
 public:
     SocketConnector socket;
     std::string file_path;
-    RICOM::modes mode;
+    int mode; // 0: file, 1: tcp
     bool b_print2file;
     int redraw_interval;
     std::atomic<int> last_y;
@@ -247,10 +232,13 @@ public:
     bool update_offset;
     bool b_continuous=false;
     bool b_cumulative=false;
-    bool b_vSTEM;
-    bool b_e_mag;
     bool b_plot_cbed;
     std::array<std::atomic<size_t>, 3> frame_id_plot_cbed = {0, 1, 0};
+
+    bool b_vSTEM;
+    bool b_e_mag;
+    bool b_ricom;
+    bool b_airpi;
 
     bool b_plot2SDL;
     bool b_recompute_detector;
@@ -259,20 +247,33 @@ public:
     Ricom_kernel kernel;
     std::array<float, 2> offset;
     std::array<float, 2> com_public;
-    std::vector<float> com_map_x;
-    std::vector<float> com_map_y;
+    std::vector<float> comx_data;
+    std::vector<float> comy_data;
     std::vector<float> ricom_data;
     std::vector<float> stem_data;
+    std::vector<float> airpi_data;
+    std::vector<size_t> dose_data;
+    std::vector<size_t> sumx_data;
+    std::vector<size_t> sumy_data;
+    std::vector<size_t> frame;
     std::vector<std::complex<float>> e_field_data;
 
-    // Scan Area Variables
+    // settings
+    int mode; // 0:file, 1:tcp
+    RICOM::cameras camera;
+
+    // Scan Variables
     int nx;
     int ny;
     int nxy;
+    int n_cam;
+    int dt;
     int rep;
     int fr_total;
     int skip_row;
     int skip_img;
+    int processor_line;
+    int preprocessor_line;
 
     // Variables for progress and performance
     int n_threads;
@@ -303,15 +304,9 @@ public:
     void draw_e_field_image();
     void draw_e_field_image(int y0, int ye);
     // template <class CameraInterface>
-    void run_reconstruction(RICOM::modes mode);
+    void run_reconstruction();
     void reset();
     template <typename T>
-    void plot_cbed(std::vector<T> &data);
-    // template <typename T, class CameraInterface>
-    // void process_data(CAMERA::Camera<CameraInterface, CAMERA::FRAME_BASED> *camera);
-    // template <class CameraInterface>
-    // void process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *camera);
-    // enum CAMERA::Camera_model select_mode_by_file(const char *filename);
     void process_data();
 
     // Constructor

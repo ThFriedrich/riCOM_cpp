@@ -94,13 +94,9 @@ imgui/imgui_tables.cpp
     src/FileConnector.cpp
     src/ProgressMonitor.cpp
     src/Ricom.cpp 
-    src/cameras/CheetahInterface.cpp
-    src/cameras/CheetahWrapper.cpp
-    src/cameras/TimepixInterface.cpp
-    src/cameras/TimepixWrapper.cpp
-    src/cameras/MerlinInterface.cpp
-    src/cameras/MerlinWrapper.cpp
-    src/Camera.cpp
+    src/cameras/Cheetah.cpp
+    src/cameras/Advapix.cpp
+    src/cameras/Timepix.cpp
     src/main.cpp
     src/GuiUtils.cpp
     src/SdlImageWindow.cpp

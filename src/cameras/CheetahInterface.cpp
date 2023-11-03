@@ -84,10 +84,10 @@ void CheetahInterface::real_read(
     }
 }
 
-void CheetahInterface::read_file(FileConnector *file, int *bc)
+void CheetahInterface::read_file(FileConnector *file, int *processor_line)
 {
     int buffer_id;
-    while (*bc != -1)
+    while (*processor_line != -1)
     {
         if (n_buffer_filled < (n_buffer + n_buffer_processed))
         {
@@ -102,9 +102,9 @@ void CheetahInterface::read_file(FileConnector *file, int *bc)
     }
 }
 
-void CheetahInterface::read_socket(SocketConnector *socket, int *bc)
+void CheetahInterface::read_socket(SocketConnector *socket, int *processor_line)
 {
-    while (*bc != -1)
+    while (*processor_line != -1)
     {
         if (n_buffer_filled < (n_buffer + n_buffer_processed))
         {
@@ -265,14 +265,7 @@ void CheetahInterface::process_event(
         probe_position += (line_count[chip_id] % scan_y) * scan_x;
 
         if (*b_stem){
-            kx = (address_multiplier[chip_id] *
-                    (((pack_44 & 0x0FE00) >> 8) +
-                    ((pack_44 & 0x00007) >> 2)) +
-                address_bias_x[chip_id]);
-            ky = (address_multiplier[chip_id] *
-                    (((pack_44 & 0x001F8) >> 1) +
-                    (pack_44 & 0x00003)) +
-                address_bias_y[chip_id]);
+
 
             float d2 = ((float)kx - (*offset)[0]) * ((float)kx - (*offset)[0]) + ((float)ky - (*offset)[1]) * ((float)ky - (*offset)[1]);
             if (d2 > (*radius)[0] && d2 <= (*radius)[1])

@@ -48,7 +48,6 @@
 
 #include "Ricom.h"
 #include "fonts.h"
-#include "Camera.h"
 #include "GuiUtils.h"
 #include "ImGuiImageWindow.h"
 
@@ -172,14 +171,10 @@ int run_gui(Ricom *ricom)
 
     // Main loop conditional flags
     bool b_done = false;
-    bool b_merlin_live_menu = true;
     bool b_acq_open = false;
     bool b_started = false;
     bool b_file_selected = false;
     bool b_restarted = false;
-
-    // Merlin Settings (to send to the Camera)
-    struct MerlinSettings merlin_settings;
 
     // Cheetah Setting (to send to the server)
     CheetahComm cheetah_comm;
@@ -205,22 +200,12 @@ int run_gui(Ricom *ricom)
     ImGuiINI::check_ini_setting(ini_cfg, "Hardware", "Threads", ricom->n_threads);
     ImGuiINI::check_ini_setting(ini_cfg, "Hardware", "Queue Size", ricom->queue_size);
     ImGuiINI::check_ini_setting(ini_cfg, "Hardware", "Image Refresh Interval [ms]", ricom->redraw_interval);
-    // Merlin Settings
-    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "Live Interface Menu", b_merlin_live_menu);
-    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "nx", ricom->nx_cam);
-    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "ny", ricom->ny_cam);
-    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "com_port", merlin_settings.com_port);
-    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "data_port", ricom->socket.port);
-    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "ip", ricom->socket.ip);
-    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "python_path", python_path);
-    // Timepix Settings
-    ImGuiINI::check_ini_setting(ini_cfg, "Timepix", "nx", ricom->nx_cam);
-    ImGuiINI::check_ini_setting(ini_cfg, "Timepix", "ny", ricom->ny_cam);
+    // Advapix Settings
+    ImGuiINI::check_ini_setting(ini_cfg, "Advapix", "nx/y", ricom->n_cam);
     // Cheetah Settings
-    ImGuiINI::check_ini_setting(ini_cfg, "Cheetah", "nx", ricom->nx_cam);
-    ImGuiINI::check_ini_setting(ini_cfg, "Cheetah", "ny", ricom->ny_cam);
-    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "data_port", ricom->socket.port);
-    ImGuiINI::check_ini_setting(ini_cfg, "Merlin", "ip", ricom->socket.ip);
+    ImGuiINI::check_ini_setting(ini_cfg, "Cheetah", "nx/y", ricom->n_cam);
+    ImGuiINI::check_ini_setting(ini_cfg, "Cheetah", "data_port", ricom->socket.port);
+    ImGuiINI::check_ini_setting(ini_cfg, "Cheetah", "ip", ricom->socket.ip);
 
     const char *cmaps[] = {"Parula", "Heat", "Jet", "Turbo", "Hot", "Gray", "Magma", "Inferno", "Plasma", "Viridis", "Cividis", "Github", "HSV"};
     bool b_redraw = false;
@@ -311,56 +296,18 @@ int run_gui(Ricom *ricom)
                 }
                 ImGui::Separator();
 
-                ImGui::Text("Merlin Camera");
-                if (ImGui::Checkbox("Live Interface Menu", &b_merlin_live_menu))
+                ImGui::Text("Advapix Camera");
+                // ImGui::Checkbox("Live Interface Menu", &b_timepix_live_menu);
+                if (ImGui::DragScalar("nx/y Advapix", ImGuiDataType_U16, &(ricom->n_cam), 1, &drag_min_pos))
                 {
-                    ini_cfg["Merlin"]["Live Interface Menu"] = std::to_string(b_merlin_live_menu);
-                }
-                if (ImGui::DragScalar("nx Merlin", ImGuiDataType_U16, &(ricom->nx_cam), 1, &drag_min_pos))
-                {
-                    ini_cfg["Merlin"]["nx"] = std::to_string(ricom->nx_cam);
-                }
-                if (ImGui::DragScalar("ny Merlin", ImGuiDataType_U16, &(ricom->ny_cam), 1, &drag_min_pos))
-                {
-                    ini_cfg["Merlin"]["ny"] = std::to_string(ricom->ny_cam);
-                }
-                if (ImGui::InputText("IP", &ricom->socket.ip))
-                {
-                    ini_cfg["Merlin"]["ip"] = ricom->socket.ip;
-                }
-                if (ImGui::InputInt("COM-Port", &merlin_settings.com_port, 8))
-                {
-                    ini_cfg["Merlin"]["com_port"] = std::to_string(ricom->socket.port);
-                }
-                if (ImGui::InputInt("Data-Port", &ricom->socket.port, 8))
-                {
-                    ini_cfg["Merlin"]["data_port"] = std::to_string(ricom->socket.port);
-                }
-                if (ImGui::InputText("python path", &python_path))
-                {
-                    ini_cfg["Merlin"]["python path"] = python_path;
+                    ini_cfg["Advapix"]["nx/y"] = std::to_string(ricom->n_cam);
                 }
                 ImGui::Separator();
 
-                ImGui::Text("Timepix Camera");
-                // ImGui::Checkbox("Live Interface Menu", &b_timepix_live_menu);
-                if (ImGui::DragScalar("nx Timepix", ImGuiDataType_U16, &(ricom->nx_cam), 1, &drag_min_pos))
-                {
-                    ini_cfg["Timepix"]["nx"] = std::to_string(ricom->nx_cam);
-                }
-                if (ImGui::DragScalar("ny Timepix", ImGuiDataType_U16, &(ricom->ny_cam), 1, &drag_min_pos))
-                {
-                    ini_cfg["Timepix"]["ny"] = std::to_string((ricom->ny_cam));
-                }
-
                 ImGui::Text("Cheetah Camera");
-                if (ImGui::DragScalar("nx Cheetah", ImGuiDataType_U16, &(ricom->nx_cam), 1, &drag_min_pos))
+                if (ImGui::DragScalar("nx/y Cheetah", ImGuiDataType_U16, &(ricom->n_cam), 1, &drag_min_pos))
                 {
-                    ini_cfg["Cheetah"]["nx"] = std::to_string(ricom->nx_cam);
-                }
-                if (ImGui::DragScalar("ny Cheetah", ImGuiDataType_U16, &(ricom->ny_cam), 1, &drag_min_pos))
-                {
-                    ini_cfg["Cheetah"]["ny"] = std::to_string(ricom->ny_cam);
+                    ini_cfg["Cheetah"]["nx/y"] = std::to_string(ricom->n_cam);
                 }
                 ImGui::EndMenu();
             }
@@ -458,7 +405,7 @@ int run_gui(Ricom *ricom)
             }
 
             ImGui::Text("CBED Centre");
-            uint16_t *max_nx = (std::max)(&ricom->camera.nx_cam, &ricom->camera.ny_cam);
+            uint16_t *max_nx = &ricom->n_cam
             bool offset_changed = ImGui::DragFloat2("Centre", &ricom->offset[0], 0.1f, 0.0, (float)*max_nx);
             if (offset_changed)
             {
@@ -518,69 +465,6 @@ int run_gui(Ricom *ricom)
             }
         }
 
-        if (b_merlin_live_menu)
-        {
-            if (ImGui::CollapsingHeader("Merlin Live Mode", ImGuiTreeNodeFlags_DefaultOpen))
-            {
-
-                ImGui::InputInt("hvbias", &merlin_settings.hvbias, 1, 10);
-                ImGui::InputInt("threshold0", &merlin_settings.threshold0, 1, 8);
-                ImGui::InputInt("threshold1", &merlin_settings.threshold1, 1, 8);
-                ImGui::InputFloat("dwell time (us)", &merlin_settings.dwell_time, 0.01, 0.1);
-                ImGui::Checkbox("trigger", &merlin_settings.trigger);
-                ImGui::SameLine();
-                ImGui::Checkbox("headless", &merlin_settings.headless);
-                ImGui::Checkbox("continuousrw", &merlin_settings.continuousrw);
-                ImGui::SameLine();
-                ImGui::Checkbox("raw", &merlin_settings.raw);
-
-                if (merlin_settings.raw)
-                {
-                    ImGui::Text("Depth");
-                    ImGui::SameLine();
-                    ImGui::BeginGroup();
-                    ImGui::RadioButton("1", ricom->camera.depth == 1);
-                    ImGui::SameLine();
-                    ImGui::RadioButton("6", ricom->camera.depth == 6);
-                    ImGui::SameLine();
-                    ImGui::RadioButton("12", ricom->camera.depth == 12);
-                    ImGui::EndGroup();
-                }
-
-                ImGui::Checkbox("save file?", &merlin_settings.save);
-
-                if (ricom->socket.b_connected)
-                {
-                    b_started = true;
-                    b_restarted = true;
-                    ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Connected");
-                    if (ricom->socket.connection_information.size() > 0)
-                    {
-                        ImGui::SameLine();
-                        if (ImGui::Button("Show Acqusition Info", ImVec2(-1.0f, 0.0f)))
-                        {
-                            b_acq_open = true;
-                        }
-                    }
-                }
-                else
-                {
-                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Not Connected");
-                }
-
-                if (ImGui::Button("Start Acquisition", ImVec2(-1.0f, 0.0f)))
-                {
-
-                    run_thread = std::thread(RICOM::run_ricom, ricom, RICOM::TCP);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                    py_thread = std::thread(RICOM::run_connection_script, ricom, &merlin_settings, python_path);
-                    run_thread.detach();
-                    py_thread.detach();
-                    GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
-                }
-            }
-        }
-
         if (ImGui::CollapsingHeader("Stream reconstruction", ImGuiTreeNodeFlags_DefaultOpen)){
 
             if (ImGui::Button("Preview", ImVec2(-1.0f, 0.0f)))
@@ -596,11 +480,11 @@ int run_gui(Ricom *ricom)
                 // ricom->socket.flush_socket();
                 b_started = true;
                 b_restarted = true;
-                run_thread = std::thread(RICOM::run_ricom, ricom, RICOM::TCP);
+                run_thread = std::thread(RICOM::run, ricom, RICOM::TCP);
                 run_thread.detach();
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 cheetah_comm.start();
-                // RICOM::run_ricom(ricom, RICOM::TCP);
+                // RICOM::run(ricom, RICOM::TCP);
                 GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
             }
 
@@ -612,7 +496,7 @@ int run_gui(Ricom *ricom)
                 cheetah_comm.tpx3_cam_init();
                 cheetah_comm.tpx3_destination();
 
-                run_thread = std::thread(RICOM::run_ricom, ricom, RICOM::TCP);
+                run_thread = std::thread(RICOM::run, ricom, RICOM::TCP);
                 run_thread.detach();
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 cheetah_comm.start();
@@ -651,29 +535,14 @@ int run_gui(Ricom *ricom)
             {
                 ImGui::Text("File: %s", filename.c_str());
 
-                if (ricom->camera.model == CAMERA::MERLIN)
+                if (ricom->camera == RICOM::ADVAPIX)
                 {
-                    ImGui::BeginGroup();
-                    ImGui::Text("Depth");
-                    ImGui::RadioButton("1", ricom->camera.depth == 1);
-                    ImGui::SameLine();
-                    ImGui::RadioButton("6", ricom->camera.depth == 6);
-                    ImGui::SameLine();
-                    ImGui::RadioButton("12", ricom->camera.depth == 12);
-                    ImGui::EndGroup();
-                    if (ImGui::IsItemHovered())
-                    {
-                        ImGui::SetTooltip("Only applicable for handling recorded files, \n recorded in raw mode.");
-                    }
-                }
-                if (ricom->camera.model == CAMERA::TIMEPIX)
-                {
-                    ImGui::DragInt("dwell time", &ricom->camera.dwell_time, 1, 1);
+                    ImGui::DragInt("dwell time", &ricom->dt, 1, 1);
                 }
 
                 if (ImGui::Button("Run File", ImVec2(-1.0f, 0.0f)))
                 {
-                    run_thread = std::thread(RICOM::run_ricom, ricom, RICOM::FILE);
+                    run_thread = std::thread(RICOM::run, ricom, RICOM::FILE);
                     b_started = true;
                     b_restarted = true;
                     run_thread.detach();
@@ -721,11 +590,11 @@ int run_gui(Ricom *ricom)
         float tex_wh = (std::min)(rem_space.x, rem_space.y);
         ImVec2 p = ImGui::GetCursorScreenPos();
 
-        float com_rel_x = p.x + tex_wh * (ricom->com_public[0] / ricom->camera.nx_cam);
-        float com_rel_y = p.y + tex_wh * (ricom->com_public[1] / ricom->camera.ny_cam);
+        float com_rel_x = p.x + tex_wh * (ricom->com_public[0] / ricom->n_cam);
+        float com_rel_y = p.y + tex_wh * (ricom->com_public[1] / ricom->n_cam);
 
-        float centre_x = p.x + tex_wh * (ricom->offset[0] / ricom->camera.nx_cam);
-        float centre_y = p.y + tex_wh * (ricom->offset[1] / ricom->camera.ny_cam);
+        float centre_x = p.x + tex_wh * (ricom->offset[0] / ricom->n_cam);
+        float centre_y = p.y + tex_wh * (ricom->offset[1] / ricom->n_cam);
 
         com_rel_x = (std::max)(p.x, com_rel_x);
         com_rel_y = (std::max)(p.y, com_rel_y);
@@ -746,8 +615,8 @@ int run_gui(Ricom *ricom)
         ImGui::GetWindowDrawList()->AddLine(ImVec2(com_rel_x, com_rel_y - cross_width), ImVec2(com_rel_x, com_rel_y + cross_width), IM_COL32(255, 0, 0, 255), 1.5f);
         if (ricom->b_vSTEM)
         {
-            ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * (ricom->detector.radius[0] / ricom->camera.nx_cam), IM_COL32(255, 50, 0, 255), 256);
-            ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * (ricom->detector.radius[1] / ricom->camera.nx_cam), IM_COL32(255, 150, 0, 255), 256);
+            ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * (ricom->detector.radius[0] / ricom->n_cam), IM_COL32(255, 50, 0, 255), 256);
+            ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * (ricom->detector.radius[1] / ricom->n_cam), IM_COL32(255, 150, 0, 255), 256);
         }
         ImGui::End();
 

@@ -18,7 +18,7 @@
 #include "SdlImageWindow.h"
 #include "GuiUtils.h"
 
-int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations &hardware_configurations)
+int run_cli(int argc, char *argv[], Ricom *ricom)
 {
     ricom->b_plot_cbed = false;
     std::string save_img = "";
@@ -32,21 +32,22 @@ int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations
             // Set filename to read from .mib file
             if (strcmp(argv[i], "-filename") == 0)
             {
-                ricom->camera = hardware_configurations[ricom->select_mode_by_file(argv[i + 1])];
+                ricom->file_path = argv[i + 1];
+                ricom->mode = 0;
                 i++;
             }
             // Set IP of camera for TCP connection
             if (strcmp(argv[i], "-ip") == 0)
             {
                 ricom->socket.ip = argv[i + 1];
-                ricom->mode = RICOM::TCP;
+                ricom->mode = 1;
                 i++;
             }
             // Set port data-read port of camera
             if (strcmp(argv[i], "-port") == 0)
             {
                 ricom->socket.port = std::stoi(argv[i + 1]);
-                ricom->mode = RICOM::TCP;
+                ricom->mode = 1;
                 i++;
             }
             // Set width of image
@@ -61,18 +62,11 @@ int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations
                 ricom->ny = std::stoi(argv[i + 1]);
                 i++;
             }
-            // Set width of camera
-            if (strcmp(argv[i], "-cam_nx") == 0)
+            // Set dimension of camera
+            if (strcmp(argv[i], "-cam_nxy") == 0)
             {
-                ricom->camera.nx_cam = std::stoi(argv[i + 1]);
-                ricom->offset[0] = ((float)ricom->camera.nx_cam - 1) / 2;
-                i++;
-            }
-            // Set height of camera
-            if (strcmp(argv[i], "-cam_ny") == 0)
-            {
-                ricom->camera.ny_cam = std::stoi(argv[i + 1]);
-                ricom->offset[1] = ((float)ricom->camera.ny_cam - 1) / 2;
+                ricom->n_cam = std::stoi(argv[i + 1]);
+                ricom->offset[0] = ((float)ricom->n_cam - 1) / 2;
                 i++;
             }
             // Set skip per row
@@ -132,12 +126,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations
                 i++;
             }
             // Set depth of pixel for raw mode
-            if (strcmp(argv[i], "-depth") == 0)
-            {
-                ricom->camera.depth = std::stoi(argv[i + 1]);
-                ricom->camera.model = CAMERA::MERLIN;
-                i++;
-            }
+
             // Set number of repetitions
             if (strcmp(argv[i], "-rep") == 0)
             {
@@ -147,8 +136,8 @@ int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations
             // Set Dwell Time
             if (strcmp(argv[i], "-dwell_time") == 0)
             {
-                ricom->camera.dwell_time = std::stof(argv[i + 1]);
-                ricom->camera.model = CAMERA::TIMEPIX;
+                ricom->dt = std::stof(argv[i + 1]);
+                ricom->camera = RICOM::ADVAPIX;
                 i++;
             }
             // Set Number of threads
@@ -196,14 +185,14 @@ int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations
     {
         std::vector<SdlImageWindow> image_windows;
         std::thread run_thread;
-        // run_thread = std::thread(RICOM::run_ricom, ricom, ricom->mode);
+        // run_thread = std::thread(RICOM::run, ricom, ricom->mode);
         while (ricom->srf_ricom == NULL)
         {
             SDL_Delay(ricom->redraw_interval);
         }
 
         // run_thread.detach();
-        RICOM::run_ricom(ricom, ricom->mode);
+        RICOM::run(ricom, ricom->mode);
 
         // // Initializing SDL
         SDL_DisplayMode DM; // To get the current display size
@@ -262,7 +251,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations
     }
     else
     {
-        RICOM::run_ricom(ricom, ricom->mode);
+        RICOM::run(ricom, ricom->mode);
     }
     if (save_dat != "")
     {
