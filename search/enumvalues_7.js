@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['tcp_503',['TCP',['../d2/d8f/namespaceRICOM.html#a31b452a6e457451cf52b54552e0ec4a6a28267594ad6d5aab4056c31c20d80bec',1,'RICOM']]],
-  ['timepix_504',['TIMEPIX',['../da/d71/namespaceCAMERA.html#a1a9dc899b585e673ed1c84ac398bc330a3c25c816ae325233846217f32262bc09',1,'CAMERA']]]
+  ['savedatabutton_518',['SaveDataButton',['../d4/d6e/ImGuiImageWindow_8h.html#a57bfef8abc6d323c65048f0c7a57a5eaafc21f76b7d81b00da25a04837a915549',1,'ImGuiImageWindow.h']]],
+  ['saveimbutton_519',['SaveImButton',['../d4/d6e/ImGuiImageWindow_8h.html#a57bfef8abc6d323c65048f0c7a57a5eaa19384afe28b41f9812a7159b6a6120db',1,'ImGuiImageWindow.h']]],
+  ['server_520',['SERVER',['../d0/d3c/SocketConnector_8h.html#a85e59479b8a0df27511e71ed47decfaca67c96b24b23bcb408bae7626730a04b7',1,'SocketConnector.h']]]
 ];

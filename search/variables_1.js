@@ -1,9 +1,18 @@
 var searchData=
 [
-  ['cbed_5fcmap_393',['cbed_cmap',['../d8/d91/classRicom.html#a292b5e0aa3f7ba28b2a627181c386249',1,'Ricom']]],
-  ['client_5fsocket_394',['client_socket',['../d7/d76/classSocketConnector.html#a4e4d7e4be372618237606c2b6c460197',1,'SocketConnector']]],
-  ['com_5fmap_5fx_395',['com_map_x',['../d8/d91/classRicom.html#aa42431ed2d234da06def7e4a0c44ca96',1,'Ricom']]],
-  ['com_5fmap_5fy_396',['com_map_y',['../d8/d91/classRicom.html#abd336db80d59ac4af51a85613a707138',1,'Ricom']]],
-  ['com_5fpublic_397',['com_public',['../d8/d91/classRicom.html#a0f0fd0e28fb859413117fa1fbe740b8d',1,'Ricom']]],
-  ['connection_5finformation_398',['connection_information',['../d7/d76/classSocketConnector.html#a50c9babc1b4efb60b9a8f6e0595ef25d',1,'SocketConnector']]]
+  ['b_5fairpi_387',['b_airpi',['../d8/d91/classRicom.html#a4433a4e18a5077ea29805f9006458b00',1,'Ricom']]],
+  ['b_5fbusy_388',['b_busy',['../d8/d91/classRicom.html#a27f73e18033dd14cf0e9ea4f503467af',1,'Ricom']]],
+  ['b_5fconnected_389',['b_connected',['../d7/d76/classSocketConnector.html#a238900b9c4e9a4f06e2abc59d7f8cf28',1,'SocketConnector']]],
+  ['b_5fcontinuous_390',['b_continuous',['../d8/d91/classRicom.html#ac921e2f242937e62841561b4ced0d19d',1,'Ricom']]],
+  ['b_5fcumulative_391',['b_cumulative',['../d8/d91/classRicom.html#acf959816c1ff9585fa0784317f17d094',1,'Ricom']]],
+  ['b_5fe_5fmag_392',['b_e_mag',['../d8/d91/classRicom.html#a9da9e5053f8141c6554845991a83eaff',1,'Ricom']]],
+  ['b_5ffilter_393',['b_filter',['../de/d71/classRicom__kernel.html#a8ace8cab0e11900b17501b88ee15d050',1,'Ricom_kernel']]],
+  ['b_5fplot2sdl_394',['b_plot2SDL',['../d8/d91/classRicom.html#a41612e4335cde6a5e505929d3102733f',1,'Ricom']]],
+  ['b_5fplot_5fcbed_395',['b_plot_cbed',['../d8/d91/classRicom.html#aac8b36e79a2e0e35f87b455088a080da',1,'Ricom']]],
+  ['b_5fprint2file_396',['b_print2file',['../d8/d91/classRicom.html#af0e981519f3312ae02894f5028f182c5',1,'Ricom']]],
+  ['b_5frecompute_5fdetector_397',['b_recompute_detector',['../d8/d91/classRicom.html#a2d898d0ee4eb4d08599c02504cd582b9',1,'Ricom']]],
+  ['b_5frecompute_5fkernel_398',['b_recompute_kernel',['../d8/d91/classRicom.html#aba5df2b38e7602393c4b9506c10067ff',1,'Ricom']]],
+  ['b_5fricom_399',['b_ricom',['../d8/d91/classRicom.html#ae62d0cdfd47ae37f27ea84f2932e1b1e',1,'Ricom']]],
+  ['b_5ftrigger_5fupdate_400',['b_trigger_update',['../d5/d5d/classImGuiImageWindow.html#a6ce7c6b64151f6e7da315567fc42d4cd',1,'ImGuiImageWindow']]],
+  ['b_5fvstem_401',['b_vSTEM',['../d8/d91/classRicom.html#ae8eeec6f9dd3475dd6d47b2dcccbd424',1,'Ricom']]]
 ];

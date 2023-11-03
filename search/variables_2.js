@@ -1,9 +1,10 @@
 var searchData=
 [
-  ['default_5fwidth_399',['DEFAULT_WIDTH',['../d1/dcc/classProgressMonitor.html#a7f3952a63fa06e94d04a34b87dd3eae7',1,'ProgressMonitor']]],
-  ['depth_400',['depth',['../d3/d29/classCAMERA_1_1Camera__BASE.html#ad62a45fb047a8a9956051dabc8cea30b',1,'CAMERA::Camera_BASE']]],
-  ['detector_401',['detector',['../d8/d91/classRicom.html#a91a00a10b3ae6879300348ab2f3325e8',1,'Ricom']]],
-  ['dock_5fid_402',['dock_id',['../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef',1,'Main_Dock']]],
-  ['dockspace_5fflags_403',['dockspace_flags',['../d5/da5/classMain__Dock.html#aa0220fc5e6fa4c04f8997db3e370b704',1,'Main_Dock']]],
-  ['dwell_5ftime_404',['dwell_time',['../d3/d29/classCAMERA_1_1Camera__BASE.html#ae2d2895f9692961f38f6a9d45be2e9b5',1,'CAMERA::Camera_BASE']]]
+  ['camera_402',['camera',['../d8/d91/classRicom.html#a809a771f50a58742146c795bcf76a1c8',1,'Ricom']]],
+  ['cbed_5fcmap_403',['cbed_cmap',['../d8/d91/classRicom.html#a292b5e0aa3f7ba28b2a627181c386249',1,'Ricom']]],
+  ['client_5fsocket_404',['client_socket',['../d7/d76/classSocketConnector.html#a4e4d7e4be372618237606c2b6c460197',1,'SocketConnector']]],
+  ['com_5fpublic_405',['com_public',['../d8/d91/classRicom.html#a0f0fd0e28fb859413117fa1fbe740b8d',1,'Ricom']]],
+  ['comx_5fdata_406',['comx_data',['../d8/d91/classRicom.html#a532041685363528cdfa0cd7d42e253db',1,'Ricom']]],
+  ['comy_5fdata_407',['comy_data',['../d8/d91/classRicom.html#a2cc9c03f52ff71811e68429d85d3b117',1,'Ricom']]],
+  ['connection_5finformation_408',['connection_information',['../d7/d76/classSocketConnector.html#a50c9babc1b4efb60b9a8f6e0595ef25d',1,'SocketConnector']]]
 ];

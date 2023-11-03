@@ -152,27 +152,6 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html#l00191">191</a> of file <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html">Ricom.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;{</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    this-&gt;nx = nx_ricom;</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;    this-&gt;ny = ny_ricom;</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;    this-&gt;kernel = kernel;</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160; </div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    <a class="code" href="../../da/df1/classUpdate__list.html#a30412e9a698b198ac4502c3e9a332079">ids</a>.resize(kernel.<a class="code" href="../../de/d71/classRicom__kernel.html#a1eca8011efa95eef0a4c87bdad7e85ca">k_area</a>);</div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    <span class="keywordtype">int</span> idul = 0;</div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> idy = -kernel.<a class="code" href="../../de/d71/classRicom__kernel.html#af9fa00cab1a28c0081c1a245c81795c7">kernel_size</a>; idy &lt;= kernel.<a class="code" href="../../de/d71/classRicom__kernel.html#af9fa00cab1a28c0081c1a245c81795c7">kernel_size</a>; idy++)</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;    {</div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> idx = -kernel.<a class="code" href="../../de/d71/classRicom__kernel.html#af9fa00cab1a28c0081c1a245c81795c7">kernel_size</a>; idx &lt;= kernel.<a class="code" href="../../de/d71/classRicom__kernel.html#af9fa00cab1a28c0081c1a245c81795c7">kernel_size</a>; idx++)</div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;        {</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;            <a class="code" href="../../da/df1/classUpdate__list.html#a30412e9a698b198ac4502c3e9a332079">ids</a>[idul] = {(idy * nx + idx), <span class="keyword">false</span>};</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;            idul++;</div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;        }</div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;    }</div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;}</div>
-<div class="ttc" id="aclassRicom__kernel_html_a1eca8011efa95eef0a4c87bdad7e85ca"><div class="ttname"><a href="../../de/d71/classRicom__kernel.html#a1eca8011efa95eef0a4c87bdad7e85ca">Ricom_kernel::k_area</a></div><div class="ttdeci">int k_area</div><div class="ttdef"><b>Definition:</b> <a href="../../de/dfc/Ricom_8h_source.html#l00064">Ricom.h:64</a></div></div>
-<div class="ttc" id="aclassRicom__kernel_html_af9fa00cab1a28c0081c1a245c81795c7"><div class="ttname"><a href="../../de/d71/classRicom__kernel.html#af9fa00cab1a28c0081c1a245c81795c7">Ricom_kernel::kernel_size</a></div><div class="ttdeci">int kernel_size</div><div class="ttdef"><b>Definition:</b> <a href="../../de/dfc/Ricom_8h_source.html#l00060">Ricom.h:60</a></div></div>
-<div class="ttc" id="aclassUpdate__list_html_a30412e9a698b198ac4502c3e9a332079"><div class="ttname"><a href="../../da/df1/classUpdate__list.html#a30412e9a698b198ac4502c3e9a332079">Update_list::ids</a></div><div class="ttdeci">std::vector&lt; id_x_y &gt; ids</div><div class="ttdef"><b>Definition:</b> <a href="../../de/dfc/Ricom_8h_source.html#l00120">Ricom.h:120</a></div></div>
-</div><!-- fragment -->
 </div>
 </div>
 <a id="a91e56327b931ea4bdb530e0f9f26f10d"></a>
@@ -215,15 +194,6 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html#l00209">209</a> of file <a class="el" href="../../d4/d9b/Ricom_8cpp_source.html">Ricom.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;{</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;    <span class="keywordtype">int</span> id_sft = <a class="code" href="../../da/df1/classUpdate__list.html#a30412e9a698b198ac4502c3e9a332079">ids</a>[id].id + <a class="code" href="../../da/df1/classUpdate__list.html#a91e56327b931ea4bdb530e0f9f26f10d">shift</a>;</div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    <span class="keywordtype">int</span> y = id_sft / nx;</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;    <span class="keywordtype">int</span> x = id_sft % nx;</div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    res = {id_sft, y &gt;= 0 &amp;&amp; y &lt; ny &amp;&amp; x &lt; nx &amp;&amp; x &gt;= 0};</div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;}</div>
-<div class="ttc" id="aclassUpdate__list_html_a91e56327b931ea4bdb530e0f9f26f10d"><div class="ttname"><a href="../../da/df1/classUpdate__list.html#a91e56327b931ea4bdb530e0f9f26f10d">Update_list::shift</a></div><div class="ttdeci">void shift(id_x_y &amp;id_sft, int id, int shift)</div><div class="ttdef"><b>Definition:</b> <a href="../../d4/d9b/Ricom_8cpp_source.html#l00209">Ricom.cpp:209</a></div></div>
-</div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
@@ -243,9 +213,8 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/<a class="el" href="../../de/dfc/Ricom_8h_source.html">Ricom.h</a></li>
-<li>src/<a class="el" href="../../d4/d9b/Ricom_8cpp_source.html">Ricom.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

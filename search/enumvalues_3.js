@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['merlin_496',['MERLIN',['../da/d71/namespaceCAMERA.html#a1a9dc899b585e673ed1c84ac398bc330aec937be59e8463c1e0fd431dc66240fc',1,'CAMERA']]],
-  ['models_5fcount_497',['MODELS_COUNT',['../da/d71/namespaceCAMERA.html#a1a9dc899b585e673ed1c84ac398bc330ae73bf02e0ab2e3787af2b4fe6e4f792b',1,'CAMERA']]]
+  ['fftbutton_512',['FftButton',['../d4/d6e/ImGuiImageWindow_8h.html#a57bfef8abc6d323c65048f0c7a57a5eaa2c7a797e1be5d5ca2b4f11e010c2775a',1,'ImGuiImageWindow.h']]],
+  ['frame_5fbased_513',['FRAME_BASED',['../da/d71/namespaceCAMERA.html#a77b2c000d09253f929ff362116628c3ca38cc83c7e0bf7e801947a7d159238d04',1,'CAMERA']]]
 ];

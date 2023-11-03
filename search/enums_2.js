@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['modes_487',['modes',['../d2/d8f/namespaceRICOM.html#a31b452a6e457451cf52b54552e0ec4a6',1,'RICOM']]]
+  ['socket_5ftype_506',['Socket_type',['../d0/d3c/SocketConnector_8h.html#a85e59479b8a0df27511e71ed47decfac',1,'SocketConnector.h']]]
 ];
