@@ -32,7 +32,14 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
             // Set filename to read from .mib file
             if (strcmp(argv[i], "-filename") == 0)
             {
-                ricom->file_path = argv[i + 1];
+                if (std::filesystem::path(argv[i + 1]).extension() == ".t3p") 
+                {
+                    ricom->camera = RICOM::ADVAPIX;
+                    ImGui::DragInt("dwell time", &ricom->dt, 1, 1);
+                }
+                else if (std::filesystem::path(argv[i + 1]).extension() == ".tpx3") 
+                {ricom->camera = RICOM::CHEETAH;}
+                ricom->file_path = argv[i + 1]; 
                 ricom->mode = 0;
                 i++;
             }
@@ -185,14 +192,14 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
     {
         std::vector<SdlImageWindow> image_windows;
         std::thread run_thread;
-        // run_thread = std::thread(RICOM::run, ricom, ricom->mode);
+        // run_thread = std::thread(&Ricom::run, ricom, ricom->mode);
         while (ricom->srf_ricom == NULL)
         {
             SDL_Delay(ricom->redraw_interval);
         }
 
         // run_thread.detach();
-        RICOM::run(ricom, ricom->mode);
+        ricom->run(ricom->mode);
 
         // // Initializing SDL
         SDL_DisplayMode DM; // To get the current display size
@@ -251,7 +258,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
     }
     else
     {
-        RICOM::run(ricom, ricom->mode);
+        ricom->run(ricom->mode);
     }
     if (save_dat != "")
     {

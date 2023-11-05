@@ -226,7 +226,7 @@ Ricom::Ricom() : stem_max(-FLT_MAX), stem_min(FLT_MAX),
                  ricom_mutex(), stem_mutex(), counter_mutex(), e_field_mutex(),
                  socket(), file_path(""),
                  camera(),
-                 mode(RICOM::FILE),
+                 mode(0),
                  b_print2file(false),
                  redraw_interval(50),
                  last_y(0),
@@ -239,7 +239,7 @@ Ricom::Ricom() : stem_max(-FLT_MAX), stem_min(FLT_MAX),
                  b_recompute_kernel(false), detector(),
                  kernel(),
                  offset{128, 128}, com_public{0.0, 0.0},
-                 com_map_x(), com_map_y(),
+                 comx_data(), comy_data(),
                  ricom_data(),
                  stem_data(),
                  nx(1024), ny(1024), nxy(0),
@@ -479,15 +479,11 @@ void Ricom::process_data()
     size_t first_frame = img_num * nxy;
     size_t end_frame = (img_num + 1) * nxy;
     size_t fr_total_u = (size_t)fr_total;
-    int processor_line = 0;
-    int preprocessor_line = 0;
 
     ProgressMonitor prog_mon(fr_total, !b_print2file, redraw_interval);
     p_prog_mon = &prog_mon;
 
     reinit_vectors_limits();
-
-    std::clock_t start_time = std::clock();
 
     while (processor_line != -1)
     {
@@ -497,13 +493,9 @@ void Ricom::process_data()
             end_frame, 
             p_prog_mon, 
             fr_total_u, 
-            &pool,
-            processor_line, 
-            preprocessor_line
+            &pool
             );
     }
-    std::clock_t end_time = std::clock();
-    double time_taken = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC;
     p_prog_mon = nullptr;
 }
 
@@ -513,12 +505,9 @@ void Ricom::line_processor(
     size_t &end_frame,
     ProgressMonitor *prog_mon,
     size_t &fr_total_u,
-    BoundedThreadPool *pool,
-    int &processor_line,
-    int &preprocessor_line
+    BoundedThreadPool *pool
 )
 {
-    int delay_update = (kernel.kernel_size+1)*2*nx;
     int idxx = 0;
     // process newly finished lines, if there are any
     if ((int)(prog_mon->fr_count / nx) < preprocessor_line)
@@ -529,33 +518,33 @@ void Ricom::line_processor(
 
         std::array<float, 2> com_xy = {0.0, 0.0};
         std::array<float, 2> com_xy_sum = {0.0, 0.0};
-        for (size_t i = 0; i < nx; i++)
+        for (size_t i = 0; i < (size_t)nx; i++)
         {
             int idxx_p_i = idxx + i;
             if ((idxx_p_i >= 0) | (nx > 1))
             {
-                if (dose_map[idxx_p_i] == 0)
+                if (dose_data[idxx_p_i] == 0)
                 {
-                    com_map_x[idxx_p_i] = offset[0];
-                    com_map_y[idxx_p_i] = offset[1];
+                    comx_data[idxx_p_i] = offset[0];
+                    comy_data[idxx_p_i] = offset[1];
                 }
                 else
                 {
-                    com_map_x[idxx_p_i] = sumx_map[idxx_p_i] / dose_map[idxx_p_i];
-                    com_map_y[idxx_p_i] = sumy_map[idxx_p_i] / dose_map[idxx_p_i];
+                    comx_data[idxx_p_i] = sumx_data[idxx_p_i] / dose_data[idxx_p_i];
+                    comy_data[idxx_p_i] = sumy_data[idxx_p_i] / dose_data[idxx_p_i];
                 }
-                com_xy_sum[0] += com_map_x[idxx_p_i];
-                com_xy_sum[1] += com_map_y[idxx_p_i];
+                com_xy_sum[0] += comx_data[idxx_p_i];
+                com_xy_sum[1] += comy_data[idxx_p_i];
                 if (!b_cumulative) {
-                    sumx_map[idxx_p_i] = 0;
-                    sumy_map[idxx_p_i] = 0;
-                    dose_map[idxx_p_i] = 0;
+                    sumx_data[idxx_p_i] = 0;
+                    sumy_data[idxx_p_i] = 0;
+                    dose_data[idxx_p_i] = 0;
                 }
             }
             if (b_e_mag)
             {
-                com_xy[0] = com_map_x[idxx_p_i];
-                com_xy[1] = com_map_y[idxx_p_i];
+                com_xy[0] = comx_data[idxx_p_i];
+                com_xy[1] = comy_data[idxx_p_i];
                 compute_electric_field(com_xy, idxx_p_i);
             }
         }
@@ -632,8 +621,6 @@ void Ricom::icom_group_classical(int idxx)
 
     if (((idxx / nx - 2*kernel.kernel_size) >= 0))
     {
-
-
         for (int i_line = 0, idr_delay = idxx - kernel.kernel_size * nx;
         i_line < nx;
         i_line++, idr_delay++)
@@ -653,11 +640,11 @@ void Ricom::icom_group_classical(int idxx)
                 {
                     if (((idr_x + ix) >= 0) & ((idr_x + ix) < nx))
                     {
-                        // ricom_data[idr] += ((com_map_x[idc + ix] - offset[0]) * -kernel.kernel_x[idk] +
-                        //                     (com_map_y[idc + ix] - offset[1]) * -kernel.kernel_y[idk]);
+                        // ricom_data[idr] += ((comx_data[idc + ix] - offset[0]) * -kernel.kernel_x[idk] +
+                        //                     (comy_data[idc + ix] - offset[1]) * -kernel.kernel_y[idk]);
 
-                        ricom_data[idr_delay] += ((com_map_x[idc + ix] - offset[0]) * -kernel.kernel_x[idk] +
-                                                  (com_map_y[idc + ix] - offset[1]) * -kernel.kernel_y[idk]);
+                        ricom_data[idr_delay] += ((comx_data[idc + ix] - offset[0]) * -kernel.kernel_x[idk] +
+                                                  (comy_data[idc + ix] - offset[1]) * -kernel.kernel_y[idk]);
                     }
                     ++idk;
                 }
@@ -670,8 +657,9 @@ void Ricom::icom_group_classical(int idxx)
 }
 
 // Entrance function for Ricom_reconstructinon
-void Ricom::run_reconstruction()
+void Ricom::run(int mode)
 {
+    this->mode = mode;
     reset();
     b_busy = true;
     // Initializations
@@ -705,15 +693,12 @@ void Ricom::run_reconstruction()
     switch (camera)
     {
         // Merlin not implemented
-        case RICOM::ADVAPIX
+        case RICOM::ADVAPIX:
         {   
-            std::vector<std::vector<ADVAPIX_ADDITIONAL::event>> buffer(
-                ADVAPIX_ADDITIONAL::n_buffer, 
-                std::vector<ADVAPIX_ADDITIONAL::event>>(ADVAPIX_ADDITIONAL::buffer_size));
-            ADVAPIX<ADVAPIX_ADDITIONAL::event> cam(
+            using namespace ADVAPIX_ADDITIONAL;
+            ADVAPIX cam(
                 nx, 
                 ny, 
-                n_cam, 
                 n_cam, 
                 dt,
                 b_vSTEM,
@@ -735,23 +720,19 @@ void Ricom::run_reconstruction()
                 &preprocessor_line,
                 mode,
                 file_path,
-                &socket,
-                ADVAPIX_ADDITIONAL::buffer_size,
-                ADVAPIX_ADDITIONAL::n_buffer,
-                &buffer,
+                &socket
             );
             cam.run();
+            process_data();
+            cam.terminate();
             break;
         }
-        case RICOM::CHEETAH
+        case RICOM::CHEETAH:
         {
-            std::vector<std::vector<CHEETAH_ADDITIONAL::event>> buffer(
-                CHEETAH_ADDITIONAL::n_buffer, 
-                std::vector<CHEETAH_ADDITIONAL::event>>(CHEETAH_ADDITIONAL::buffer_size));
-            CHEETAH<CHEETAH_ADDITIONAL::event> cam(
+            using namespace CHEETAH_ADDITIONAL;
+            CHEETAH cam(
                 nx, 
                 ny, 
-                n_cam, 
                 n_cam, 
                 dt,
                 b_vSTEM,
@@ -773,17 +754,18 @@ void Ricom::run_reconstruction()
                 &preprocessor_line,
                 mode,
                 file_path,
-                &socket,
-                CHEETAH_ADDITIONAL::buffer_size,
-                CHEETAH_ADDITIONAL::n_buffer,
-                &buffer,
+                &socket
             );
             cam.run();
+            process_data();
+            cam.terminate();
             break;
         }
     }
 
-    process_data();
+
+    // std::this_thread::sleep_for(std::chrono::milliseconds(10*1000));
+
 
     // close the reading and preprocess threads ??
 
@@ -807,8 +789,8 @@ void Ricom::reinit_vectors_limits()
 {
     std::fill(ricom_data.begin(), ricom_data.end(), 0);
     std::fill(stem_data.begin(), stem_data.end(), 0);
-    std::fill(com_map_x.begin(), com_map_x.end(), 0);
-    std::fill(com_map_y.begin(), com_map_y.end(), 0);
+    std::fill(comx_data.begin(), comx_data.end(), 0);
+    std::fill(comy_data.begin(), comy_data.end(), 0);
     last_y = 0;
     reset_limits();
 }
@@ -818,12 +800,4 @@ void Ricom::reset()
     rc_quit = false;
     fr_freq = 0;
     reinit_vectors_limits();
-}
-
-
-void RICOM::run(Ricom *r, int mode, RICOM::cameras cameras)
-{
-    r->modes = mode;
-    r->cameras = cameras;
-    r->run_reconstruction();
 }

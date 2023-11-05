@@ -12,8 +12,74 @@
  */
 
 #include "Cheetah.h"
+using namespace CHEETAH_ADDITIONAL;
 
-void CHEETAH::process_buffer()
+void CHEETAH::run()
+{
+    reset();
+    switch (mode)
+    {
+        case 0:
+        {
+            file.path = file_path;
+            file.open_file();
+            read_guy = std::thread(&CHEETAH::read_file, this);
+            break;
+        }
+        case 1:
+        {
+            p_socket->socket_type = Socket_type::SERVER;
+            p_socket->accept_socket();
+            read_guy = std::thread(&CHEETAH::read_socket, this);
+            break;
+        }
+    }
+    proc_guy = std::thread(&CHEETAH::process_buffer, this);
+    // read_guy.detach();
+    // proc_guy.detach();
+
+}
+
+inline void CHEETAH::read_file()
+{
+    int buffer_id;
+    while (*p_processor_line!=-1)
+    {
+        if ( (n_buffer_filled < (n_buffer + n_buffer_processed)) && (*p_preprocessor_line < (*p_processor_line + (int)(ny/2))) ) 
+        {
+            buffer_id = n_buffer_filled % n_buffer;
+            file.read_data((char *)&(buffer[buffer_id]), sizeof(buffer[buffer_id]));
+            ++n_buffer_filled;
+        }
+        else
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+    }
+    file.close_file();
+}
+
+inline void CHEETAH::read_socket()
+{
+    int buffer_id;
+    while (*p_processor_line != -1)
+    {
+        if (n_buffer_filled < (n_buffer + n_buffer_processed))
+        {
+            buffer_id = n_buffer_filled % n_buffer;
+            socket->read_data((char *)&(buffer[buffer_id]), sizeof(buffer[buffer_id]));
+            ++n_buffer_filled;
+        }
+        else
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+    }
+    std::cout << "n_buffer_filled" << std::endl;
+}
+
+
+inline void CHEETAH::process_buffer()
 {
     int type;
     int buffer_id;
@@ -24,10 +90,10 @@ void CHEETAH::process_buffer()
             buffer_id = n_buffer_processed % n_buffer;
             for (int j = 0; j < buffer_size; j++)
             {
-                type = which_type(&((*p_buffer)[buffer_id][j]));
+                type = which_type(&(buffer[buffer_id])[j]);
                 if ((type == 2) & rise_fall[chip_id] & (line_count[chip_id] != 0))
                 {
-                    process_event(&((*p_buffer)[buffer_id][j]))
+                    process_event(&(buffer[buffer_id])[j]);
                     for (int i_proc=0; i_proc<n_proc; i_proc++) { process[i_proc](); }
                 }
             }
@@ -41,7 +107,7 @@ void CHEETAH::process_buffer()
     }
 }
 
-void CHEETAH::process_event(event *packet)
+inline void CHEETAH::process_event(CHEETAH_ADDITIONAL::EVENT *packet)
 {
     toa = (((*packet & 0xFFFF) << 14) + ((*packet >> 30) & 0x3FFF)) << 4;
     probe_position = ( toa - (rise_t[chip_id] * 2)) / dwell_time;
@@ -60,7 +126,7 @@ void CHEETAH::process_event(event *packet)
     }
 }
 
-int CHEETAH::which_type(event *packet)
+int CHEETAH::which_type(CHEETAH_ADDITIONAL::EVENT *packet)
 {
     // if ( (*packet & ((1 << 32) - 1) == tpx_header)  ) {
     if ((*packet & 0xFFFFFFFF) == tpx_header)
@@ -70,7 +136,7 @@ int CHEETAH::which_type(event *packet)
     } // header
     else if (*packet >> 60 == 0x6)
     {
-        process_tdc(packet, stem_map);
+        process_tdc(packet);
         return 1;
     } // TDC
     else if (*packet >> 60 == 0xb)
@@ -84,7 +150,7 @@ int CHEETAH::which_type(event *packet)
 }
 
 
-void CheetahInterface::process_tdc(uint64_t *packet, std::vector<float> *stem_map)
+void CHEETAH::process_tdc(CHEETAH_ADDITIONAL::EVENT *packet)
 {
     if (((*packet >> 56) & 0x0F) == 15)
     {
@@ -105,24 +171,7 @@ void CheetahInterface::process_tdc(uint64_t *packet, std::vector<float> *stem_ma
         else if (line_count[chip_id] >= most_advanced_line)
         {
             most_advanced_line = line_count[chip_id];
-            if ( (most_advanced_line+1)%ny < (most_advanced_line)%ny )
-            {
-                for (int i_image = 0; i_image < n_images; i_images++)
-                {
-                    std::fill(
-                        *(p_images[i_images]).begin()+(((most_advanced_line)%ny)*nx), 
-                        *(p_images[i_images]).end(), 0);
-                }
-            }
-            else 
-            {
-                for (int i_image = 0; i_image < n_images; i_images++)
-                {
-                    std::fill(
-                        *(p_images[i_images]).begin()+(((most_advanced_line+1)%ny)*nx), 
-                        *(p_images[i_images]).begin()+(((most_advanced_line+1)%ny)*nx)+nx, 0);
-                }
-            }
+            flush_next_line(most_advanced_line);
         }
 
         line_interval = (fall_t[chip_id] - rise_t[chip_id]) * 2;

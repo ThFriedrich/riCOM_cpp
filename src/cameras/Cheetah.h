@@ -29,17 +29,17 @@
 #include <array>
 #include <thread>
 #include <chrono>
+#include <nlohmann/json.hpp>
+#include <cpr/cpr.h>
 
 #include "FileConnector.h"
-#include "Timepix.h.h"
+#include "Timepix.h"
 
 namespace CHEETAH_ADDITIONAL{
-    const size_t PRELOC_SIZE = 1000*25;
+    const size_t BUFFER_SIZE = 1000*25;
     const size_t N_BUFFER = 4;
-    using event = uint64_t;
-}
+    using EVENT = uint64_t;
 
-template <typename T>
 class CHEETAH : public TIMEPIX
 {
 private:
@@ -65,13 +65,75 @@ private:
     int address_bias_x[4] = {256, 511, 255, 0};
     int address_bias_y[4] = {0, 511, 511, 0};
 
-    inline int which_type(event *packet);
-    inline void process_tdc(event *packet);
+    void reset();
+    inline int which_type(EVENT *packet);
+    inline void process_tdc(EVENT *packet);
 
 public:
-    inline void process_event();
+    inline void read_file();
+    inline void read_socket();
+    int buffer_size = BUFFER_SIZE;
+    int n_buffer = N_BUFFER;
+    std::array<std::array<EVENT, BUFFER_SIZE>, N_BUFFER> buffer;
+    using event = EVENT;
+
+    inline void process_event(EVENT *packet);
     inline void process_buffer();
+    void run();
+
+    CHEETAH(
+        int &nx,
+        int &ny,
+        int &n_cam,
+        int &dt, // unit: n,
+        bool &b_vSTEM,
+        bool &b_ricom,
+        bool &b_e_mag,
+        bool &b_airpi,
+        std::array<float, 2> *p_radius,
+        std::array<float, 2> *p_offset,
+        std::vector<float> *p_stem_data,
+        std::vector<float> *p_ricom_data,
+        std::vector<float> *p_comx_data,
+        std::vector<float> *p_comy_data,
+        std::vector<size_t> *p_dose_data,
+        std::vector<size_t> *p_sumx_data,
+        std::vector<size_t> *p_sumy_data,
+        std::vector<size_t> *p_frame,
+        std::vector<float> *p_airpi_data,
+        int *p_processor_line,
+        int *p_preprocessor_line,
+        int &mode,
+        std::string &file_path,  
+        SocketConnector *p_socket
+    ) : TIMEPIX(
+            nx,
+            ny,
+            n_cam,
+            dt,
+            b_vSTEM,
+            b_ricom,
+            b_e_mag,
+            b_airpi,
+            p_radius,
+            p_offset,
+            p_stem_data,
+            p_ricom_data,
+            p_comx_data,
+            p_comy_data,
+            p_dose_data,
+            p_sumx_data,
+            p_sumy_data,
+            p_frame,
+            p_airpi_data,
+            p_processor_line,
+            p_preprocessor_line,
+            mode,
+            file_path,
+            p_socket
+        ) {}
 };
+}; //end of namespace
 
 
 class CheetahComm

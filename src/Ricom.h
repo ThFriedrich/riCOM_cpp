@@ -43,10 +43,9 @@
 #include "fft2d.hpp"
 #include "SocketConnector.h"
 #include "ProgressMonitor.h"
-#include "MerlinInterface.h"
-#include "CheetahInterface.h"
-#include "TimepixInterface.h"
-#include "Camera.h"
+#include "Cheetah.h"
+#include "Timepix.h"
+#include "Advapix.h"
 #include "GuiUtils.h"
 
 namespace chc = std::chrono;
@@ -145,11 +144,10 @@ namespace RICOM
 {
     enum cameras
     {
-        MERLIN,
+        // MERLIN,
         ADVAPIX,
         CHEETAH
     };
-    void run(Ricom *r, int mode, RICOM::cameras cameras);
 }
 
 class Ricom
@@ -200,9 +198,7 @@ private:
         size_t &end_frame,
         ProgressMonitor *prog_mon,
         size_t &fr_total_u,
-        BoundedThreadPool *pool,
-        int &processor_line,
-        int &preprocessor_line
+        BoundedThreadPool *pool
     );
 
     void icom_group_decompose(int idxx);
@@ -223,7 +219,6 @@ private:
 public:
     SocketConnector socket;
     std::string file_path;
-    int mode; // 0: file, 1: tcp
     bool b_print2file;
     int redraw_interval;
     std::atomic<int> last_y;
@@ -304,9 +299,8 @@ public:
     void draw_e_field_image();
     void draw_e_field_image(int y0, int ye);
     // template <class CameraInterface>
-    void run_reconstruction();
+    void run(int mode);
     void reset();
-    template <typename T>
     void process_data();
 
     // Constructor

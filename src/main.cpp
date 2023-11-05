@@ -18,8 +18,8 @@
 static std::string version("0.0.4-beta");
 
 // Forward Declarations
-int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations &hardware_configurations);
-int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configurations);
+int run_cli(int argc, char *argv[], Ricom *ricom);
+int run_gui(Ricom *ricom);
 void log2file(Ricom *ricom);
 
 # ifdef __linux__

@@ -68,11 +68,48 @@ int run_gui(Ricom *ricom)
 {
     std::thread run_thread;
     std::thread py_thread;
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+    // if (SDL_Init(SDL_INIT_EVERYTHING) != 0) // fail here
+    // {
+    //     printf("Error: %s\n", SDL_GetError());
+    //     return -1;
+    // }
+
+    if (SDL_Init(SDL_INIT_TIMER) != 0) // fail here
     {
         printf("Error: %s\n", SDL_GetError());
         return -1;
-    }
+    }    
+    if (SDL_Init(SDL_INIT_AUDIO) != 0) // fail here
+    {
+        printf("Error: %s\n", SDL_GetError());
+        return -1;
+    }    
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) // fail here
+    {
+        printf("Error: %s\n", SDL_GetError());
+        return -1;
+    }    
+    // if (SDL_Init(SDL_INIT_EVERYTHING) != 0) // fail here
+    // {
+    //     printf("Error: %s\n", SDL_GetError());
+    //     return -1;
+    // }    
+    // if (SDL_Init(SDL_INIT_EVERYTHING) != 0) // fail here
+    // {
+    //     printf("Error: %s\n", SDL_GetError());
+    //     return -1;
+    // }    
+    // if (SDL_Init(SDL_INIT_EVERYTHING) != 0) // fail here
+    // {
+    //     printf("Error: %s\n", SDL_GetError());
+    //     return -1;
+    // }    
+    // if (SDL_Init(SDL_INIT_EVERYTHING) != 0) // fail here
+    // {
+    //     printf("Error: %s\n", SDL_GetError());
+    //     return -1;
+    // }
+
 
     // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -298,14 +335,14 @@ int run_gui(Ricom *ricom)
 
                 ImGui::Text("Advapix Camera");
                 // ImGui::Checkbox("Live Interface Menu", &b_timepix_live_menu);
-                if (ImGui::DragScalar("nx/y Advapix", ImGuiDataType_U16, &(ricom->n_cam), 1, &drag_min_pos))
+                if (ImGui::DragScalar("nx/y Advapix", ImGuiDataType_U16, &ricom->n_cam, 1, &drag_min_pos))
                 {
                     ini_cfg["Advapix"]["nx/y"] = std::to_string(ricom->n_cam);
                 }
                 ImGui::Separator();
 
                 ImGui::Text("Cheetah Camera");
-                if (ImGui::DragScalar("nx/y Cheetah", ImGuiDataType_U16, &(ricom->n_cam), 1, &drag_min_pos))
+                if (ImGui::DragScalar("nx/y Cheetah", ImGuiDataType_U16, &ricom->n_cam, 1, &drag_min_pos))
                 {
                     ini_cfg["Cheetah"]["nx/y"] = std::to_string(ricom->n_cam);
                 }
@@ -317,7 +354,7 @@ int run_gui(Ricom *ricom)
                 {
                     if (show_com_x)
                     {
-                        GENERIC_WINDOW("COM-X").set_data(ricom->nx, ricom->ny, &ricom->com_map_x);
+                        GENERIC_WINDOW("COM-X").set_data(ricom->nx, ricom->ny, &ricom->comx_data);
                     }
                     else
                     {
@@ -328,7 +365,7 @@ int run_gui(Ricom *ricom)
                 {
                     if (show_com_y)
                     {
-                        GENERIC_WINDOW("COM-Y").set_data(ricom->nx, ricom->ny, &ricom->com_map_y);
+                        GENERIC_WINDOW("COM-Y").set_data(ricom->nx, ricom->ny, &ricom->comy_data);
                     }
                     else
                     {
@@ -405,7 +442,7 @@ int run_gui(Ricom *ricom)
             }
 
             ImGui::Text("CBED Centre");
-            uint16_t *max_nx = &ricom->n_cam
+            int *max_nx = &ricom->n_cam;
             bool offset_changed = ImGui::DragFloat2("Centre", &ricom->offset[0], 0.1f, 0.0, (float)*max_nx);
             if (offset_changed)
             {
@@ -480,7 +517,8 @@ int run_gui(Ricom *ricom)
                 // ricom->socket.flush_socket();
                 b_started = true;
                 b_restarted = true;
-                run_thread = std::thread(RICOM::run, ricom, RICOM::TCP);
+                ricom->camera = RICOM::CHEETAH;
+                run_thread = std::thread(&Ricom::run, ricom, 1);
                 run_thread.detach();
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 cheetah_comm.start();
@@ -495,8 +533,8 @@ int run_gui(Ricom *ricom)
                 cheetah_comm.tpx3_det_config();
                 cheetah_comm.tpx3_cam_init();
                 cheetah_comm.tpx3_destination();
-
-                run_thread = std::thread(RICOM::run, ricom, RICOM::TCP);
+                ricom->camera = RICOM::CHEETAH;
+                run_thread = std::thread(&Ricom::run, ricom, 1);
                 run_thread.detach();
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 cheetah_comm.start();
@@ -530,19 +568,23 @@ int run_gui(Ricom *ricom)
                 filename = openFileDialog.GetSelected().string();
                 b_file_selected = true;
                 openFileDialog.ClearSelected();
+                ricom->mode = 0;
+                if (std::filesystem::path(filename).extension() == ".t3p") 
+                {
+                    ricom->camera = RICOM::ADVAPIX;
+                    ImGui::DragInt("dwell time", &ricom->dt, 1, 1);
+                }
+                else if (std::filesystem::path(filename).extension() == ".tpx3") 
+                {ricom->camera = RICOM::CHEETAH;}
+
             }
             if (b_file_selected)
             {
                 ImGui::Text("File: %s", filename.c_str());
 
-                if (ricom->camera == RICOM::ADVAPIX)
-                {
-                    ImGui::DragInt("dwell time", &ricom->dt, 1, 1);
-                }
-
                 if (ImGui::Button("Run File", ImVec2(-1.0f, 0.0f)))
                 {
-                    run_thread = std::thread(RICOM::run, ricom, RICOM::FILE);
+                    run_thread = std::thread(&Ricom::run, ricom, 0);
                     b_started = true;
                     b_restarted = true;
                     run_thread.detach();
