@@ -78,8 +78,8 @@ private:
     {
         this->probe_position_total = packet->toa * 25 / this->dt;
         this->probe_position = this->probe_position_total % this->nxy;
-        this->kx = packet->index % this->nx;
-        this->ky = packet->index / this->nx;
+        this->kx = packet->index % this->n_cam;
+        this->ky = packet->index / this->n_cam;
 
         if ((this->probe_position_total / this->nx) > this->current_line){
             this->current_line++;
