@@ -1,9 +1,5 @@
 <map id="src/Camera.h" name="src/Camera.h">
-<area shape="rect" id="node1" title=" " alt="" coords="111,5,219,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="82,5,190,32"/>
 <area shape="rect" id="node2" href="$da/d8c/Camera_8cpp.html" title=" " alt="" coords="5,80,128,107"/>
-<area shape="rect" id="node3" href="$df/d0a/main_8cpp.html" title=" " alt="" coords="90,155,195,181"/>
-<area shape="rect" id="node4" href="$de/dfc/Ricom_8h.html" title=" " alt="" coords="227,80,325,107"/>
-<area shape="rect" id="node5" href="$d4/d9b/Ricom_8cpp.html" title=" " alt="" coords="219,155,333,181"/>
-<area shape="rect" id="node6" href="$d5/d6c/RunCLI_8cpp.html" title=" " alt="" coords="357,155,475,181"/>
-<area shape="rect" id="node7" href="$d2/d30/RunGUI_8cpp.html" title=" " alt="" coords="499,155,621,181"/>
+<area shape="rect" id="node3" href="$df/d0a/main_8cpp.html" title=" " alt="" coords="153,80,258,107"/>
 </map>
