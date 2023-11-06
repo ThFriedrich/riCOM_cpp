@@ -74,43 +74,6 @@ int run_gui(Ricom *ricom)
         return -1;
     }
 
-    // if (SDL_Init(SDL_INIT_TIMER) != 0) // fail here
-    // {
-    //     printf("Error: %s\n", SDL_GetError());
-    //     return -1;
-    // }    
-    // if (SDL_Init(SDL_INIT_AUDIO) != 0) // fail here
-    // {
-    //     printf("Error: %s\n", SDL_GetError());
-    //     return -1;
-    // }    
-    // if (SDL_Init(SDL_INIT_VIDEO) != 0) // fail here
-    // {
-    //     printf("Error: %s\n", SDL_GetError());
-    //     return -1;
-    // }    
-    // if (SDL_Init(SDL_INIT_EVERYTHING) != 0) // fail here
-    // {
-    //     printf("Error: %s\n", SDL_GetError());
-    //     return -1;
-    // }    
-    // if (SDL_Init(SDL_INIT_EVERYTHING) != 0) // fail here
-    // {
-    //     printf("Error: %s\n", SDL_GetError());
-    //     return -1;
-    // }    
-    // if (SDL_Init(SDL_INIT_EVERYTHING) != 0) // fail here
-    // {
-    //     printf("Error: %s\n", SDL_GetError());
-    //     return -1;
-    // }    
-    // if (SDL_Init(SDL_INIT_EVERYTHING) != 0) // fail here
-    // {
-    //     printf("Error: %s\n", SDL_GetError());
-    //     return -1;
-    // }
-
-
     // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
     // GL ES 2.0 + GLSL 100
@@ -261,7 +224,7 @@ int run_gui(Ricom *ricom)
     GIM_Flags common_flags = GIM_Flags::SaveImButton | GIM_Flags::SaveDataButton | GIM_Flags::ColormapSelector | GIM_Flags::PowerSlider;
     std::map<std::string, ImGuiImageWindow<float>> generic_windows_f;
     std::map<std::string, ImGuiImageWindow<std::complex<float>>> generic_windows_c;
-    generic_windows_f.emplace("RICOM", ImGuiImageWindow<float>("RICOM", &uiTextureIDs[1], true, 9, common_flags | GIM_Flags::FftButton));
+    generic_windows_f.emplace("RICOM", ImGuiImageWindow<float>("RICOM", &uiTextureIDs[1], true, 9, common_flags | GIM_Flags::FftButton, &ricom->b_ricom));
     generic_windows_f.emplace("RICOM-FFT", ImGuiImageWindow<float>("RICOM-FFT", &uiTextureIDs[2], false, 4, common_flags, &ricom_fft));
     GENERIC_WINDOW("RICOM").fft_window = &GENERIC_WINDOW("RICOM-FFT");
 
@@ -508,7 +471,6 @@ int run_gui(Ricom *ricom)
                 cheetah_comm.tpx3_cam_init();
                 cheetah_comm.tpx3_destination();
 
-
                 // ricom->socket.connect_socket();
                 // ricom->socket.flush_socket();
                 b_started = true;
@@ -566,18 +528,18 @@ int run_gui(Ricom *ricom)
                 openFileDialog.ClearSelected();
                 ricom->mode = 0;
                 ricom->file_path = filename;
+            }
+            if (b_file_selected)
+            {
+                ImGui::Text("File: %s", filename.c_str());
+
                 if (std::filesystem::path(filename).extension() == ".t3p") 
                 {
                     ricom->camera = RICOM::ADVAPIX;
                     ImGui::DragInt("dwell time", &ricom->dt, 1, 1);
                 }
                 else if (std::filesystem::path(filename).extension() == ".tpx3") 
-                {ricom->camera = RICOM::CHEETAH;}
-
-            }
-            if (b_file_selected)
-            {
-                ImGui::Text("File: %s", filename.c_str());
+                    ricom->camera = RICOM::CHEETAH;
 
                 if (ImGui::Button("Run File", ImVec2(-1.0f, 0.0f)))
                 {

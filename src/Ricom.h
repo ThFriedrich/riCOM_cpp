@@ -43,9 +43,9 @@
 #include "fft2d.hpp"
 #include "SocketConnector.h"
 #include "ProgressMonitor.h"
-#include "Cheetah.h"
-#include "Timepix.h"
-#include "Advapix.h"
+#include "Cheetah.hpp"
+#include "Timepix.hpp"
+#include "Advapix.hpp"
 #include "GuiUtils.h"
 
 namespace chc = std::chrono;

@@ -94,9 +94,9 @@ imgui/imgui_tables.cpp
     src/FileConnector.cpp
     src/ProgressMonitor.cpp
     src/Ricom.cpp 
-    src/cameras/Cheetah.cpp
-    src/cameras/Advapix.cpp
-    src/cameras/Timepix.cpp
+    src/cameras/Cheetah.hpp
+    src/cameras/Advapix.hpp
+    src/cameras/Timepix.hpp
     src/main.cpp
     src/GuiUtils.cpp
     src/SdlImageWindow.cpp

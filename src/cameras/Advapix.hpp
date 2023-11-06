@@ -31,7 +31,7 @@
 #include <chrono>
 
 #include "FileConnector.h"
-#include "Timepix.h"
+#include "Timepix.hpp"
 
 namespace ADVAPIX_ADDITIONAL
 {
@@ -45,18 +45,70 @@ namespace ADVAPIX_ADDITIONAL
         uint8_t ftoa;
         uint16_t tot;
     });
+};
 
-class ADVAPIX : public TIMEPIX
+
+template <typename event, int buffer_size, int n_buffer>
+class ADVAPIX : public TIMEPIX<event, buffer_size, n_buffer>
 { 
-public:
-    inline void read_file();
-    inline void read_socket();
-    int buffer_size = BUFFER_SIZE;
-    int n_buffer = N_BUFFER;
-    std::array<std::array<EVENT, BUFFER_SIZE>, N_BUFFER> buffer;
-    using event = EVENT;
+private:
+    inline void process_buffer()
+    {
+        int buffer_id;
+        while ((*this->p_processor_line)!=-1)
+        {
+            if (this->n_buffer_processed < this->n_buffer_filled)
+            {
+                buffer_id = this->n_buffer_processed % this->n_buf;
+                for (int j = 0; j < buffer_size; j++)
+                {
+                    process_event(&(this->buffer[buffer_id])[j]);
+                    for (int i_proc=0; i_proc<this->n_proc; i_proc++) { this->process[i_proc](); }
+                }
+                ++this->n_buffer_processed;
+                *this->p_preprocessor_line = (int)this->current_line;
+            }
+            else
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+        }
+    };
+    inline void process_event(event *packet)
+    {
+        this->probe_position_total = packet->toa * 25 / this->dt;
+        this->probe_position = this->probe_position_total % this->nxy;
+        this->kx = packet->index % this->nx;
+        this->ky = packet->index / this->nx;
 
-    void run();
+        if ((this->probe_position_total / this->nx) > this->current_line){
+            this->current_line++;
+            this->flush_next_line(this->current_line);
+        }
+    };
+public:
+    void run()
+    {
+        this->reset();
+        switch (this->mode)
+        {
+            case 0:
+            {
+                this->file.path = this->file_path;
+                this->file.open_file();
+                this->read_guy = std::thread(&ADVAPIX<event, buffer_size, n_buffer>::read_file, this);
+                break;
+            }
+            case 1:
+            {
+                this->p_socket->socket_type = Socket_type::SERVER;
+                this->p_socket->accept_socket();
+                this->read_guy = std::thread(&ADVAPIX<event, buffer_size, n_buffer>::read_socket, this);
+                break;
+            }
+        }
+        this->proc_guy = std::thread(&ADVAPIX<event, buffer_size, n_buffer>::process_buffer, this);
+    };
 
     ADVAPIX(
         int &nx,
@@ -83,7 +135,7 @@ public:
         int &mode,
         std::string &file_path,  
         SocketConnector *p_socket
-    ) : TIMEPIX(
+    ) : TIMEPIX<event, buffer_size, n_buffer>(
             nx,
             ny,
             n_cam,
@@ -110,6 +162,5 @@ public:
             p_socket
         ) {}
 };
-}; // end of namespace
 
 #endif // ADVAPIX_H

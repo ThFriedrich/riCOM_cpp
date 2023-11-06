@@ -34,38 +34,36 @@
 #include "SocketConnector.h"
 #include "FileConnector.h"
 
-
-namespace TIMEPIX_ADDITIONAL{
-    const size_t BUFFER_SIZE = 1000*25;
-    const size_t N_BUFFER = 4;
-    PACK(struct EVENT
-    {
-        uint32_t index;
-        uint64_t toa;
-        uint8_t overflow;
-        uint8_t ftoa;
-        uint16_t tot;
-    });
-}
-
-
+template <typename event, int buffer_size, int n_buffer>
 class TIMEPIX
 {
 private:
     int sleep = 1;
 
     // process methods
-    void vstem();
-    void com();
-    void airpi();
+    void vstem()
+    {
+        d2 = pow((float)kx - (*p_offset)[0], 2) + pow((float)ky - (*p_offset)[1], 2);
+        if (d2 > (*p_radius)[0] && d2 <= (*p_radius)[1])
+        {
+            (*p_stem_data)[probe_position]++;
+        }
+    };
+    void com()
+    {
+        (*p_dose_data)[probe_position]++;
+        (*p_sumy_data)[probe_position] += ky;
+        (*p_sumx_data)[probe_position] += kx;
+    };
+    void airpi(){};
 
 protected:
-    // access by child class
     SocketConnector *socket;
     FileConnector file;
     std::thread read_guy;
     std::thread proc_guy;
 
+    int n_buf = n_buffer;
     int n_buffer_filled=0;
     int n_buffer_processed=0;
     uint64_t current_line = 0;
@@ -74,20 +72,88 @@ protected:
     uint16_t kx;
     uint16_t ky;
     float d2;
-    void flush_next_line(int line_id);
-    void reset();
+    inline void read_file()
+    {
+        int buffer_id;
+        while (*p_processor_line!=-1)
+        {
+            if ( (n_buffer_filled < (n_buffer + n_buffer_processed)) && (*p_preprocessor_line < (*p_processor_line + (int)(ny/2))) ) 
+            {
+                buffer_id = n_buffer_filled % n_buffer;
+                file.read_data((char *)&(buffer[buffer_id]), sizeof(buffer[buffer_id]));
+                ++n_buffer_filled;
+            }
+            else
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+        }
+        file.close_file();
+    };
+    inline void read_socket()
+    {
+        int buffer_id;
+        while (*p_processor_line != -1)
+        {
+            if (n_buffer_filled < (n_buffer + n_buffer_processed))
+            {
+                buffer_id = n_buffer_filled % n_buffer;
+                socket->read_data((char *)&(buffer[buffer_id]), sizeof(buffer[buffer_id]));
+                ++n_buffer_filled;
+            }
+            else
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+        }
+        std::cout << "n_buffer_filled" << std::endl;
+    };
+    void flush_next_line(int line_id)
+    {
+        if ( (line_id+1)%ny < (line_id)%ny ){
+            for (int i_image = 0; i_image < n_images_f; i_image++)
+            {
+                std::fill(
+                    (*(p_images_f[i_image])).begin()+(((line_id)%ny)*nx), 
+                    (*(p_images_f[i_image])).end(), 0);
+            }
+            for (int i_image = 0; i_image < n_images_t; i_image++)
+            {
+                std::fill(
+                    (*(p_images_t[i_image])).begin()+(((line_id)%ny)*nx), 
+                    (*(p_images_t[i_image])).end(), 0);
+            }
+        }
+        else {
+            for (int i_image = 0; i_image < n_images_f; i_image++)
+            {
+                std::fill(
+                    (*(p_images_f[i_image])).begin()+(((line_id+1)%ny)*nx), 
+                    (*(p_images_f[i_image])).begin()+(((line_id+1)%ny)*nx)+nx, 0);
+            }
+            for (int i_image = 0; i_image < n_images_t; i_image++)
+            {
+                std::fill(
+                    (*(p_images_t[i_image])).begin()+(((line_id+1)%ny)*nx), 
+                    (*(p_images_t[i_image])).begin()+(((line_id+1)%ny)*nx)+nx, 0);
+            }
+        }
+    };
+    void reset()
+    {
+        n_buffer_filled = 0;
+        n_buffer_processed = 0;
+        current_line = 0;
+    };
 
 public:
-    // to be overwritten
-    using event = TIMEPIX_ADDITIONAL::EVENT;
-    inline void read_file();
-    inline void read_socket();
-    inline void process_buffer();
-    inline void process_event(event *packet);
-    void run();
-
-    // to be called
-    void terminate();
+    void terminate()
+    {
+        while ( (!read_guy.joinable()) || (!proc_guy.joinable()) ) 
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        read_guy.join();
+        proc_guy.join();
+    };
 
     // init variables
     int nx;
@@ -115,9 +181,7 @@ public:
     int mode;
     std::string file_path;
     SocketConnector *p_socket;
-    int buffer_size = TIMEPIX_ADDITIONAL::BUFFER_SIZE;
-    int n_buffer = TIMEPIX_ADDITIONAL::N_BUFFER;
-    std::array<std::array<TIMEPIX_ADDITIONAL::EVENT, TIMEPIX_ADDITIONAL::BUFFER_SIZE>, TIMEPIX_ADDITIONAL::N_BUFFER> buffer;
+    std::array<std::array<event, buffer_size>, n_buffer> buffer;
 
     std::vector<std::function<void()>> process;
     int n_proc = 0;

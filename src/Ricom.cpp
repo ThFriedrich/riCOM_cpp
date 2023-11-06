@@ -220,39 +220,42 @@ void Ricom::init_surface()
 //     RICOM class method implementations     //
 ////////////////////////////////////////////////
 Ricom::Ricom() : stem_max(-FLT_MAX), stem_min(FLT_MAX),
-                 e_mag_max(-FLT_MAX), e_mag_min(FLT_MAX),
-                 ricom_max(-FLT_MAX), ricom_min(FLT_MAX),
-                 cbed_log(),
-                 ricom_mutex(), stem_mutex(), counter_mutex(), e_field_mutex(),
-                 socket(), file_path(""),
-                 camera(),
-                 mode(0),
-                 b_print2file(false),
-                 redraw_interval(50),
-                 last_y(0),
-                 p_prog_mon(nullptr),
-                 b_busy(false),
-                 update_offset(true),
-                 b_vSTEM(false), b_e_mag(false),
-                 b_plot_cbed(true),
-                 b_plot2SDL(false), b_recompute_detector(false),
-                 b_recompute_kernel(false), detector(),
-                 kernel(),
-                 offset{128, 128}, com_public{0.0, 0.0},
-                 comx_data(), comy_data(),
-                 ricom_data(),
-                 stem_data(),
-                 nx(1024), ny(1024), nxy(0),
-                 rep(1), fr_total(0),
-                 skip_row(1), skip_img(0),
-                 n_threads(1), queue_size(64),
-                 fr_freq(0.0), fr_count(0.0), fr_count_total(0.0),
-                 rescale_ricom(false), rescale_stem(false),
-                 rc_quit(false),
-                 srf_ricom(NULL), ricom_cmap(9),
-                 srf_stem(NULL), stem_cmap(9),
-                 srf_cbed(NULL), cbed_cmap(5),
-                 srf_e_mag(NULL), e_mag_cmap(12)
+    e_mag_max(-FLT_MAX), e_mag_min(FLT_MAX),
+    ricom_max(-FLT_MAX), ricom_min(FLT_MAX),
+    cbed_log(),
+    ricom_mutex(), stem_mutex(), counter_mutex(), e_field_mutex(),
+    socket(), file_path(""),
+    camera(),
+    mode(0),
+    b_print2file(false),
+    redraw_interval(50),
+    last_y(0),
+    p_prog_mon(nullptr),
+    b_busy(false),
+    update_offset(true),
+    b_ricom(false),
+    b_airpi(false),
+    b_vSTEM(false),
+    b_e_mag(false),
+    b_plot_cbed(true),
+    b_plot2SDL(false), b_recompute_detector(false),
+    b_recompute_kernel(false), detector(),
+    kernel(),
+    offset{128, 128}, com_public{0.0, 0.0},
+    comx_data(), comy_data(),
+    ricom_data(),
+    stem_data(),
+    nx(1024), ny(1024), nxy(0),
+    rep(1), fr_total(0),
+    skip_row(1), skip_img(0),
+    n_threads(1), queue_size(64),
+    fr_freq(0.0), fr_count(0.0), fr_count_total(0.0),
+    rescale_ricom(false), rescale_stem(false),
+    rc_quit(false),
+    srf_ricom(NULL), ricom_cmap(9),
+    srf_stem(NULL), stem_cmap(9),
+    srf_cbed(NULL), cbed_cmap(5),
+    srf_e_mag(NULL), e_mag_cmap(12)
 {
     n_threads_max = std::thread::hardware_concurrency();
 }
@@ -710,7 +713,7 @@ void Ricom::run(int mode)
         case RICOM::ADVAPIX:
         {   
             using namespace ADVAPIX_ADDITIONAL;
-            ADVAPIX cam(
+            ADVAPIX<EVENT, BUFFER_SIZE, N_BUFFER> cam(
                 nx, 
                 ny, 
                 n_cam, 
@@ -744,7 +747,7 @@ void Ricom::run(int mode)
         case RICOM::CHEETAH:
         {
             using namespace CHEETAH_ADDITIONAL;
-            CHEETAH cam(
+            CHEETAH<EVENT, BUFFER_SIZE, N_BUFFER> cam(
                 nx, 
                 ny, 
                 n_cam, 
