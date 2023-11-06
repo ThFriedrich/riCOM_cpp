@@ -57,10 +57,7 @@ private:
     uint64_t dwell_time;
     // event
     uint64_t toa;
-    uint64_t probe_position;
     uint64_t pack_44;
-    uint16_t kx;
-    uint16_t ky;
     int address_multiplier[4] = {1,-1,-1,1};
     int address_bias_x[4] = {256, 511, 255, 0};
     int address_bias_y[4] = {0, 511, 511, 0};
@@ -70,6 +67,7 @@ private:
     inline void process_tdc(EVENT *packet);
 
 public:
+
     inline void read_file();
     inline void read_socket();
     int buffer_size = BUFFER_SIZE;
@@ -77,7 +75,7 @@ public:
     std::array<std::array<EVENT, BUFFER_SIZE>, N_BUFFER> buffer;
     using event = EVENT;
 
-    inline void process_event(EVENT *packet);
+    inline bool process_event(EVENT *packet);
     inline void process_buffer();
     void run();
 

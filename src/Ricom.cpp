@@ -551,12 +551,13 @@ void Ricom::line_processor(
 
         if (n_threads > 1)
         {
-            pool->push_task([=]
-                            { icom_group_classical(idxx); });
+            if (b_ricom)
+                pool->push_task([=]{ icom_group_classical(idxx); });
         }
         else
         {
-            icom_group_classical(idxx);
+            if (b_ricom)
+                icom_group_classical(idxx);
         }
         // end of line handler
         int update_line = idxx / nx - kernel.kernel_size*2;
@@ -673,6 +674,19 @@ void Ricom::run(int mode)
     detector.compute_detector(n_cam, n_cam, offset);
 
     // Allocate memory for image arrays
+    switch (camera)
+    {
+        case RICOM::ADVAPIX:
+        {
+            n_cam = 256;
+            break;
+        }
+        case RICOM::CHEETAH:
+        {
+            n_cam = 512;
+            break;
+        }
+    }
     offset[0] = n_cam / 2;
     offset[1] = n_cam / 2;
     stem_data.assign(nxy, 0);

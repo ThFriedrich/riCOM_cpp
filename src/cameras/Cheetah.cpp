@@ -93,8 +93,8 @@ inline void CHEETAH::process_buffer()
                 type = which_type(&(buffer[buffer_id])[j]);
                 if ((type == 2) & rise_fall[chip_id] & (line_count[chip_id] != 0))
                 {
-                    process_event(&(buffer[buffer_id])[j]);
-                    for (int i_proc=0; i_proc<n_proc; i_proc++) { process[i_proc](); }
+                    if (process_event(&(buffer[buffer_id])[j]))
+                        for (int i_proc=0; i_proc<n_proc; i_proc++) { process[i_proc](); }
                 }
             }
             ++n_buffer_processed;
@@ -107,7 +107,7 @@ inline void CHEETAH::process_buffer()
     }
 }
 
-inline void CHEETAH::process_event(CHEETAH_ADDITIONAL::EVENT *packet)
+inline bool CHEETAH::process_event(CHEETAH_ADDITIONAL::EVENT *packet)
 {
     toa = (((*packet & 0xFFFF) << 14) + ((*packet >> 30) & 0x3FFF)) << 4;
     probe_position = ( toa - (rise_t[chip_id] * 2)) / dwell_time;
@@ -123,7 +123,9 @@ inline void CHEETAH::process_event(CHEETAH_ADDITIONAL::EVENT *packet)
             (((pack_44 & 0x001F8) >> 1) +
             (pack_44 & 0x00003)) +
             address_bias_y[chip_id]);
+        return true;
     }
+    return false;
 }
 
 int CHEETAH::which_type(CHEETAH_ADDITIONAL::EVENT *packet)

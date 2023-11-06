@@ -68,27 +68,27 @@ int run_gui(Ricom *ricom)
 {
     std::thread run_thread;
     std::thread py_thread;
-    // if (SDL_Init(SDL_INIT_EVERYTHING) != 0) // fail here
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) // fail here
+    {
+        printf("Error: %s\n", SDL_GetError());
+        return -1;
+    }
+
+    // if (SDL_Init(SDL_INIT_TIMER) != 0) // fail here
     // {
     //     printf("Error: %s\n", SDL_GetError());
     //     return -1;
-    // }
-
-    if (SDL_Init(SDL_INIT_TIMER) != 0) // fail here
-    {
-        printf("Error: %s\n", SDL_GetError());
-        return -1;
-    }    
-    if (SDL_Init(SDL_INIT_AUDIO) != 0) // fail here
-    {
-        printf("Error: %s\n", SDL_GetError());
-        return -1;
-    }    
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) // fail here
-    {
-        printf("Error: %s\n", SDL_GetError());
-        return -1;
-    }    
+    // }    
+    // if (SDL_Init(SDL_INIT_AUDIO) != 0) // fail here
+    // {
+    //     printf("Error: %s\n", SDL_GetError());
+    //     return -1;
+    // }    
+    // if (SDL_Init(SDL_INIT_VIDEO) != 0) // fail here
+    // {
+    //     printf("Error: %s\n", SDL_GetError());
+    //     return -1;
+    // }    
     // if (SDL_Init(SDL_INIT_EVERYTHING) != 0) // fail here
     // {
     //     printf("Error: %s\n", SDL_GetError());
@@ -331,25 +331,21 @@ int run_gui(Ricom *ricom)
                 {
                     ini_cfg["Hardware"]["Queue Size"] = std::to_string(ricom->queue_size);
                 }
-                ImGui::Separator();
-
-                ImGui::Text("Advapix Camera");
-                // ImGui::Checkbox("Live Interface Menu", &b_timepix_live_menu);
-                if (ImGui::DragScalar("nx/y Advapix", ImGuiDataType_U16, &ricom->n_cam, 1, &drag_min_pos))
-                {
-                    ini_cfg["Advapix"]["nx/y"] = std::to_string(ricom->n_cam);
-                }
-                ImGui::Separator();
-
-                ImGui::Text("Cheetah Camera");
-                if (ImGui::DragScalar("nx/y Cheetah", ImGuiDataType_U16, &ricom->n_cam, 1, &drag_min_pos))
-                {
-                    ini_cfg["Cheetah"]["nx/y"] = std::to_string(ricom->n_cam);
-                }
                 ImGui::EndMenu();
             }
-            if (ImGui::BeginMenu("Additional Imaging Modes"))
+            if (ImGui::BeginMenu("Imaging Modes"))
             {
+                if (ImGui::Checkbox("Show riCOM", &ricom->b_ricom))
+                {
+                    if (&ricom->b_ricom)
+                    {
+                        GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
+                    }
+                    else
+                    {
+                        *GENERIC_WINDOW("RICOM").pb_open = false;
+                    }
+                }
                 if (ImGui::Checkbox("Show CoM-X", &show_com_x))
                 {
                     if (show_com_x)
@@ -523,7 +519,7 @@ int run_gui(Ricom *ricom)
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 cheetah_comm.start();
                 // RICOM::run(ricom, RICOM::TCP);
-                GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
+                // GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
             }
 
             if (ImGui::Button("Acquire", ImVec2(-1.0f, 0.0f)))
@@ -538,7 +534,7 @@ int run_gui(Ricom *ricom)
                 run_thread.detach();
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 cheetah_comm.start();
-                GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
+                // GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
             }
 
             if (ImGui::Button("Stop", ImVec2(-1.0f, 0.0f)))
@@ -569,6 +565,7 @@ int run_gui(Ricom *ricom)
                 b_file_selected = true;
                 openFileDialog.ClearSelected();
                 ricom->mode = 0;
+                ricom->file_path = filename;
                 if (std::filesystem::path(filename).extension() == ".t3p") 
                 {
                     ricom->camera = RICOM::ADVAPIX;
@@ -588,7 +585,7 @@ int run_gui(Ricom *ricom)
                     b_started = true;
                     b_restarted = true;
                     run_thread.detach();
-                    GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
+                    // GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
                 }
             }
         }
