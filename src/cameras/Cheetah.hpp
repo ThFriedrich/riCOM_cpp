@@ -155,7 +155,11 @@ private:
             else if (line_count[chip_id] >= most_advanced_line)
             {
                 most_advanced_line = line_count[chip_id];
-                this->flush_next_line(most_advanced_line);
+                if (most_advanced_line%this->ny == 0)
+                {
+                    this->id_image = most_advanced_line / this->ny % 2;
+                    this->flush_image(this->id_image);
+                }
             }
 
             line_interval = (fall_t[chip_id] - rise_t[chip_id]) * 2;
@@ -202,22 +206,19 @@ public:
         int &nx,
         int &ny,
         int &n_cam,
-        int &dt, // unit: n,
+        int &dt, // unit: ns
         bool &b_vSTEM,
         bool &b_ricom,
         bool &b_e_mag,
         bool &b_airpi,
+        bool *b_cumulative,
         std::array<float, 2> *p_radius,
         std::array<float, 2> *p_offset,
-        std::vector<float> *p_stem_data,
-        std::vector<float> *p_ricom_data,
-        std::vector<float> *p_comx_data,
-        std::vector<float> *p_comy_data,
-        std::vector<size_t> *p_dose_data,
-        std::vector<size_t> *p_sumx_data,
-        std::vector<size_t> *p_sumy_data,
+        std::vector<size_t> (*p_dose_data)[2],
+        std::vector<size_t> (*p_sumx_data)[2],
+        std::vector<size_t> (*p_sumy_data)[2],
+        std::vector<size_t> (*p_stem_data)[2],
         std::vector<size_t> *p_frame,
-        std::vector<float> *p_airpi_data,
         int *p_processor_line,
         int *p_preprocessor_line,
         int &mode,
@@ -232,17 +233,14 @@ public:
             b_ricom,
             b_e_mag,
             b_airpi,
+            b_cumulative,
             p_radius,
             p_offset,
-            p_stem_data,
-            p_ricom_data,
-            p_comx_data,
-            p_comy_data,
             p_dose_data,
             p_sumx_data,
             p_sumy_data,
+            p_stem_data,
             p_frame,
-            p_airpi_data,
             p_processor_line,
             p_preprocessor_line,
             mode,

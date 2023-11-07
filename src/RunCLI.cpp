@@ -262,7 +262,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom)
     }
     if (save_dat != "")
     {
-        save_numpy(&save_dat, ricom->nx, ricom->ny, &ricom->ricom_data);
+        save_numpy(&save_dat, ricom->nx, ricom->ny, &ricom->ricom_image);
         std::cout << "riCOM reconstruction data saved as " + save_dat << std::endl;
     }
     if (save_img != "")

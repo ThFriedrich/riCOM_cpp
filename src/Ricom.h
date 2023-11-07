@@ -242,14 +242,15 @@ public:
     Ricom_kernel kernel;
     std::array<float, 2> offset;
     std::array<float, 2> com_public;
-    std::vector<float> comx_data;
-    std::vector<float> comy_data;
-    std::vector<float> ricom_data;
-    std::vector<float> stem_data;
-    std::vector<float> airpi_data;
-    std::vector<size_t> dose_data;
-    std::vector<size_t> sumx_data;
-    std::vector<size_t> sumy_data;
+    std::vector<float> comx_image;
+    std::vector<float> comy_image;
+    std::vector<float> ricom_image;
+    std::vector<float> stem_image;
+    std::vector<float> airpi_image;
+    std::vector<size_t> dose_data[2];
+    std::vector<size_t> sumx_data[2];
+    std::vector<size_t> sumy_data[2];
+    std::vector<size_t> stem_data[2];
     std::vector<size_t> frame;
     std::vector<std::complex<float>> e_field_data;
 
@@ -269,6 +270,7 @@ public:
     int skip_img;
     int processor_line;
     int preprocessor_line;
+    int id_image;
 
     // Variables for progress and performance
     int n_threads;

@@ -242,9 +242,9 @@ Ricom::Ricom() : stem_max(-FLT_MAX), stem_min(FLT_MAX),
     b_recompute_kernel(false), detector(),
     kernel(),
     offset{128, 128}, com_public{0.0, 0.0},
-    comx_data(), comy_data(),
-    ricom_data(),
-    stem_data(),
+    comx_image(), comy_image(),
+    ricom_image(),
+    stem_image(),
     nx(1024), ny(1024), nxy(0),
     rep(1), fr_total(0),
     skip_row(1), skip_img(0),
@@ -294,16 +294,16 @@ void Ricom::draw_ricom_image(int y0, int ye)
 }
 
 // set pixel in ricom image srf_ricom at location idx, idy to value corresponding
-// value in ricom_data array
+// value in ricom_image array
 void Ricom::set_ricom_pixel(int idx, int idy)
 {
     // determine location index of value in memory
 
     int idr = idy * nx + idx;
-    if (ricom_data[idr] < ricom_min) {ricom_min = ricom_data[idr];}
-    if (ricom_data[idr] > ricom_max) {ricom_max = ricom_data[idr];}
+    if (ricom_image[idr] < ricom_min) {ricom_min = ricom_image[idr];}
+    if (ricom_image[idr] > ricom_max) {ricom_max = ricom_image[idr];}
 
-    float val = (ricom_data[idr] - ricom_min) / ((ricom_max - ricom_min));
+    float val = (ricom_image[idr] - ricom_min) / ((ricom_max - ricom_min));
 
     // Update pixel at location
     SDL_Utils::draw_pixel(srf_ricom, idx, idy, val, ricom_cmap);
@@ -326,8 +326,8 @@ void Ricom::draw_stem_image()
 void Ricom::draw_stem_image(int y0, int ye)
 {
     if (y0==0) {
-        stem_min = stem_data[y0*nx];
-        stem_max = stem_data[y0*nx];
+        stem_min = stem_image[y0*nx];
+        stem_max = stem_image[y0*nx];
     }
 
     std::lock_guard<std::mutex> lock(stem_mutex);
@@ -367,23 +367,23 @@ void Ricom::draw_e_field_image()
 }
 
 // set pixel in stem image srf_stem at location idx, idy to value corresponding
-// value in stem_data array
+// value in stem_image array
 void Ricom::set_stem_pixel(size_t idx, size_t idy)
 {
     // determine location index of value in memory
     int idr = idy * nx + idx;
 
-    if (stem_data[idr] < stem_min) {stem_min = stem_data[idr];}
-    if (stem_data[idr] > stem_max) {stem_max = stem_data[idr];}
+    if (stem_image[idr] < stem_min) {stem_min = stem_image[idr];}
+    if (stem_image[idr] > stem_max) {stem_max = stem_image[idr];}
 
-    float val = (stem_data[idr] - stem_min) / (stem_max - stem_min);
+    float val = (stem_image[idr] - stem_min) / (stem_max - stem_min);
 
     // Update pixel at location
     SDL_Utils::draw_pixel(srf_stem, idx, idy, val, stem_cmap);
 }
 
 // set pixel in stem image srf_stem at location idx, idy to value corresponding
-// value in stem_data array
+// value in stem_image array
 void Ricom::set_e_field_pixel(size_t idx, size_t idy)
 {
     // determine location index of value in memory
@@ -516,6 +516,8 @@ void Ricom::line_processor(
     if ((int)(prog_mon->fr_count / nx) < preprocessor_line)
     {
         processor_line = (int)(prog_mon->fr_count) / nx;
+        if (processor_line%ny==0)
+            id_image = processor_line / ny % 2;
         idxx = (int)(prog_mon->fr_count) % nxy;
         *prog_mon += nx;
 
@@ -526,28 +528,25 @@ void Ricom::line_processor(
             int idxx_p_i = idxx + i;
             if ((idxx_p_i >= 0) | (nx > 1))
             {
-                if (dose_data[idxx_p_i] == 0)
+                if (dose_data[id_image][idxx_p_i] == 0)
                 {
-                    comx_data[idxx_p_i] = offset[0];
-                    comy_data[idxx_p_i] = offset[1];
+                    comx_image[idxx_p_i] = offset[0];
+                    comy_image[idxx_p_i] = offset[1];
                 }
                 else
                 {
-                    comx_data[idxx_p_i] = sumx_data[idxx_p_i] / dose_data[idxx_p_i];
-                    comy_data[idxx_p_i] = sumy_data[idxx_p_i] / dose_data[idxx_p_i];
+                    comx_image[idxx_p_i] = sumx_data[id_image][idxx_p_i] / dose_data[id_image][idxx_p_i];
+                    comy_image[idxx_p_i] = sumy_data[id_image][idxx_p_i] / dose_data[id_image][idxx_p_i];
                 }
-                com_xy_sum[0] += comx_data[idxx_p_i];
-                com_xy_sum[1] += comy_data[idxx_p_i];
-                if (!b_cumulative) {
-                    sumx_data[idxx_p_i] = 0;
-                    sumy_data[idxx_p_i] = 0;
-                    dose_data[idxx_p_i] = 0;
-                }
+                com_xy_sum[0] += comx_image[idxx_p_i];
+                com_xy_sum[1] += comy_image[idxx_p_i];
             }
+            if (b_vSTEM)
+                stem_image[idxx_p_i] = (float)stem_data[id_image][idxx_p_i];
             if (b_e_mag)
             {
-                com_xy[0] = comx_data[idxx_p_i];
-                com_xy[1] = comy_data[idxx_p_i];
+                com_xy[0] = comx_image[idxx_p_i];
+                com_xy[1] = comy_image[idxx_p_i];
                 compute_electric_field(com_xy, idxx_p_i);
             }
         }
@@ -566,8 +565,6 @@ void Ricom::line_processor(
         int update_line = idxx / nx - kernel.kernel_size*2;
         if ((prog_mon->report_set) && (update_line)>0)
         {
-            update_surfaces(update_line, frame);
-
             fr_freq = prog_mon->fr_freq;
             rescales_recomputes();
             for (int i = 0; i < 2; i++)
@@ -628,7 +625,7 @@ void Ricom::icom_group_classical(int idxx)
         for (int i_line = 0, idr_delay = idxx - kernel.kernel_size * nx;
         i_line < nx;
         i_line++, idr_delay++)
-        { ricom_data[idr_delay]=0; }
+        { ricom_image[idr_delay]=0; }
 
 
         for (int iy = -kernel.kernel_size; iy <= kernel.kernel_size; iy++)
@@ -644,11 +641,11 @@ void Ricom::icom_group_classical(int idxx)
                 {
                     if (((idr_x + ix) >= 0) & ((idr_x + ix) < nx))
                     {
-                        // ricom_data[idr] += ((comx_data[idc + ix] - offset[0]) * -kernel.kernel_x[idk] +
-                        //                     (comy_data[idc + ix] - offset[1]) * -kernel.kernel_y[idk]);
+                        // ricom_image[idr] += ((comx_image[idc + ix] - offset[0]) * -kernel.kernel_x[idk] +
+                        //                     (comy_image[idc + ix] - offset[1]) * -kernel.kernel_y[idk]);
 
-                        ricom_data[idr_delay] += ((comx_data[idc + ix] - offset[0]) * -kernel.kernel_x[idk] +
-                                                  (comy_data[idc + ix] - offset[1]) * -kernel.kernel_y[idk]);
+                        ricom_image[idr_delay] += ((comx_image[idc + ix] - offset[0]) * -kernel.kernel_x[idk] +
+                                                  (comy_image[idc + ix] - offset[1]) * -kernel.kernel_y[idk]);
                     }
                     ++idk;
                 }
@@ -683,17 +680,14 @@ void Ricom::run(int mode)
                 b_ricom,
                 b_e_mag,
                 b_airpi,
+                &b_cumulative,
                 &detector.radius2,
                 &offset,
-                &stem_data,
-                &ricom_data,
-                &comx_data,
-                &comy_data,
                 &dose_data,
                 &sumx_data,
                 &sumy_data,
+                &stem_data,
                 &frame,
-                &airpi_data,
                 &processor_line,
                 &preprocessor_line,
                 mode,
@@ -717,17 +711,14 @@ void Ricom::run(int mode)
                 b_ricom,
                 b_e_mag,
                 b_airpi,
+                &b_cumulative,
                 &detector.radius2,
                 &offset,
-                &stem_data,
-                &ricom_data,
-                &comx_data,
-                &comy_data,
                 &dose_data,
                 &sumx_data,
                 &sumy_data,
+                &stem_data,
                 &frame,
-                &airpi_data,
                 &processor_line,
                 &preprocessor_line,
                 mode,
@@ -765,10 +756,10 @@ void Ricom::reset_limits()
 
 void Ricom::reinit_vectors_limits()
 {
-    std::fill(ricom_data.begin(), ricom_data.end(), 0);
-    std::fill(stem_data.begin(), stem_data.end(), 0);
-    std::fill(comx_data.begin(), comx_data.end(), 0);
-    std::fill(comy_data.begin(), comy_data.end(), 0);
+    std::fill(ricom_image.begin(), ricom_image.end(), 0);
+    std::fill(stem_image.begin(), stem_image.end(), 0);
+    std::fill(comx_image.begin(), comx_image.end(), 0);
+    std::fill(comy_image.begin(), comy_image.end(), 0);
     last_y = 0;
     reset_limits();
 }
@@ -781,10 +772,11 @@ void Ricom::reset()
 
     // Initializations
     nxy = nx * ny;
+    id_image = 0;
     fr_total = nxy * rep;
     fr_count = 0;
     init_surface();
-    
+
     // Imaging tools
     switch (camera)
     {
@@ -805,15 +797,19 @@ void Ricom::reset()
     detector.compute_detector(n_cam, n_cam, offset);
 
     // Allocate memory for image arrays
-    stem_data.assign(nxy, 0);
-    ricom_data.assign(nxy, 0);
-    comx_data.assign(nxy, 0);
-    comy_data.assign(nxy, 0);
-    dose_data.assign(nxy, 0);
-    sumx_data.assign(nxy, 0);
-    sumy_data.assign(nxy, 0);
+    stem_image.assign(nxy, 0);
+    ricom_image.assign(nxy, 0);
+    comx_image.assign(nxy, 0);
+    comy_image.assign(nxy, 0);
+    for (int i=0; i<2; i++)
+    {
+        dose_data[i].assign(nxy, 0);
+        sumx_data[i].assign(nxy, 0);
+        sumy_data[i].assign(nxy, 0);
+        stem_data[i].assign(nxy, 0);
+    }
     frame.assign(n_cam * n_cam, 0);
-    airpi_data.assign(nxy, 0); // not correct, airpi_data size will be larger due to super resolution
+    airpi_image.assign(nxy, 0); // not correct, airpi_image size will be larger due to super resolution
 
     // Data Processing Progress
     processor_line = 0;

@@ -46,14 +46,14 @@ private:
         d2 = pow((float)kx - (*p_offset)[0], 2) + pow((float)ky - (*p_offset)[1], 2);
         if (d2 > (*p_radius)[0] && d2 <= (*p_radius)[1])
         {
-            (*p_stem_data)[probe_position]++;
+            (*p_stem_data)[id_image][probe_position]++;
         }
     };
     void com()
     {
-        (*p_dose_data)[probe_position]++;
-        (*p_sumy_data)[probe_position] += ky;
-        (*p_sumx_data)[probe_position] += kx;
+        (*p_dose_data)[id_image][probe_position]++;
+        (*p_sumy_data)[id_image][probe_position] += ky;
+        (*p_sumx_data)[id_image][probe_position] += kx;
     };
     void airpi(){};
 
@@ -66,6 +66,7 @@ protected:
     int n_buf = n_buffer;
     int n_buffer_filled=0;
     int n_buffer_processed=0;
+    int id_image;
     uint64_t current_line = 0;
     uint64_t probe_position;
     uint64_t probe_position_total;
@@ -108,34 +109,15 @@ protected:
         }
         std::cout << "n_buffer_filled" << std::endl;
     };
-    void flush_next_line(int line_id)
+    void flush_image(int id_img)
     {
-        if ( (line_id+1)%ny < (line_id)%ny ){
-            for (int i_image = 0; i_image < n_images_f; i_image++)
+        if (!*b_cumulative)
+        {
+            for (int i_image = 0; i_image < n_images; i_image++)
             {
                 std::fill(
-                    (*(p_images_f[i_image])).begin()+(((line_id)%ny)*nx), 
-                    (*(p_images_f[i_image])).end(), 0);
-            }
-            for (int i_image = 0; i_image < n_images_t; i_image++)
-            {
-                std::fill(
-                    (*(p_images_t[i_image])).begin()+(((line_id)%ny)*nx), 
-                    (*(p_images_t[i_image])).end(), 0);
-            }
-        }
-        else {
-            for (int i_image = 0; i_image < n_images_f; i_image++)
-            {
-                std::fill(
-                    (*(p_images_f[i_image])).begin()+(((line_id+1)%ny)*nx), 
-                    (*(p_images_f[i_image])).begin()+(((line_id+1)%ny)*nx)+nx, 0);
-            }
-            for (int i_image = 0; i_image < n_images_t; i_image++)
-            {
-                std::fill(
-                    (*(p_images_t[i_image])).begin()+(((line_id+1)%ny)*nx), 
-                    (*(p_images_t[i_image])).begin()+(((line_id+1)%ny)*nx)+nx, 0);
+                    (*(p_images[i_image]))[id_img].begin(),
+                    (*(p_images[i_image]))[id_img].end(), 0);
             }
         }
     };
@@ -165,17 +147,14 @@ public:
     bool b_ricom;
     bool b_e_mag;
     bool b_airpi;
+    bool *b_cumulative;
     std::array<float, 2> *p_radius;
     std::array<float, 2> *p_offset;
-    std::vector<float> *p_stem_data;
-    std::vector<float> *p_ricom_data;
-    std::vector<float> *p_comx_data;
-    std::vector<float> *p_comy_data;
-    std::vector<size_t> *p_dose_data;
-    std::vector<size_t> *p_sumx_data;
-    std::vector<size_t> *p_sumy_data;
+    std::vector<size_t> (*p_dose_data)[2];
+    std::vector<size_t> (*p_sumx_data)[2];
+    std::vector<size_t> (*p_sumy_data)[2];
+    std::vector<size_t> (*p_stem_data)[2];
     std::vector<size_t> *p_frame;
-    std::vector<float> *p_airpi_data;
     int *p_processor_line;
     int *p_preprocessor_line;
     int mode;
@@ -185,32 +164,27 @@ public:
 
     std::vector<std::function<void()>> process;
     int n_proc = 0;
-    std::vector<std::vector<size_t>*> p_images_t;
-    int n_images_t = 0;
-    std::vector<std::vector<float>*> p_images_f;
-    int n_images_f = 0;
+    std::vector<std::vector<size_t> (*)[2]> p_images;
+    int n_images = 0;
 
 
     TIMEPIX(
         int &nx,
         int &ny,
         int &n_cam,
-        int &dt, // unit: n,
+        int &dt, // unit: ns
         bool &b_vSTEM,
         bool &b_ricom,
         bool &b_e_mag,
         bool &b_airpi,
+        bool *b_cumulative,
         std::array<float, 2> *p_radius,
         std::array<float, 2> *p_offset,
-        std::vector<float> *p_stem_data,
-        std::vector<float> *p_ricom_data,
-        std::vector<float> *p_comx_data,
-        std::vector<float> *p_comy_data,
-        std::vector<size_t> *p_dose_data,
-        std::vector<size_t> *p_sumx_data,
-        std::vector<size_t> *p_sumy_data,
+        std::vector<size_t> (*p_dose_data)[2],
+        std::vector<size_t> (*p_sumx_data)[2],
+        std::vector<size_t> (*p_sumy_data)[2],
+        std::vector<size_t> (*p_stem_data)[2],
         std::vector<size_t> *p_frame,
-        std::vector<float> *p_airpi_data,
         int *p_processor_line,
         int *p_preprocessor_line,
         int &mode,
@@ -225,17 +199,14 @@ public:
         b_ricom(b_ricom),
         b_e_mag(b_e_mag),
         b_airpi(b_airpi),
+        b_cumulative(b_cumulative),
         p_radius(p_radius),
         p_offset(p_offset),
-        p_stem_data(p_stem_data),
-        p_ricom_data(p_ricom_data),
-        p_comx_data(p_comx_data),
-        p_comy_data(p_comy_data),
         p_dose_data(p_dose_data),
         p_sumx_data(p_sumx_data),
         p_sumy_data(p_sumy_data),
+        p_stem_data(p_stem_data),
         p_frame(p_frame),
-        p_airpi_data(p_airpi_data),
         p_processor_line(p_processor_line),
         p_preprocessor_line(p_preprocessor_line),
         mode(mode),
@@ -244,33 +215,26 @@ public:
     {
         nxy = nx*ny;
         n_proc = 0;
-        n_images_t = 0;
-        n_images_f = 0;
+        n_images = 0;
         if (b_vSTEM) 
         { 
             process.push_back(std::bind(&TIMEPIX::vstem, this));
-            p_images_f.push_back(p_stem_data);
+            p_images.push_back(p_stem_data);
             ++n_proc;
-            ++n_images_f;
+            ++n_images;
         }
         if (b_ricom || b_e_mag) 
         { 
             process.push_back(std::bind(&TIMEPIX::com, this));
-            p_images_f.push_back(p_ricom_data);
-            p_images_f.push_back(p_comx_data);
-            p_images_f.push_back(p_comy_data);
-            p_images_t.push_back(p_sumx_data);
-            p_images_t.push_back(p_sumy_data);
-            p_images_t.push_back(p_dose_data);
+            p_images.push_back(p_sumx_data);
+            p_images.push_back(p_sumy_data);
+            p_images.push_back(p_dose_data);
             ++n_proc; 
-            n_images_f += 3;
-            n_images_t += 3;
+            n_images += 3;
         }
         if (b_airpi) { 
             process.push_back(std::bind(&TIMEPIX::airpi, this)); // not implemented yet
-            p_images_f.push_back(p_airpi_data);
             ++n_proc; 
-            ++n_images_f;
         } 
     }
 };

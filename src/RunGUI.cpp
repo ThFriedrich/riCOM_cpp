@@ -302,7 +302,7 @@ int run_gui(Ricom *ricom)
                 {
                     if (&ricom->b_ricom)
                     {
-                        GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
+                        GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_image);
                     }
                     else
                     {
@@ -313,7 +313,7 @@ int run_gui(Ricom *ricom)
                 {
                     if (show_com_x)
                     {
-                        GENERIC_WINDOW("COM-X").set_data(ricom->nx, ricom->ny, &ricom->comx_data);
+                        GENERIC_WINDOW("COM-X").set_data(ricom->nx, ricom->ny, &ricom->comx_image);
                     }
                     else
                     {
@@ -324,7 +324,7 @@ int run_gui(Ricom *ricom)
                 {
                     if (show_com_y)
                     {
-                        GENERIC_WINDOW("COM-Y").set_data(ricom->nx, ricom->ny, &ricom->comy_data);
+                        GENERIC_WINDOW("COM-Y").set_data(ricom->nx, ricom->ny, &ricom->comy_image);
                     }
                     else
                     {
@@ -346,7 +346,7 @@ int run_gui(Ricom *ricom)
                 {
                     if (ricom->b_vSTEM)
                     {
-                        GENERIC_WINDOW("vSTEM").set_data(ricom->nx, ricom->ny, &ricom->stem_data);
+                        GENERIC_WINDOW("vSTEM").set_data(ricom->nx, ricom->ny, &ricom->stem_image);
                     }
                     else
                     {
@@ -481,7 +481,7 @@ int run_gui(Ricom *ricom)
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 cheetah_comm.start();
                 // RICOM::run(ricom, RICOM::TCP);
-                // GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
+                // GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_image);
             }
 
             if (ImGui::Button("Acquire", ImVec2(-1.0f, 0.0f)))
@@ -496,7 +496,7 @@ int run_gui(Ricom *ricom)
                 run_thread.detach();
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 cheetah_comm.start();
-                // GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
+                // GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_image);
             }
 
             if (ImGui::Button("Stop", ImVec2(-1.0f, 0.0f)))
@@ -547,7 +547,7 @@ int run_gui(Ricom *ricom)
                     b_started = true;
                     b_restarted = true;
                     run_thread.detach();
-                    // GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_data);
+                    // GENERIC_WINDOW("RICOM").set_data(ricom->nx, ricom->ny, &ricom->ricom_image);
                 }
             }
         }
@@ -603,13 +603,13 @@ int run_gui(Ricom *ricom)
         com_rel_y = (std::min)(p.y + tex_wh, com_rel_y);
 
         float cross_width = tex_wh / 15.0f;
-        if (b_redraw)
-        {
-            if (ricom->srf_cbed != NULL)
-            {
-                bind_tex(ricom->srf_cbed, uiTextureIDs[0]);
-            }
-        }
+        // if (b_redraw)
+        // {
+        //     if (ricom->srf_cbed != NULL)
+        //     {
+        //         bind_tex(ricom->srf_cbed, uiTextureIDs[0]);
+        //     }
+        // }
         ImGui::Image((ImTextureID)uiTextureIDs[0], ImVec2(tex_wh, tex_wh), uv_min, uv_max, tint_col, border_col);
         ImGui::GetWindowDrawList()->AddCircle(ImVec2(centre_x, centre_y), tex_wh * 0.03, IM_COL32(255, 255, 255, 255), 256);
         ImGui::GetWindowDrawList()->AddLine(ImVec2(com_rel_x - cross_width, com_rel_y), ImVec2(com_rel_x + cross_width, com_rel_y), IM_COL32(255, 0, 0, 255), 1.5f);
