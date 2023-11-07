@@ -666,45 +666,6 @@ void Ricom::run(int mode)
     this->mode = mode;
     reset();
     b_busy = true;
-    // Initializations
-    nxy = nx * ny;
-    fr_total = nxy * rep;
-    fr_count = 0;
-    init_surface();
-
-    // Imaging tools
-    kernel.compute_kernel();
-    detector.compute_detector(n_cam, n_cam, offset);
-
-    // Allocate memory for image arrays
-    switch (camera)
-    {
-        case RICOM::ADVAPIX:
-        {
-            n_cam = 256;
-            break;
-        }
-        case RICOM::CHEETAH:
-        {
-            n_cam = 512;
-            break;
-        }
-    }
-    offset[0] = n_cam / 2;
-    offset[1] = n_cam / 2;
-    stem_data.assign(nxy, 0);
-    ricom_data.assign(nxy, 0);
-    comx_data.assign(nxy, 0);
-    comy_data.assign(nxy, 0);
-    dose_data.assign(nxy, 0);
-    sumx_data.assign(nxy, 0);
-    sumy_data.assign(nxy, 0);
-    frame.assign(n_cam * n_cam, 0);
-    airpi_data.assign(nxy, 0); // not correct, airpi_data size will be larger due to super resolution
-
-    // Data Processing Progress
-    processor_line = 0;
-    preprocessor_line = 0;
 
     // Run camera dependent pipeline
     switch (camera)
@@ -817,4 +778,45 @@ void Ricom::reset()
     rc_quit = false;
     fr_freq = 0;
     reinit_vectors_limits();
+
+    // Initializations
+    nxy = nx * ny;
+    fr_total = nxy * rep;
+    fr_count = 0;
+    init_surface();
+    
+    // Imaging tools
+    switch (camera)
+    {
+        case RICOM::ADVAPIX:
+        {
+            n_cam = 256;
+            break;
+        }
+        case RICOM::CHEETAH:
+        {
+            n_cam = 512;
+            break;
+        }
+    }
+    offset[0] = n_cam / 2;
+    offset[1] = n_cam / 2;
+    kernel.compute_kernel();
+    detector.compute_detector(n_cam, n_cam, offset);
+
+    // Allocate memory for image arrays
+    stem_data.assign(nxy, 0);
+    ricom_data.assign(nxy, 0);
+    comx_data.assign(nxy, 0);
+    comy_data.assign(nxy, 0);
+    dose_data.assign(nxy, 0);
+    sumx_data.assign(nxy, 0);
+    sumy_data.assign(nxy, 0);
+    frame.assign(n_cam * n_cam, 0);
+    airpi_data.assign(nxy, 0); // not correct, airpi_data size will be larger due to super resolution
+
+    // Data Processing Progress
+    processor_line = 0;
+    preprocessor_line = 0;
+
 }
