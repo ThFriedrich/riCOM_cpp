@@ -26,8 +26,8 @@ var searchData=
   ['compute_5fdetector_46',['compute_detector',['../d6/da7/classRicom__detector.html#ae689fa990235cb6a8444b10169239cd6',1,'Ricom_detector']]],
   ['compute_5ffilter_47',['compute_filter',['../de/d71/classRicom__kernel.html#adb20f779de51a904b325872a4d24f5b1',1,'Ricom_kernel']]],
   ['compute_5fkernel_48',['compute_kernel',['../de/d71/classRicom__kernel.html#a58084cb1d2236734020236a1be400442',1,'Ricom_kernel']]],
-  ['comx_5fdata_49',['comx_data',['../d8/d91/classRicom.html#a532041685363528cdfa0cd7d42e253db',1,'Ricom']]],
-  ['comy_5fdata_50',['comy_data',['../d8/d91/classRicom.html#a2cc9c03f52ff71811e68429d85d3b117',1,'Ricom']]],
+  ['comx_5fimage_49',['comx_image',['../d8/d91/classRicom.html#a71d62aca095e50b45411cf25e127e761',1,'Ricom']]],
+  ['comy_5fimage_50',['comy_image',['../d8/d91/classRicom.html#a073c2f61cffe7184d4511c74aa9ffe56',1,'Ricom']]],
   ['connect_5fsocket_51',['connect_socket',['../d7/d76/classSocketConnector.html#ade2eea78b021fcbdd7d48c30061c4835',1,'SocketConnector']]],
   ['connection_5finformation_52',['connection_information',['../d7/d76/classSocketConnector.html#a50c9babc1b4efb60b9a8f6e0595ef25d',1,'SocketConnector']]],
   ['create_5fwindow_53',['create_window',['../d0/d05/classSdlImageWindow.html#aa7eb519081e93ce775cc2d16e78c724d',1,'SdlImageWindow']]]

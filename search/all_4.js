@@ -6,7 +6,7 @@ var searchData=
   ['detector_57',['detector',['../d8/d91/classRicom.html#a91a00a10b3ae6879300348ab2f3325e8',1,'Ricom']]],
   ['dock_5fid_58',['dock_id',['../d5/da5/classMain__Dock.html#aa8be27ed15b4ef2f9ecd5a17e5b665ef',1,'Main_Dock']]],
   ['dockspace_5fflags_59',['dockspace_flags',['../d5/da5/classMain__Dock.html#aa0220fc5e6fa4c04f8997db3e370b704',1,'Main_Dock']]],
-  ['dose_5fdata_60',['dose_data',['../d8/d91/classRicom.html#ae198729022daee3b7ae778a2fe6c4d91',1,'Ricom']]],
+  ['dose_5fdata_60',['dose_data',['../d8/d91/classRicom.html#abd60b8d6f7c599a45273e78af458eb9d',1,'Ricom']]],
   ['draw_5fe_5ffield_5fimage_61',['draw_e_field_image',['../d8/d91/classRicom.html#a6c80a9ec67ba19d86932d3a0271f5cca',1,'Ricom::draw_e_field_image(int y0, int ye)'],['../d8/d91/classRicom.html#a397d411fd7b77504ab8ae2d8316fb04a',1,'Ricom::draw_e_field_image()']]],
   ['draw_5fpixel_62',['draw_pixel',['../d2/dd4/namespaceSDL__Utils.html#a4a2f3b5faa308dab188cdfe41aa923a8',1,'SDL_Utils::draw_pixel(SDL_Surface *surface, int x, int y, float val, int col_map)'],['../d2/dd4/namespaceSDL__Utils.html#abcff677e10b2801ad0239fb25eb57e22',1,'SDL_Utils::draw_pixel(SDL_Surface *surface, int x, int y, float ang, float mag, int col_map)']]],
   ['draw_5fricom_5fimage_63',['draw_ricom_image',['../d8/d91/classRicom.html#a7d15e4ad0767cdf1725bfcf691b5f1cc',1,'Ricom::draw_ricom_image()'],['../d8/d91/classRicom.html#a1841a75e1c5a0bd5cf077bf4dae24e78',1,'Ricom::draw_ricom_image(int y0, int ye)']]],
