@@ -791,8 +791,8 @@ void Ricom::reset()
             break;
         }
     }
-    offset[0] = n_cam / 2;
-    offset[1] = n_cam / 2;
+    // offset[0] = n_cam / 2;
+    // offset[1] = n_cam / 2;
     kernel.compute_kernel();
     detector.compute_detector(n_cam, n_cam, offset);
 
