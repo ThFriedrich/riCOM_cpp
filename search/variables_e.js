@@ -1,9 +1,17 @@
 var searchData=
 [
-  ['p_5fprog_5fmon_460',['p_prog_mon',['../d8/d91/classRicom.html#aa5e6653c0b5da76bc762d58a520d5e58',1,'Ricom']]],
-  ['path_461',['path',['../d1/dd7/classFileConnector.html#a99ddb6b74c93c8ff1efe8ccbc490ac83',1,'FileConnector']]],
-  ['pb_5fopen_462',['pb_open',['../d5/d5d/classImGuiImageWindow.html#ac1f4efdc53f1712170f2df1ce0d5b3ed',1,'ImGuiImageWindow']]],
-  ['port_463',['port',['../d7/d76/classSocketConnector.html#a79d0487b330729276b0f6519906399a1',1,'SocketConnector']]],
-  ['preprocessor_5fline_464',['preprocessor_line',['../d8/d91/classRicom.html#a7d074be8b39cb4bca0c1f6a3965a159b',1,'Ricom']]],
-  ['processor_5fline_465',['processor_line',['../d8/d91/classRicom.html#a38713dc779e93bb9b8fb502e6bed1463',1,'Ricom']]]
+  ['radius_434',['radius',['../d6/da7/classRicom__detector.html#a63e4db9f0ea06fc4fdd8aa29d820d5e5',1,'Ricom_detector']]],
+  ['radius2_435',['radius2',['../d6/da7/classRicom__detector.html#a314f973eb4cf7d8ecc8e93277e1f9df7',1,'Ricom_detector']]],
+  ['rc_5fquit_436',['rc_quit',['../d8/d91/classRicom.html#a951248a8ec56a16d20a38f0804be7aef',1,'Ricom']]],
+  ['rc_5fsocket_437',['rc_socket',['../d7/d76/classSocketConnector.html#a02d1516156beb3b3524ef32e6135e86d',1,'SocketConnector']]],
+  ['redraw_5finterval_438',['redraw_interval',['../d8/d91/classRicom.html#a2566f62aca4dd6fac9ac28caa9013f7c',1,'Ricom']]],
+  ['rep_439',['rep',['../d8/d91/classRicom.html#a3a12d75248c5e06987b5a72f45172486',1,'Ricom']]],
+  ['report_5fset_440',['report_set',['../d1/dcc/classProgressMonitor.html#a191780ceea497b28f02ca5c1f6732ada',1,'ProgressMonitor']]],
+  ['report_5fset_5fpublic_441',['report_set_public',['../d1/dcc/classProgressMonitor.html#af8d35eed5331dfdd6108462faed6e060',1,'ProgressMonitor']]],
+  ['rescale_5fe_5fmag_442',['rescale_e_mag',['../d8/d91/classRicom.html#ae5c78b804b843ab5315dbeabdb91460a',1,'Ricom']]],
+  ['rescale_5fricom_443',['rescale_ricom',['../d8/d91/classRicom.html#a4dacb9cae983f42a0346c705e3f34406',1,'Ricom']]],
+  ['rescale_5fstem_444',['rescale_stem',['../d8/d91/classRicom.html#af4aaf303c09ea6b2e6b603a2b151c43c',1,'Ricom']]],
+  ['ricom_5fcmap_445',['ricom_cmap',['../d8/d91/classRicom.html#aa61dd15da9654398f656f254300ac222',1,'Ricom']]],
+  ['ricom_5fdata_446',['ricom_data',['../d8/d91/classRicom.html#a4349810ef9b361a23632ee0c2ec4fc08',1,'Ricom']]],
+  ['rotation_447',['rotation',['../de/d71/classRicom__kernel.html#aa8e0749e796bbc34391287beeee148f8',1,'Ricom_kernel']]]
 ];

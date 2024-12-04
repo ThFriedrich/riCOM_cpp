@@ -1,7 +1,8 @@
 <map id="Ricom" name="Ricom">
-<area shape="rect" id="node1" title=" " alt="" coords="263,95,326,121"/>
+<area shape="rect" id="node1" title=" " alt="" coords="370,95,433,121"/>
 <area shape="rect" id="node2" href="$d1/dcc/classProgressMonitor.html" title=" " alt="" coords="5,5,133,32"/>
 <area shape="rect" id="node3" href="$d7/d76/classSocketConnector.html" title=" " alt="" coords="157,5,288,32"/>
-<area shape="rect" id="node4" href="$de/d71/classRicom__kernel.html" title=" " alt="" coords="313,5,423,32"/>
-<area shape="rect" id="node5" href="$d6/da7/classRicom__detector.html" title=" " alt="" coords="447,5,571,32"/>
+<area shape="rect" id="node4" href="$d3/d29/classCAMERA_1_1Camera__BASE.html" title=" " alt="" coords="312,5,491,32"/>
+<area shape="rect" id="node5" href="$de/d71/classRicom__kernel.html" title=" " alt="" coords="515,5,626,32"/>
+<area shape="rect" id="node6" href="$d6/da7/classRicom__detector.html" title=" " alt="" coords="650,5,774,32"/>
 </map>

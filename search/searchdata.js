@@ -5,10 +5,10 @@ var indexSectionsWithContent =
   2: "cirs",
   3: "bcfgimprs",
   4: "abcdfgijlmoprsuvw~",
-  5: "abcdefghiklmnopqrstuvw",
+  5: "bcdefhiklmnopqrstuvw",
   6: "f",
-  7: "cgs",
-  8: "acefmnpst",
+  7: "cgm",
+  8: "cefmnpst",
   9: "_cgimst",
   10: "r"
 };

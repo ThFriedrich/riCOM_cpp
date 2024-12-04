@@ -108,8 +108,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d44/FileConnector_8cpp_source.html#l00065">65</a> of file <a class="el" href="../../d3/d44/FileConnector_8cpp_source.html">FileConnector.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;: <a class="code" href="../../d1/dd7/classFileConnector.html#a99ddb6b74c93c8ff1efe8ccbc490ac83">path</a>(), stream(), file_size(0), pos(0) {}</div>
+<p class="definition">Definition at line <a class="el" href="../../d3/d44/FileConnector_8cpp_source.html#l00064">64</a> of file <a class="el" href="../../d3/d44/FileConnector_8cpp_source.html">FileConnector.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;: <a class="code" href="../../d1/dd7/classFileConnector.html#a99ddb6b74c93c8ff1efe8ccbc490ac83">path</a>(), stream(), file_size(0), pos(0) {}</div>
 <div class="ttc" id="aclassFileConnector_html_a99ddb6b74c93c8ff1efe8ccbc490ac83"><div class="ttname"><a href="../../d1/dd7/classFileConnector.html#a99ddb6b74c93c8ff1efe8ccbc490ac83">FileConnector::path</a></div><div class="ttdeci">std::filesystem::path path</div><div class="ttdef"><b>Definition:</b> <a href="../../da/dab/FileConnector_8h_source.html#l00026">FileConnector.h:26</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -207,14 +207,13 @@ Public Attributes</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="../../d3/d44/FileConnector_8cpp_source.html#l00046">46</a> of file <a class="el" href="../../d3/d44/FileConnector_8cpp_source.html">FileConnector.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;{</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    stream.read(buffer, data_size);</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    pos += data_size;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="comment">// Reset file to the beginning for repeat reading</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keywordflow">if</span> (file_size - pos &lt; data_size)</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    {</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        reset_file();</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    }</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;};</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    pos += data_size;</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="comment">// Reset file to the beginning for repeat reading</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="keywordflow">if</span> (file_size - pos &lt; data_size)</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    {</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        reset_file();</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    }</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;};</div>
 </div><!-- fragment -->
 </div>
 </div>

@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['u_499',['u',['../d3/d29/classCAMERA_1_1Camera__BASE.html#abe462fa6278683dc73202eea71e84a90',1,'CAMERA::Camera_BASE']]],
-  ['update_5foffset_500',['update_offset',['../d8/d91/classRicom.html#a406e6dc9d511ea645cd088c180fb5bb0',1,'Ricom']]]
+  ['window_5fflags_466',['window_flags',['../d5/da5/classMain__Dock.html#a704472dfcdad9a5935bd56b3511e18a1',1,'Main_Dock']]]
 ];

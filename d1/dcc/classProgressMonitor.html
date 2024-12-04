@@ -78,11 +78,9 @@ $(function() {
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ac735dab0df1a98b885b5f59ca7b18dff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d1/dcc/classProgressMonitor.html">ProgressMonitor</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dcc/classProgressMonitor.html#ac735dab0df1a98b885b5f59ca7b18dff">operator++</a> ()</td></tr>
 <tr class="separator:ac735dab0df1a98b885b5f59ca7b18dff"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0c6f021170796c637fbba0175852c49f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d1/dcc/classProgressMonitor.html">ProgressMonitor</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dcc/classProgressMonitor.html#a0c6f021170796c637fbba0175852c49f">operator+=</a> (int step)</td></tr>
-<tr class="separator:a0c6f021170796c637fbba0175852c49f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abf6bcae01e1629db543e1517cf2ff1c1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dcc/classProgressMonitor.html#abf6bcae01e1629db543e1517cf2ff1c1">reset_flags</a> ()</td></tr>
 <tr class="separator:abf6bcae01e1629db543e1517cf2ff1c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1efcee928c9d8787c840165a24f1374"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dcc/classProgressMonitor.html#ab1efcee928c9d8787c840165a24f1374">ProgressMonitor</a> (size_t <a class="el" href="../../d1/dcc/classProgressMonitor.html#a8e3d54558a236bbb7f1791a4e930773b">fr_total</a>, bool b_bar=true, float report_interval=250.0, std::ostream &amp;out=std::cerr)</td></tr>
+<tr class="memitem:ab1efcee928c9d8787c840165a24f1374"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dcc/classProgressMonitor.html#ab1efcee928c9d8787c840165a24f1374">ProgressMonitor</a> (size_t fr_total, bool b_bar=true, float report_interval=250.0, std::ostream &amp;out=std::cerr)</td></tr>
 <tr class="separator:ab1efcee928c9d8787c840165a24f1374"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
@@ -99,8 +97,6 @@ Public Attributes</h2></td></tr>
 <tr class="separator:af8d35eed5331dfdd6108462faed6e060"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8d6d3dc60f1053f996f6924aa9f937eb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dcc/classProgressMonitor.html#a8d6d3dc60f1053f996f6924aa9f937eb">first_frame</a></td></tr>
 <tr class="separator:a8d6d3dc60f1053f996f6924aa9f937eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e3d54558a236bbb7f1791a4e930773b"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dcc/classProgressMonitor.html#a8e3d54558a236bbb7f1791a4e930773b">fr_total</a></td></tr>
-<tr class="separator:a8e3d54558a236bbb7f1791a4e930773b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -164,7 +160,7 @@ Static Public Attributes</h2></td></tr>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;                                                                                                          time_stamp(chc::high_resolution_clock::now()), unit(<span class="stringliteral">&quot;kHz&quot;</span>),</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;                                                                                                          unit_bar(<span class="stringliteral">&quot;#&quot;</span>), unit_space(<span class="stringliteral">&quot;-&quot;</span>)</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;{</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    this-&gt;<a class="code" href="../../d1/dcc/classProgressMonitor.html#a8e3d54558a236bbb7f1791a4e930773b">fr_total</a> = <a class="code" href="../../d1/dcc/classProgressMonitor.html#a8e3d54558a236bbb7f1791a4e930773b">fr_total</a>;</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    this-&gt;fr_total = fr_total;</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    this-&gt;b_bar = b_bar;</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    this-&gt;out = &amp;out;</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    this-&gt;report_interval = report_interval;</div>
@@ -173,7 +169,6 @@ Static Public Attributes</h2></td></tr>
 <div class="ttc" id="aclassProgressMonitor_html_a1b5fc7e0538c9d5180e49d2d4cea2a23"><div class="ttname"><a href="../../d1/dcc/classProgressMonitor.html#a1b5fc7e0538c9d5180e49d2d4cea2a23">ProgressMonitor::fr_freq</a></div><div class="ttdeci">float fr_freq</div><div class="ttdef"><b>Definition:</b> <a href="../../da/dce/ProgressMonitor_8h_source.html#l00042">ProgressMonitor.h:42</a></div></div>
 <div class="ttc" id="aclassProgressMonitor_html_a6b8720e81ffecdb33ad09ac681f7891b"><div class="ttname"><a href="../../d1/dcc/classProgressMonitor.html#a6b8720e81ffecdb33ad09ac681f7891b">ProgressMonitor::fr_count_i</a></div><div class="ttdeci">std::atomic&lt; size_t &gt; fr_count_i</div><div class="ttdef"><b>Definition:</b> <a href="../../da/dce/ProgressMonitor_8h_source.html#l00041">ProgressMonitor.h:41</a></div></div>
 <div class="ttc" id="aclassProgressMonitor_html_a8d6d3dc60f1053f996f6924aa9f937eb"><div class="ttname"><a href="../../d1/dcc/classProgressMonitor.html#a8d6d3dc60f1053f996f6924aa9f937eb">ProgressMonitor::first_frame</a></div><div class="ttdeci">bool first_frame</div><div class="ttdef"><b>Definition:</b> <a href="../../da/dce/ProgressMonitor_8h_source.html#l00045">ProgressMonitor.h:45</a></div></div>
-<div class="ttc" id="aclassProgressMonitor_html_a8e3d54558a236bbb7f1791a4e930773b"><div class="ttname"><a href="../../d1/dcc/classProgressMonitor.html#a8e3d54558a236bbb7f1791a4e930773b">ProgressMonitor::fr_total</a></div><div class="ttdeci">size_t fr_total</div><div class="ttdef"><b>Definition:</b> <a href="../../da/dce/ProgressMonitor_8h_source.html#l00046">ProgressMonitor.h:46</a></div></div>
 <div class="ttc" id="aclassProgressMonitor_html_ad8b7272c1eb191d1f36248ae8118152c"><div class="ttname"><a href="../../d1/dcc/classProgressMonitor.html#ad8b7272c1eb191d1f36248ae8118152c">ProgressMonitor::fr_count</a></div><div class="ttdeci">std::atomic&lt; size_t &gt; fr_count</div><div class="ttdef"><b>Definition:</b> <a href="../../da/dce/ProgressMonitor_8h_source.html#l00040">ProgressMonitor.h:40</a></div></div>
 <div class="ttc" id="aclassProgressMonitor_html_af8d35eed5331dfdd6108462faed6e060"><div class="ttname"><a href="../../d1/dcc/classProgressMonitor.html#af8d35eed5331dfdd6108462faed6e060">ProgressMonitor::report_set_public</a></div><div class="ttdeci">std::atomic&lt; bool &gt; report_set_public</div><div class="ttdef"><b>Definition:</b> <a href="../../da/dce/ProgressMonitor_8h_source.html#l00044">ProgressMonitor.h:44</a></div></div>
 </div><!-- fragment -->
@@ -200,7 +195,7 @@ Static Public Attributes</h2></td></tr>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <a class="code" href="../../d1/dcc/classProgressMonitor.html#a6b8720e81ffecdb33ad09ac681f7891b">fr_count_i</a>++;</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <a class="code" href="../../d1/dcc/classProgressMonitor.html#ad8b7272c1eb191d1f36248ae8118152c">fr_count</a>++;</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keyword">auto</span> mil_secs = chc::duration_cast&lt;float_ms&gt;(chc::high_resolution_clock::now() - time_stamp).count();</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <span class="keywordflow">if</span> (mil_secs &gt; report_interval || <a class="code" href="../../d1/dcc/classProgressMonitor.html#ad8b7272c1eb191d1f36248ae8118152c">fr_count</a> &gt;= <a class="code" href="../../d1/dcc/classProgressMonitor.html#a8e3d54558a236bbb7f1791a4e930773b">fr_total</a>)</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <span class="keywordflow">if</span> (mil_secs &gt; report_interval || <a class="code" href="../../d1/dcc/classProgressMonitor.html#ad8b7272c1eb191d1f36248ae8118152c">fr_count</a> &gt;= fr_total)</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    {</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        fr = <a class="code" href="../../d1/dcc/classProgressMonitor.html#a6b8720e81ffecdb33ad09ac681f7891b">fr_count_i</a> / mil_secs;</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        fr_avg += fr;</div>
@@ -212,42 +207,6 @@ Static Public Attributes</h2></td></tr>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    }</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;}</div>
-</div><!-- fragment -->
-</div>
-</div>
-<a id="a0c6f021170796c637fbba0175852c49f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0c6f021170796c637fbba0175852c49f">&#9670;&nbsp;</a></span>operator+=()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d1/dcc/classProgressMonitor.html">ProgressMonitor</a> &amp; ProgressMonitor::operator+= </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>step</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d5/d9c/ProgressMonitor_8cpp_source.html#l00062">62</a> of file <a class="el" href="../../d5/d9c/ProgressMonitor_8cpp_source.html">ProgressMonitor.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;{</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <a class="code" href="../../d1/dcc/classProgressMonitor.html#a6b8720e81ffecdb33ad09ac681f7891b">fr_count_i</a> += step;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <a class="code" href="../../d1/dcc/classProgressMonitor.html#ad8b7272c1eb191d1f36248ae8118152c">fr_count</a> += step;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <span class="keyword">auto</span> mil_secs = chc::duration_cast&lt;float_ms&gt;(chc::high_resolution_clock::now() - time_stamp).count();</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <span class="keywordflow">if</span> (mil_secs &gt; report_interval || <a class="code" href="../../d1/dcc/classProgressMonitor.html#ad8b7272c1eb191d1f36248ae8118152c">fr_count</a> &gt;= <a class="code" href="../../d1/dcc/classProgressMonitor.html#a8e3d54558a236bbb7f1791a4e930773b">fr_total</a>)</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    {</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        fr = <a class="code" href="../../d1/dcc/classProgressMonitor.html#a6b8720e81ffecdb33ad09ac681f7891b">fr_count_i</a> / mil_secs;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        fr_avg += fr;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        fr_count_a++;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <a class="code" href="../../d1/dcc/classProgressMonitor.html#a1b5fc7e0538c9d5180e49d2d4cea2a23">fr_freq</a> = fr_avg / fr_count_a;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        Report(<a class="code" href="../../d1/dcc/classProgressMonitor.html#ad8b7272c1eb191d1f36248ae8118152c">fr_count</a>, fr_avg / fr_count_a);</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <a class="code" href="../../d1/dcc/classProgressMonitor.html#a191780ceea497b28f02ca5c1f6732ada">report_set</a> = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <a class="code" href="../../d1/dcc/classProgressMonitor.html#af8d35eed5331dfdd6108462faed6e060">report_set_public</a> = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    }</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -266,12 +225,12 @@ Static Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d9c/ProgressMonitor_8cpp_source.html#l00081">81</a> of file <a class="el" href="../../d5/d9c/ProgressMonitor_8cpp_source.html">ProgressMonitor.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;{</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    <a class="code" href="../../d1/dcc/classProgressMonitor.html#a6b8720e81ffecdb33ad09ac681f7891b">fr_count_i</a> = 0;</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    <a class="code" href="../../d1/dcc/classProgressMonitor.html#a191780ceea497b28f02ca5c1f6732ada">report_set</a> = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    time_stamp = chc::high_resolution_clock::now();</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;}</div>
+<p class="definition">Definition at line <a class="el" href="../../d5/d9c/ProgressMonitor_8cpp_source.html#l00062">62</a> of file <a class="el" href="../../d5/d9c/ProgressMonitor_8cpp_source.html">ProgressMonitor.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;{</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <a class="code" href="../../d1/dcc/classProgressMonitor.html#a6b8720e81ffecdb33ad09ac681f7891b">fr_count_i</a> = 0;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <a class="code" href="../../d1/dcc/classProgressMonitor.html#a191780ceea497b28f02ca5c1f6732ada">report_set</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    time_stamp = chc::high_resolution_clock::now();</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -361,22 +320,6 @@ Static Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="../../da/dce/ProgressMonitor_8h_source.html#l00042">42</a> of file <a class="el" href="../../da/dce/ProgressMonitor_8h_source.html">ProgressMonitor.h</a>.</p>
-
-</div>
-</div>
-<a id="a8e3d54558a236bbb7f1791a4e930773b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8e3d54558a236bbb7f1791a4e930773b">&#9670;&nbsp;</a></span>fr_total</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">size_t ProgressMonitor::fr_total</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../da/dce/ProgressMonitor_8h_source.html#l00046">46</a> of file <a class="el" href="../../da/dce/ProgressMonitor_8h_source.html">ProgressMonitor.h</a>.</p>
 
 </div>
 </div>

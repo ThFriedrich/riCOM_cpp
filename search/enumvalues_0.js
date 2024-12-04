@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['advapix_510',['ADVAPIX',['../d2/d8f/namespaceRICOM.html#a9999da161d59f2cf6ee0c3e82ca9e501ad3038a9419cea3b7dbea41783931de12',1,'RICOM']]]
+  ['colormapselector_472',['ColormapSelector',['../d4/d6e/ImGuiImageWindow_8h.html#a57bfef8abc6d323c65048f0c7a57a5eaafccbe5934a1deb5b9d42d40b40f08577',1,'ImGuiImageWindow.h']]]
 ];
