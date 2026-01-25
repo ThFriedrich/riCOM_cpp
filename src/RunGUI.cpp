@@ -177,6 +177,8 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
     bool b_started = false;
     bool b_file_selected = false;
     bool b_restarted = false;
+    bool b_show_kernel = false;
+    bool b_show_frequencies = true;
 
     // Merlin Settings (to send to the Camera)
     struct MerlinSettings merlin_settings;
@@ -190,6 +192,8 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
     ImGuiINI::set_font(font_index);
     ImGuiINI::check_ini_setting(ini_cfg, "Appearance", "Style", style_index);
     ImGuiINI::set_style(style_index);
+    ImGuiINI::check_ini_setting(ini_cfg, "Appearance", "Show Kernel", b_show_kernel);
+    ImGuiINI::check_ini_setting(ini_cfg, "Appearance", "Show Frequencies", b_show_frequencies);
     // Hardware Settings
     std::string python_path;
 #ifdef _WIN32
@@ -244,6 +248,7 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
     generic_windows_f.emplace("E-Field-FFT", ImGuiImageWindow<float>("E-Field-FFT", &uiTextureIDs[8], false, 4, common_flags, &e_field_fft));
     GENERIC_WINDOW_C("E-FIELD").fft_window = &GENERIC_WINDOW("E-Field-FFT");
 
+    // Initial draw of the Kernel surfaces
     ricom->kernel.draw_surfaces();
     bind_tex(ricom->kernel.srf_kx, uiTextureIDs[9]);
     bind_tex(ricom->kernel.srf_ky, uiTextureIDs[10]);
@@ -278,6 +283,8 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
                 ImGui::Combo("CBED Colormap", &ricom->cbed_cmap, cmaps, IM_ARRAYSIZE(cmaps));
                 ImGuiINI::ShowFontSelector("Font", font_index, ini_cfg);
                 ImGuiINI::ShowStyleSelector("Style", style_index, ini_cfg);
+                ImGui::Checkbox("Show Kernel", &b_show_kernel);
+                ImGui::Checkbox("Show Frequencies", &b_show_frequencies);
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Hardware Settings"))
@@ -469,19 +476,28 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
                     ricom->kernel.compute_kernel();
                 }
                 GENERIC_WINDOW("RICOM").reset_min_max();
-                ricom->kernel.draw_surfaces();
-                bind_tex(ricom->kernel.srf_kx, uiTextureIDs[9]);
-                bind_tex(ricom->kernel.srf_ky, uiTextureIDs[10]);
+                if (b_show_kernel)
+                {
+                    ricom->kernel.draw_surfaces();
+                    bind_tex(ricom->kernel.srf_kx, uiTextureIDs[9]);
+                    bind_tex(ricom->kernel.srf_ky, uiTextureIDs[10]);
+                }
             }
             if (kernel_changed || b_nx_changed)
             {
                 ricom->kernel.approximate_frequencies((size_t)ricom->nx);
             }
-            float sxk = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.y * 3) / 2;
-            ImGui::Image((void *)(intptr_t)uiTextureIDs[9], ImVec2(sxk, sxk), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
-            ImGui::SameLine();
-            ImGui::Image((void *)(intptr_t)uiTextureIDs[10], ImVec2(sxk, sxk), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
-            ImGui::PlotLines("Frequencies", ricom->kernel.f_approx.data(), ricom->kernel.f_approx.size(), 0, NULL, 0.0f, 1.0f, ImVec2(0, 50));
+            if (b_show_kernel)
+            {
+                float sxk = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.y * 3) / 2;
+                ImGui::Image((void *)(intptr_t)uiTextureIDs[9], ImVec2(sxk, sxk), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
+                ImGui::SameLine();
+                ImGui::Image((void *)(intptr_t)uiTextureIDs[10], ImVec2(sxk, sxk), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
+            }
+            if (b_show_frequencies)
+            {
+                ImGui::PlotLines("Frequencies", ricom->kernel.f_approx.data(), ricom->kernel.f_approx.size(), 0, NULL, 0.0f, 1.0f, ImVec2(0, 50));
+            }
         }
         if (ricom->b_vSTEM)
         {
@@ -646,6 +662,18 @@ int run_gui(Ricom *ricom, CAMERA::Default_configurations &hardware_configuration
 
         ImGui::Begin("CBED", nullptr, ImGuiWindowFlags_NoScrollbar);
         ImGui::Checkbox("Plot CBED", &ricom->b_plot_cbed);
+        if (ricom->b_plot_cbed)
+        {
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(80);
+            ImGui::InputInt("Frames", &ricom->cbed_cmap_frames);
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::SetTooltip("Number of frames to integrate for CBED image");
+            }
+        }
+        if (ricom->cbed_cmap_frames < 1)
+            ricom->cbed_cmap_frames = 1;
         ImVec2 rem_space = ImGui::GetContentRegionAvail();
         float tex_wh = (std::min)(rem_space.x, rem_space.y);
         ImVec2 p = ImGui::GetCursorScreenPos();
