@@ -1,5 +1,7 @@
 <map id="CAMERA::Camera&lt; CameraInterface, cam_type &gt;" name="CAMERA::Camera&lt; CameraInterface, cam_type &gt;">
-<area shape="rect" id="node1" title=" " alt="" coords="27,80,293,121"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,5,136,32"/>
-<area shape="rect" id="node3" href="$d3/d29/classCAMERA_1_1Camera__BASE.html" title=" " alt="" coords="160,5,339,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="27,79,293,119"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,136,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,38,140,77,137,81,92,42"/>
+<area shape="rect" id="Node000003" href="$d3/d29/classCAMERA_1_1Camera__BASE.html" title=" " alt="" coords="160,5,339,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="228,42,183,81,180,77,224,38"/>
 </map>

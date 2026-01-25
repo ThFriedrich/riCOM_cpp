@@ -1,9 +1,15 @@
 <map id="src/FileConnector.cpp" name="src/FileConnector.cpp">
-<area shape="rect" id="node1" title=" " alt="" coords="141,5,301,32"/>
-<area shape="rect" id="node2" href="$da/dab/FileConnector_8h.html" title=" " alt="" coords="160,80,283,107"/>
-<area shape="rect" id="node3" title=" " alt="" coords="5,155,85,181"/>
-<area shape="rect" id="node4" title=" " alt="" coords="109,155,168,181"/>
-<area shape="rect" id="node5" title=" " alt="" coords="192,155,251,181"/>
-<area shape="rect" id="node6" title=" " alt="" coords="275,155,349,181"/>
-<area shape="rect" id="node7" title=" " alt="" coords="373,155,464,181"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="141,5,301,31"/>
+<area shape="rect" id="Node000002" href="$da/dab/FileConnector_8h.html" title=" " alt="" coords="160,79,283,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="224,31,224,65,219,65,219,31"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,152,85,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="194,106,88,149,86,144,192,102"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="109,152,168,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="210,106,164,145,161,141,206,102"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="192,152,251,177"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="224,104,224,138,219,138,219,104"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="275,152,349,177"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="238,102,288,141,285,145,234,106"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="373,152,464,177"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="254,102,374,145,373,150,252,107"/>
 </map>

@@ -1,6 +1,9 @@
 <map id="CAMERA::Camera_BASE" name="CAMERA::Camera_BASE">
-<area shape="rect" id="node1" title=" " alt="" coords="5,78,184,105"/>
-<area shape="rect" id="node2" href="$d4/d8c/classCAMERA_1_1Camera.html" title=" " alt="" coords="232,5,497,47"/>
-<area shape="rect" id="node3" href="$da/df9/classCAMERA_1_1Camera_3_01CameraInterface_00_01EVENT__BASED_01_4.html" title=" " alt="" coords="232,71,497,112"/>
-<area shape="rect" id="node4" href="$d6/d0f/classCAMERA_1_1Camera_3_01CameraInterface_00_01FRAME__BASED_01_4.html" title=" " alt="" coords="232,136,497,177"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,77,184,102"/>
+<area shape="rect" id="Node000002" href="$d4/d8c/classCAMERA_1_1Camera.html" title=" " alt="" coords="232,5,497,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,71,279,43,280,48,163,76"/>
+<area shape="rect" id="Node000003" href="$da/df9/classCAMERA_1_1Camera_3_01CameraInterface_00_01EVENT__BASED_01_4.html" title=" " alt="" coords="232,69,497,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="198,87,232,87,232,92,198,92"/>
+<area shape="rect" id="Node000004" href="$d6/d0f/classCAMERA_1_1Camera_3_01CameraInterface_00_01FRAME__BASED_01_4.html" title=" " alt="" coords="232,133,497,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="163,103,280,131,279,136,162,108"/>
 </map>

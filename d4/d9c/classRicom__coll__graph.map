@@ -1,8 +1,13 @@
 <map id="Ricom" name="Ricom">
-<area shape="rect" id="node1" title=" " alt="" coords="370,95,433,121"/>
-<area shape="rect" id="node2" href="$d1/dcc/classProgressMonitor.html" title=" " alt="" coords="5,5,133,32"/>
-<area shape="rect" id="node3" href="$d7/d76/classSocketConnector.html" title=" " alt="" coords="157,5,288,32"/>
-<area shape="rect" id="node4" href="$d3/d29/classCAMERA_1_1Camera__BASE.html" title=" " alt="" coords="312,5,491,32"/>
-<area shape="rect" id="node5" href="$de/d71/classRicom__kernel.html" title=" " alt="" coords="515,5,626,32"/>
-<area shape="rect" id="node6" href="$d6/da7/classRicom__detector.html" title=" " alt="" coords="650,5,774,32"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="395,93,458,119"/>
+<area shape="rect" id="Node000002" href="$d7/d76/classSocketConnector.html" title=" " alt="" coords="5,5,136,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,31,277,67,396,95,394,100,275,72,130,37"/>
+<area shape="rect" id="Node000003" href="$d3/d29/classCAMERA_1_1Camera__BASE.html" title=" " alt="" coords="160,5,339,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="286,34,404,91,401,95,284,39"/>
+<area shape="rect" id="Node000004" href="$d1/dcc/classProgressMonitor.html" title=" " alt="" coords="363,5,491,31"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="429,45,429,93,424,93,424,45"/>
+<area shape="rect" id="Node000005" href="$d6/da7/classRicom__detector.html" title=" " alt="" coords="515,5,639,31"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="558,42,519,72,459,98,457,93,516,67,554,38"/>
+<area shape="rect" id="Node000006" href="$de/d71/classRicom__kernel.html" title=" " alt="" coords="663,5,774,31"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="684,39,602,72,525,91,459,103,458,98,524,86,601,67,682,34"/>
 </map>

@@ -1,7 +1,13 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$d3/d29/classCAMERA_1_1Camera__BASE.html" title=" " alt="" coords="5,53,184,79"/>
-<area shape="rect" id="node2" href="$d4/d8c/classCAMERA_1_1Camera.html" title=" " alt="" coords="232,5,497,47"/>
-<area shape="rect" id="node3" href="$da/df9/classCAMERA_1_1Camera_3_01CameraInterface_00_01EVENT__BASED_01_4.html" title=" " alt="" coords="232,71,497,112"/>
-<area shape="rect" id="node4" href="$d6/d0f/classCAMERA_1_1Camera_3_01CameraInterface_00_01FRAME__BASED_01_4.html" title=" " alt="" coords="232,136,497,177"/>
-<area shape="rect" id="node5" title=" " alt="" coords="29,103,160,130"/>
+<area shape="rect" id="Node000000" href="$d3/d29/classCAMERA_1_1Camera__BASE.html" title=" " alt="" coords="5,53,184,78"/>
+<area shape="rect" id="Node000001" href="$d4/d8c/classCAMERA_1_1Camera.html" title=" " alt="" coords="232,5,497,45"/>
+<area shape="poly" id="edge1_Node000000_Node000001" title=" " alt="" coords="194,48,231,42,232,48,195,53"/>
+<area shape="rect" id="Node000003" href="$da/df9/classCAMERA_1_1Camera_3_01CameraInterface_00_01EVENT__BASED_01_4.html" title=" " alt="" coords="232,69,497,109"/>
+<area shape="poly" id="edge2_Node000000_Node000003" title=" " alt="" coords="198,72,232,75,231,80,197,77"/>
+<area shape="rect" id="Node000004" href="$d6/d0f/classCAMERA_1_1Camera_3_01CameraInterface_00_01FRAME__BASED_01_4.html" title=" " alt="" coords="232,133,497,173"/>
+<area shape="poly" id="edge3_Node000000_Node000004" title=" " alt="" coords="167,80,185,87,209,103,233,119,265,131,264,136,231,124,206,108,183,92,165,85"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="29,102,160,127"/>
+<area shape="poly" id="edge4_Node000002_Node000001" title=" " alt="" coords="162,95,183,87,206,71,231,55,264,43,265,48,233,60,209,75,185,92,164,100"/>
+<area shape="poly" id="edge5_Node000002_Node000003" title=" " alt="" coords="173,105,231,99,232,104,174,110"/>
+<area shape="poly" id="edge6_Node000002_Node000004" title=" " alt="" coords="174,123,232,132,231,137,173,129"/>
 </map>

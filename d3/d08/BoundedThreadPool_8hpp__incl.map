@@ -1,10 +1,17 @@
 <map id="src/BoundedThreadPool.hpp" name="src/BoundedThreadPool.hpp">
-<area shape="rect" id="node1" title=" " alt="" coords="223,5,425,32"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,80,69,107"/>
-<area shape="rect" id="node3" title=" " alt="" coords="94,80,157,107"/>
-<area shape="rect" id="node4" title=" " alt="" coords="181,80,267,107"/>
-<area shape="rect" id="node5" title=" " alt="" coords="292,80,356,107"/>
-<area shape="rect" id="node6" title=" " alt="" coords="381,80,523,107"/>
-<area shape="rect" id="node7" title=" " alt="" coords="548,80,615,107"/>
-<area shape="rect" id="node8" title=" " alt="" coords="639,80,719,107"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="223,5,425,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,69,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="277,33,83,81,82,76,276,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="94,79,157,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="293,33,171,77,169,72,291,28"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="181,79,267,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="309,33,253,73,250,68,306,29"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="292,79,356,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="327,31,327,65,321,65,321,31"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="381,79,523,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="346,28,420,69,418,74,343,33"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="548,79,615,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="366,28,536,75,534,80,365,33"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="639,79,719,104"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="384,28,625,76,624,81,383,33"/>
 </map>

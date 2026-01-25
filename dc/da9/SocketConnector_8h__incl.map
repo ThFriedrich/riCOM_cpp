@@ -1,9 +1,15 @@
 <map id="src/SocketConnector.h" name="src/SocketConnector.h">
-<area shape="rect" id="node1" title=" " alt="" coords="214,5,379,32"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,80,97,107"/>
-<area shape="rect" id="node3" title=" " alt="" coords="122,80,197,107"/>
-<area shape="rect" id="node4" title=" " alt="" coords="221,80,284,107"/>
-<area shape="rect" id="node5" title=" " alt="" coords="309,80,375,107"/>
-<area shape="rect" id="node6" title=" " alt="" coords="399,80,458,107"/>
-<area shape="rect" id="node7" title=" " alt="" coords="482,80,562,107"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="214,5,379,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,97,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="258,33,105,77,103,72,257,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="122,79,197,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="276,33,195,75,193,70,273,28"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="221,79,284,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="292,32,269,68,265,66,287,30"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="309,79,375,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="306,30,330,66,325,69,302,32"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="399,79,458,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="319,28,396,70,394,74,317,33"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="482,79,562,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="334,28,473,72,472,77,332,33"/>
 </map>

@@ -1,6 +1,9 @@
 <map id="src/ImGuiINI.hpp" name="src/ImGuiINI.hpp">
-<area shape="rect" id="node1" title=" " alt="" coords="61,5,191,32"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,80,76,107"/>
-<area shape="rect" id="node3" title=" " alt="" coords="101,80,151,107"/>
-<area shape="rect" id="node4" title=" " alt="" coords="175,80,234,107"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="61,5,191,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,76,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,33,67,72,63,68,111,29"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="101,79,151,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="129,31,129,65,123,65,123,31"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="175,79,234,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="140,29,184,68,180,71,137,33"/>
 </map>
