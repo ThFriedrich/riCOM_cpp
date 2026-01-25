@@ -69,11 +69,13 @@ void ImGuiImageWindow<T>::render_image()
         {
             set_min_max();
         }
-        for (int y = 0; y < ny; y++)
+        int binned_nx = (nx + bin_factor - 1) / bin_factor;
+        int binned_ny = (ny + bin_factor - 1) / bin_factor;
+        for (int by = 0; by < binned_ny; by++)
         {
-            for (int x = 0; x < nx; x++)
+            for (int bx = 0; bx < binned_nx; bx++)
             {
-                set_pixel(x, y);
+                set_pixel_binned(bx, by);
             }
         }
     }
@@ -87,11 +89,16 @@ void ImGuiImageWindow<T>::render_image(int last_idr)
     if (b_data_set)
     {
         set_min_max(last_idr);
-        for (int y = (std::max)(0, this->last_y - render_update_offset); y < (std::min)(last_yt + render_update_offset, ny); y++)
+        int binned_nx = (nx + bin_factor - 1) / bin_factor;
+        int y_start = (std::max)(0, this->last_y - render_update_offset);
+        int y_end = (std::min)(last_yt + render_update_offset, ny);
+        int by_start = y_start / bin_factor;
+        int by_end = (y_end + bin_factor - 1) / bin_factor;
+        for (int by = by_start; by < by_end; by++)
         {
-            for (int x = 0; x < nx; x++)
+            for (int bx = 0; bx < binned_nx; bx++)
             {
-                set_pixel(x, y);
+                set_pixel_binned(bx, by);
             }
         }
     }
@@ -124,6 +131,62 @@ void ImGuiImageWindow<std::complex<float>>::set_pixel(int idx, int idy)
 
     // Update pixel at location
     SDL_Utils::draw_pixel(sdl_srf, idx, idy, ang, mag, data_cmap);
+}
+
+// Binned pixel setter for float data - averages bin_factor x bin_factor block
+template <>
+void ImGuiImageWindow<float>::set_pixel_binned(int bx, int by)
+{
+    float sum = 0.0f;
+    int count = 0;
+    for (int dy = 0; dy < bin_factor; dy++)
+    {
+        for (int dx = 0; dx < bin_factor; dx++)
+        {
+            int x = bx * bin_factor + dx;
+            int y = by * bin_factor + dy;
+            if (x < nx && y < ny)
+            {
+                sum += data->at(y * nx + x);
+                count++;
+            }
+        }
+    }
+    float avg = (count > 0) ? sum / count : 0.0f;
+    float val = pw((avg - data_min) / data_range, power);
+    SDL_Utils::draw_pixel(sdl_srf, bx, by, val, data_cmap);
+}
+
+// Binned pixel setter for complex data - averages magnitude and angle separately
+template <>
+void ImGuiImageWindow<std::complex<float>>::set_pixel_binned(int bx, int by)
+{
+    float mag_sum = 0.0f;
+    float ang_sin_sum = 0.0f;
+    float ang_cos_sum = 0.0f;
+    int count = 0;
+    for (int dy = 0; dy < bin_factor; dy++)
+    {
+        for (int dx = 0; dx < bin_factor; dx++)
+        {
+            int x = bx * bin_factor + dx;
+            int y = by * bin_factor + dy;
+            if (x < nx && y < ny)
+            {
+                std::complex<float> val = data->at(y * nx + x);
+                mag_sum += abs(val);
+                float ang = arg(val);
+                ang_sin_sum += sin(ang);
+                ang_cos_sum += cos(ang);
+                count++;
+            }
+        }
+    }
+    float mag = (count > 0) ? (mag_sum / count - data_min) / data_range : 0.0f;
+    float ang = (count > 0) ? atan2(ang_sin_sum / count, ang_cos_sum / count) : 0.0f;
+    ang = (ang / M_PI + 1) / 2;
+    mag = pw(mag, power);
+    SDL_Utils::draw_pixel(sdl_srf, bx, by, ang, mag, data_cmap);
 }
 
 template <>
@@ -200,6 +263,8 @@ ImGuiImageWindow<T>::ImGuiImageWindow(const std::string &title, GLuint *tex_id, 
     this->nxy = 1;
     this->render_update_offset = 0;
     this->b_trigger_update = false;
+    this->bin_factor = 1;
+    this->bin_factor_idx = 0;
     saveFileDialog = ImGui::FileBrowser(ImGuiFileBrowserFlags_EnterNewFilename | ImGuiFileBrowserFlags_CreateNewDir);
     saveFileDialog.SetTitle("Save " + title + " image as .png");
     saveDataDialog = ImGui::FileBrowser(ImGuiFileBrowserFlags_EnterNewFilename | ImGuiFileBrowserFlags_CreateNewDir);
@@ -253,8 +318,19 @@ void ImGuiImageWindow<T>::set_nx_ny(int width, int height)
     data_val.resize(nxy);
 
     reset_limits();
+    recreate_surface();
+}
 
-    sdl_srf = SDL_CreateRGBSurface(0, this->nx, this->ny, 32, 0, 0, 0, 0);
+template <typename T>
+void ImGuiImageWindow<T>::recreate_surface()
+{
+    if (sdl_srf != NULL)
+    {
+        SDL_FreeSurface(sdl_srf);
+    }
+    int binned_nx = (nx + bin_factor - 1) / bin_factor;
+    int binned_ny = (ny + bin_factor - 1) / bin_factor;
+    sdl_srf = SDL_CreateRGBSurface(0, binned_nx, binned_ny, 32, 0, 0, 0, 0);
     if (sdl_srf == NULL)
     {
         std::cout << "Surface could not be created! SDL Error: " << SDL_GetError() << std::endl;
@@ -426,7 +502,7 @@ void ImGuiImageWindow<T>::render_window(bool b_redraw, int fr_count, bool b_trig
         if (this->has(GIM_Flags::ColormapSelector))
         {
             ImGui::SameLine();
-            ImGui::SetNextItemWidth(-1);
+            ImGui::SetNextItemWidth(100);
             if (ImGui::Combo("Colormap", &data_cmap, cmaps, IM_ARRAYSIZE(cmaps)))
             {
                 this->last_idr = 0;
@@ -434,6 +510,19 @@ void ImGuiImageWindow<T>::render_window(bool b_redraw, int fr_count, bool b_trig
                 render_image((fr_count == 0) ? nxy : fr_count);
                 b_trigger_update = true;
             }
+        }
+
+        // Binning selector
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(60);
+        if (ImGui::Combo("Bin", &bin_factor_idx, bin_options, IM_ARRAYSIZE(bin_options)))
+        {
+            bin_factor = 1 << bin_factor_idx;  // 0->1, 1->2, 2->4, 3->8
+            recreate_surface();
+            this->last_idr = 0;
+            this->last_y = 0;
+            render_image((fr_count == 0) ? nxy : fr_count);
+            b_trigger_update = true;
         }
 
         if (b_redraw && auto_render && fr_count > 0)

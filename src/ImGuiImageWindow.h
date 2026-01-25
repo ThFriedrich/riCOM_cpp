@@ -77,10 +77,13 @@ private:
     float start_x, start_y;   // Scrolling/Panning positions
     float start_xs, start_ys; // Scrolling/Panning positions
     const char *cmaps[13] = {"Parula", "Heat", "Jet", "Turbo", "Hot", "Gray", "Magma", "Inferno", "Plasma", "Viridis", "Cividis", "Github", "HSV"};
+    const char *bin_options[4] = {"1x1", "2x2", "4x4", "8x8"};
     int data_cmap;
     float zoom;
     float power;
     bool auto_render;
+    int bin_factor;
+    int bin_factor_idx;
 
     // Data Properties
     int nx;
@@ -112,6 +115,8 @@ private:
     inline void set_min_max(int last_y);
     inline void reset_limits();
     inline void set_pixel(int idx, int idy);
+    inline void set_pixel_binned(int bx, int by);
+    inline void recreate_surface();
     inline void compute_fft();
     inline bool has(GIM_Flags flag);
     inline bool detect_frame_switch(int &fr_count);
