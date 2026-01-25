@@ -267,7 +267,7 @@ Ricom::Ricom() : stem_max(-FLT_MAX), stem_min(FLT_MAX),
                  p_prog_mon(nullptr),
                  b_busy(false),
                  update_offset(true),
-                 b_vSTEM(false), b_e_mag(false), b_plot_cbed(true), b_plot2SDL(false),
+                 b_vSTEM(false), b_e_mag(false), b_plot_cbed(true), cbed_cmap_frames(1), b_plot2SDL(false),
                  b_recompute_detector(false), b_recompute_kernel(false),
                  detector(),
                  kernel(),
@@ -576,12 +576,12 @@ void Ricom::plot_cbed(std::vector<T> *cbed_data)
     }
 
     float v_rng = v_max - v_min;
-    for (int ix = 0; ix < camera.ny_cam; ix++)
+    for (int iy = 0; iy < camera.ny_cam; iy++)
     {
-        int iy_t = camera.v[ix] * camera.nx_cam;
-        for (int iy = 0; iy < camera.nx_cam; iy++)
+        int iy_t = camera.v[iy] * camera.nx_cam;
+        for (int ix = 0; ix < camera.nx_cam; ix++)
         {
-            float vl_f = cbed_log[iy_t + camera.u[iy]];
+            float vl_f = cbed_log[iy_t + camera.u[ix]];
             float val = (vl_f - v_min) / v_rng;
             SDL_Utils::draw_pixel(srf_cbed, ix, iy, val, cbed_cmap);
         }
@@ -862,21 +862,28 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
 
     while (true)
     {
-        // process two frames before the probe position to avoid toa problem
+        // Process two frames behind to ensure events are accumulated
+        // (The event reader handles out-of-order events with its own margin)
         int idxx = prog_mon.fr_count - nxy * img_num - 2;
 
         ++prog_mon;
         fr_count = prog_mon.fr_count;
 
-        if (acc_cbed < 3 && b_plot_cbed)
+        if (b_plot_cbed && acc_cbed < cbed_cmap_frames)
         {
+            // Reset frame only when starting new accumulation window
+            if (acc_cbed == 0)
+            {
+                frame.assign(camera_spec->nx_cam * camera_spec->ny_cam, 0);
+                acc_idx = fr_count;
+            }
             camera_spec->read_frame_com_cbed(prog_mon.fr_count,
                                              dose_map, sumx_map, sumy_map,
                                              stem_data, b_vSTEM,
                                              offset, detector.radius2,
-                                             frame, acc_idx,
+                                             frame, acc_idx, cbed_cmap_frames,
                                              first_frame, end_frame);
-            acc_cbed += 1;
+            acc_cbed++;
         }
         else
         {
@@ -889,6 +896,7 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
 
         if (idxx >= 0)
         {
+            
             if (dose_map[idxx] == 0)
             {
                 com_xy[0] = offset[0];
@@ -896,8 +904,9 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
             }
             else
             {
-                com_xy[0] = sumx_map[idxx] / dose_map[idxx];
-                com_xy[1] = sumy_map[idxx] / dose_map[idxx];
+                // Cast to float before division to preserve fractional precision
+                com_xy[0] = static_cast<float>(sumx_map[idxx]) / static_cast<float>(dose_map[idxx]);
+                com_xy[1] = static_cast<float>(sumy_map[idxx]) / static_cast<float>(dose_map[idxx]);
             }
             com_map_x[idxx] = com_xy[0];
             com_map_y[idxx] = com_xy[1];
@@ -927,9 +936,8 @@ void Ricom::process_data(CAMERA::Camera<CameraInterface, CAMERA::EVENT_BASED> *c
             update_surfaces(iy, p_frame);
             if (b_plot_cbed)
             {
-                frame.assign(camera_spec->nx_cam * camera_spec->ny_cam, 0);
+                // Only reset counter - frame will be reset when accumulation starts
                 acc_cbed = 0;
-                acc_idx = fr_count;
             }
             fr_freq = prog_mon.fr_freq;
             rescales_recomputes();
