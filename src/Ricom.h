@@ -226,6 +226,7 @@ public:
     bool b_vSTEM;
     bool b_e_mag;
     bool b_plot_cbed;
+    int cbed_cmap_frames;
     bool b_plot2SDL;
     bool b_recompute_detector;
     bool b_recompute_kernel;

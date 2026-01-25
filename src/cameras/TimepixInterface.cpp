@@ -43,7 +43,10 @@ void TimepixInterface::read_frame_com(std::atomic<size_t> &idx, std::vector<size
                 }
             }
         }
-        if (probe_position > idx)
+        // Add margin to account for out-of-order events in Timepix3 stream
+        // Events can be out of order by ~2000 toa units, use margin of 100 probe positions
+        const size_t event_order_margin = 100;
+        if (probe_position > idx + event_order_margin)
         {
             break;
         }
@@ -56,7 +59,7 @@ void TimepixInterface::read_frame_com(std::atomic<size_t> &idx, std::vector<size
                                       std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
                                       std::vector<float> &stem_map, bool b_stem,
                                       std::array<float, 2> &offset, std::array<float, 2> &radius2,
-                                      std::vector<T> &frame, size_t frame_id,
+                                      std::vector<T> &frame, size_t frame_id, int cbed_cmap_frames,
                                       size_t first_frame, size_t end_frame)
 {
     e_event ev;
@@ -64,16 +67,18 @@ void TimepixInterface::read_frame_com(std::atomic<size_t> &idx, std::vector<size
     while (true)
     {
         read_event(ev);
-        size_t probe_position = floor(ev.toa * 25 / dt);
+        // Use integer division like Python: toa * 25 // dt
+        size_t probe_position = (ev.toa * 25) / dt;
         if (probe_position >= first_frame && probe_position < end_frame) //  && ev.toa * 25 % dt < dt/10
         {
             size_t x = ev.index % nx;
-            size_t y = floor(ev.index / nx);
+            size_t y = ev.index / nx;
             size_t probe_position2 = probe_position - first_frame;
             dose_map[probe_position2]++;
             sumx_map[probe_position2] += x;
             sumy_map[probe_position2] += y;
-            if (probe_position == frame_id)
+            // Accumulate into frame for positions within the CBED window
+            if (probe_position >= frame_id && probe_position < frame_id + (size_t)cbed_cmap_frames)
                 frame[x + y * nx]++;
             if (b_stem)
             {
@@ -84,7 +89,9 @@ void TimepixInterface::read_frame_com(std::atomic<size_t> &idx, std::vector<size
                 }
             }
         }
-        if (probe_position > idx)
+        // Add margin to account for out-of-order events in Timepix3 stream
+        const size_t event_order_margin = 100;
+        if (probe_position > idx + event_order_margin)
         {
             break;
         }
@@ -94,19 +101,19 @@ template void TimepixInterface::read_frame_com<uint8_t>(std::atomic<size_t> &idx
                                                         std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
                                                         std::vector<float> &stem_map, bool b_stem,
                                                         std::array<float, 2> &offset, std::array<float, 2> &radius,
-                                                        std::vector<uint8_t> &frame, size_t frame_id,
+                                                        std::vector<uint8_t> &frame, size_t frame_id, int cbed_cmap_frames,
                                                         size_t first_frame, size_t end_frame);
 template void TimepixInterface::read_frame_com<uint16_t>(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
                                                          std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
                                                          std::vector<float> &stem_map, bool b_stem,
                                                          std::array<float, 2> &offset, std::array<float, 2> &radius,
-                                                         std::vector<uint16_t> &frame, size_t frame_id,
+                                                         std::vector<uint16_t> &frame, size_t frame_id, int cbed_cmap_frames,
                                                          size_t first_frame, size_t end_frame);
 template void TimepixInterface::read_frame_com<uint32_t>(std::atomic<size_t> &idx, std::vector<size_t> &dose_map,
                                                          std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
                                                          std::vector<float> &stem_map, bool b_stem,
                                                          std::array<float, 2> &offset, std::array<float, 2> &radius,
-                                                         std::vector<uint32_t> &frame, size_t frame_id,
+                                                         std::vector<uint32_t> &frame, size_t frame_id, int cbed_cmap_frames,
                                                          size_t first_frame, size_t end_frame);
 
 void TimepixInterface::read_event(e_event &ev)

@@ -68,10 +68,10 @@ void Camera<TimepixInterface, EVENT_BASED>::read_frame_com_cbed(std::atomic<size
                         std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
                         std::vector<float> &stem_map, bool b_stem,
                         std::array<float, 2> &offset, std::array<float, 2> &radius,
-                        std::vector<uint16_t> &frame, size_t frame_id,
+                        std::vector<uint16_t> &frame, size_t frame_id, int cbed_cmap_frames,
                         size_t first_frame, size_t end_frame)
 {
-    TimepixInterface::read_frame_com(idx, dose_map, sumx_map, sumy_map, stem_map, b_stem, offset, radius, frame, frame_id, first_frame, end_frame);
+    TimepixInterface::read_frame_com(idx, dose_map, sumx_map, sumy_map, stem_map, b_stem, offset, radius, frame, frame_id, cbed_cmap_frames, first_frame, end_frame);
 }
 
 // Run method wrapper

@@ -68,7 +68,7 @@ public:
                         std::vector<size_t> &sumx_map, std::vector<size_t> &sumy_map,
                         std::vector<float> &stem_map, bool b_stem,
                         std::array<float, 2> &offset, std::array<float, 2> &radius,
-                        std::vector<T> &frame, size_t frame_id,
+                        std::vector<T> &frame, size_t frame_id, int cbed_cmap_frames,
                         size_t first_frame, size_t end_frame);
 
     inline void read_event(e_event &ev);
