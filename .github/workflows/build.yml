@@ -26,27 +26,30 @@ jobs:
           arch: amd64_x86
 
       - name: get sdl, fftw
+        shell: powershell
         run: |
-          curl.exe http://www.libsdl.org/release/SDL2-devel-2.0.16-VC.zip --output sdl.zip
-          curl.exe http://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-2.0.5-VC.zip --output sdl_im.zip
-          tar -xf sdl.zip
-          tar -xf sdl_im.zip
-          ren SDL2_image-2.0.5 SDL2_IM_VC
-          ren SDL2-2.0.16 SDL2_VC
-          move .\SDL2_IM_VC\include\* .\SDL2_VC\include\
-          move .\SDL2_IM_VC\lib\x64\* .\SDL2_VC\lib\x64
-          move .\SDL2_IM_VC\lib\x86\* .\SDL2_VC\lib\x86
-          move SDL2_VC C:\
-          del sdl.zip
-          del sdl_im.zip
-          mkdir FFTW
-          cd FFTW
-          curl.exe https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip --output fftw.zip
-          tar -xf fftw.zip
-          del fftw.zip
+          # Download SDL2 and SDL2_image and extract using PowerShell (follows redirects and supports ZIP)
+          Invoke-WebRequest -Uri "https://www.libsdl.org/release/SDL2-devel-2.0.16-VC.zip" -OutFile sdl.zip -UseBasicParsing
+          Invoke-WebRequest -Uri "https://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-2.0.5-VC.zip" -OutFile sdl_im.zip -UseBasicParsing
+          Expand-Archive -LiteralPath sdl.zip -DestinationPath .
+          Expand-Archive -LiteralPath sdl_im.zip -DestinationPath .
+          Rename-Item SDL2_image-2.0.5 SDL2_IM_VC
+          Rename-Item SDL2-2.0.16 SDL2_VC
+          Move-Item .\SDL2_IM_VC\include\* .\SDL2_VC\include\
+          Move-Item .\SDL2_IM_VC\lib\x64\* .\SDL2_VC\lib\x64\
+          Move-Item .\SDL2_IM_VC\lib\x86\* .\SDL2_VC\lib\x86\
+          Move-Item SDL2_VC C:\
+          Remove-Item sdl.zip, sdl_im.zip -Force
+          # FFTW
+          New-Item -ItemType Directory FFTW -Force | Out-Null
+          Push-Location FFTW
+          Invoke-WebRequest -Uri "https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip" -OutFile fftw.zip -UseBasicParsing
+          Expand-Archive -LiteralPath fftw.zip -DestinationPath .
+          Remove-Item fftw.zip -Force
           lib /machine:x64 /def:libfftw3f-3.def
-          cd ..
-          move FFTW C:\
+          Pop-Location
+          Move-Item FFTW C:\
+
 
       - name: Build with MSVC
         run: |
