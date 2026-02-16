@@ -263,6 +263,7 @@ int run_cli(int argc, char *argv[], Ricom *ricom, CAMERA::Default_configurations
     {
         RICOM::run_ricom(ricom, ricom->mode);
     }
+    std::cout << "COM_AVG " << ricom->com_public[0] << " " << ricom->com_public[1] << std::endl;
     if (save_dat != "")
     {
         save_numpy(&save_dat, ricom->nx, ricom->ny, &ricom->ricom_data);
